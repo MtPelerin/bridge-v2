@@ -1,0 +1,34 @@
+{
+  "name": "bridge-contracts",
+  "version": "1.0.0",
+  "description": "BRIDGE",
+  "main": "index.js",
+  "scripts": {
+    "test": "scripts/test.sh",
+    "security": "scripts/security.sh",
+    "security:slither": "scripts/security.sh slither",
+    "security:mythril": "scripts/security.sh mythril",
+    "doc": "scripts/docgen.sh",
+    "coverage": "npx solidity-coverage",
+    "lint": "eslint .",
+    "lint:sol": "solium -d ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.com/mtpelerin/bridge-contracts"
+  },
+  "author": "Mt Pelerin",
+  "license": "AGPL-3.0",
+  "devDependencies": {
+    "@openzeppelin/cli": "^2.5.2",
+    "@openzeppelin/upgrades": "^2.5.2",
+    "chai": "^4.2.0",
+    "openzeppelin-test-helpers": "^0.3.2",
+    "solidity-coverage": "^0.6.3"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts-ethereum-package": "^2.2.3",
+    "solidity-docgen": "git+https://github.com/skrafft/solidity-docgen.git",
+    "truffle": "^5.0.28"
+  }
+}

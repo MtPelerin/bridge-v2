@@ -1,0 +1,5 @@
+node_modules
+build
+coverage.json
+coverage
+.DS_Store
