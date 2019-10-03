@@ -33,6 +33,8 @@
 
     For more information, please contact Mt Pelerin Group Ltd at this
     address: hello@mtpelerin.com
+
+    This contract is a modified version of Maker OTC contracts: https://github.com/makerdao/maker-otc
 */
 
 pragma solidity 0.5.2;

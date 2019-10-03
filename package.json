@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts-ethereum-package": "^2.2.3",
+    "solc": "0.5.2",
     "solidity-docgen": "git+https://github.com/skrafft/solidity-docgen.git",
     "truffle": "^5.0.28"
   }

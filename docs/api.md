@@ -149,10 +149,8 @@
 [IExchange-ItemUpdated-uint256-]: #IExchange-ItemUpdated-uint256-
 [IExchange-OrderTraded-uint256-contract-IERC20-uint256-contract-IERC20-]: #IExchange-OrderTraded-uint256-contract-IERC20-uint256-contract-IERC20-
 [IExchange-OrderMade-bytes32-bytes32-address-contract-IERC20-contract-IERC20-uint256-uint256-uint256-]: #IExchange-OrderMade-bytes32-bytes32-address-contract-IERC20-contract-IERC20-uint256-uint256-uint256-
-[IExchange-OrderBumped-bytes32-bytes32-address-contract-IERC20-contract-IERC20-uint256-uint256-uint256-]: #IExchange-OrderBumped-bytes32-bytes32-address-contract-IERC20-contract-IERC20-uint256-uint256-uint256-
 [IExchange-OrderTaken-bytes32-bytes32-address-contract-IERC20-contract-IERC20-address-uint256-uint256-uint256-]: #IExchange-OrderTaken-bytes32-bytes32-address-contract-IERC20-contract-IERC20-address-uint256-uint256-uint256-
 [IExchange-OrderKilled-bytes32-bytes32-address-contract-IERC20-contract-IERC20-uint256-uint256-uint256-]: #IExchange-OrderKilled-bytes32-bytes32-address-contract-IERC20-contract-IERC20-uint256-uint256-uint256-
-[IExchange-BuyEnabled-bool-]: #IExchange-BuyEnabled-bool-
 [IExchange-MinSellSet-contract-IERC20-uint256-]: #IExchange-MinSellSet-contract-IERC20-uint256-
 [IExchange-UnsortedOffer-uint256-]: #IExchange-UnsortedOffer-uint256-
 [IExchange-SortedOffer-uint256-]: #IExchange-SortedOffer-uint256-
@@ -188,7 +186,8 @@
 [IComplianceRegistry-yearlyOutTransfers-address-address---address-]: #IComplianceRegistry-yearlyOutTransfers-address-address---address-
 [IComplianceRegistry-addOnHoldTransfer-address-address-address-address-uint256-]: #IComplianceRegistry-addOnHoldTransfer-address-address-address-address-uint256-
 [IComplianceRegistry-getOnHoldTransfers-address-]: #IComplianceRegistry-getOnHoldTransfers-address-
-[IComplianceRegistry-processOnHoldTransfers-uint256---uint8---]: #IComplianceRegistry-processOnHoldTransfers-uint256---uint8---
+[IComplianceRegistry-processOnHoldTransfers-uint256---uint8---bool-]: #IComplianceRegistry-processOnHoldTransfers-uint256---uint8---bool-
+[IComplianceRegistry-updateOnHoldMinBoundary-uint256-]: #IComplianceRegistry-updateOnHoldMinBoundary-uint256-
 [IComplianceRegistry-AddressAttached-address-uint256-address-]: #IComplianceRegistry-AddressAttached-address-uint256-address-
 [IComplianceRegistry-AddressDetached-address-uint256-address-]: #IComplianceRegistry-AddressDetached-address-uint256-address-
 [IComplianceRegistry-TransferOnHold-address-address-address-address-uint256-]: #IComplianceRegistry-TransferOnHold-address-address-address-address-uint256-
@@ -211,10 +210,8 @@
 [IExchange-ItemUpdated-uint256-]: #IExchange-ItemUpdated-uint256-
 [IExchange-OrderTraded-uint256-contract-IERC20-uint256-contract-IERC20-]: #IExchange-OrderTraded-uint256-contract-IERC20-uint256-contract-IERC20-
 [IExchange-OrderMade-bytes32-bytes32-address-contract-IERC20-contract-IERC20-uint256-uint256-uint256-]: #IExchange-OrderMade-bytes32-bytes32-address-contract-IERC20-contract-IERC20-uint256-uint256-uint256-
-[IExchange-OrderBumped-bytes32-bytes32-address-contract-IERC20-contract-IERC20-uint256-uint256-uint256-]: #IExchange-OrderBumped-bytes32-bytes32-address-contract-IERC20-contract-IERC20-uint256-uint256-uint256-
 [IExchange-OrderTaken-bytes32-bytes32-address-contract-IERC20-contract-IERC20-address-uint256-uint256-uint256-]: #IExchange-OrderTaken-bytes32-bytes32-address-contract-IERC20-contract-IERC20-address-uint256-uint256-uint256-
 [IExchange-OrderKilled-bytes32-bytes32-address-contract-IERC20-contract-IERC20-uint256-uint256-uint256-]: #IExchange-OrderKilled-bytes32-bytes32-address-contract-IERC20-contract-IERC20-uint256-uint256-uint256-
-[IExchange-BuyEnabled-bool-]: #IExchange-BuyEnabled-bool-
 [IExchange-MinSellSet-contract-IERC20-uint256-]: #IExchange-MinSellSet-contract-IERC20-uint256-
 [IExchange-UnsortedOffer-uint256-]: #IExchange-UnsortedOffer-uint256-
 [IExchange-SortedOffer-uint256-]: #IExchange-SortedOffer-uint256-
@@ -223,10 +220,15 @@
 [IGovernable]: #IGovernable
 [IGovernable-realm--]: #IGovernable-realm--
 [IGovernable-setRealm-address-]: #IGovernable-setRealm-address-
+[IGovernable-isRealmAdministrator-address-]: #IGovernable-isRealmAdministrator-address-
+[IGovernable-addRealmAdministrator-address-]: #IGovernable-addRealmAdministrator-address-
+[IGovernable-removeRealmAdministrator-address-]: #IGovernable-removeRealmAdministrator-address-
 [IGovernable-trustedIntermediaries--]: #IGovernable-trustedIntermediaries--
 [IGovernable-setTrustedIntermediaries-address---]: #IGovernable-setTrustedIntermediaries-address---
 [IGovernable-TrustedIntermediariesChanged-address---]: #IGovernable-TrustedIntermediariesChanged-address---
 [IGovernable-RealmChanged-address-]: #IGovernable-RealmChanged-address-
+[IGovernable-RealmAdministratorAdded-address-]: #IGovernable-RealmAdministratorAdded-address-
+[IGovernable-RealmAdministratorRemoved-address-]: #IGovernable-RealmAdministratorRemoved-address-
 [IMintable]: #IMintable
 [IMintable-mint-address-uint256-]: #IMintable-mint-address-uint256-
 [IMintable-burn-address-uint256-]: #IMintable-burn-address-uint256-
@@ -238,13 +240,13 @@
 [IOwnable-renounceOwnership--]: #IOwnable-renounceOwnership--
 [IOwnable-OwnershipTransferred-address-]: #IOwnable-OwnershipTransferred-address-
 [IPriceOracle]: #IPriceOracle
-[IPriceOracle-setPrice-bytes32-uint256-uint8-]: #IPriceOracle-setPrice-bytes32-uint256-uint8-
-[IPriceOracle-setPrices-bytes32---uint256---uint8---]: #IPriceOracle-setPrices-bytes32---uint256---uint8---
-[IPriceOracle-getPrice-bytes32-]: #IPriceOracle-getPrice-bytes32-
+[IPriceOracle-setPrice-bytes32-bytes32-uint256-uint8-]: #IPriceOracle-setPrice-bytes32-bytes32-uint256-uint8-
+[IPriceOracle-setPrices-bytes32---bytes32---uint256---uint8---]: #IPriceOracle-setPrices-bytes32---bytes32---uint256---uint8---
+[IPriceOracle-getPrice-bytes32-bytes32-]: #IPriceOracle-getPrice-bytes32-bytes32-
 [IPriceOracle-getPrice-string-string-]: #IPriceOracle-getPrice-string-string-
-[IPriceOracle-getLastUpdated-bytes32-]: #IPriceOracle-getLastUpdated-bytes32-
-[IPriceOracle-getDecimals-bytes32-]: #IPriceOracle-getDecimals-bytes32-
-[IPriceOracle-PriceSet-bytes32-uint256-uint8-uint256-]: #IPriceOracle-PriceSet-bytes32-uint256-uint8-uint256-
+[IPriceOracle-getLastUpdated-bytes32-bytes32-]: #IPriceOracle-getLastUpdated-bytes32-bytes32-
+[IPriceOracle-getDecimals-bytes32-bytes32-]: #IPriceOracle-getDecimals-bytes32-bytes32-
+[IPriceOracle-PriceSet-bytes32-bytes32-uint256-uint8-uint256-]: #IPriceOracle-PriceSet-bytes32-bytes32-uint256-uint8-uint256-
 [IPriceable]: #IPriceable
 [IPriceable-priceOracle--]: #IPriceable-priceOracle--
 [IPriceable-setPriceOracle-contract-IPriceOracle-]: #IPriceable-setPriceOracle-contract-IPriceOracle-
@@ -315,6 +317,9 @@
 [BridgeERC20Mock-setRealm-address-]: #BridgeERC20Mock-setRealm-address-
 [BridgeERC20Mock-trustedIntermediaries--]: #BridgeERC20Mock-trustedIntermediaries--
 [BridgeERC20Mock-setTrustedIntermediaries-address---]: #BridgeERC20Mock-setTrustedIntermediaries-address---
+[BridgeERC20Mock-isRealmAdministrator-address-]: #BridgeERC20Mock-isRealmAdministrator-address-
+[BridgeERC20Mock-addRealmAdministrator-address-]: #BridgeERC20Mock-addRealmAdministrator-address-
+[BridgeERC20Mock-removeRealmAdministrator-address-]: #BridgeERC20Mock-removeRealmAdministrator-address-
 [BridgeERC20Mock-priceOracle--]: #BridgeERC20Mock-priceOracle--
 [BridgeERC20Mock-setPriceOracle-contract-IPriceOracle-]: #BridgeERC20Mock-setPriceOracle-contract-IPriceOracle-
 [BridgeERC20Mock-convertTo-uint256-string-uint8-]: #BridgeERC20Mock-convertTo-uint256-string-uint8-
@@ -332,13 +337,20 @@
 [IPriceable-PriceOracleChanged-address-]: #IPriceable-PriceOracleChanged-address-
 [IGovernable-TrustedIntermediariesChanged-address---]: #IGovernable-TrustedIntermediariesChanged-address---
 [IGovernable-RealmChanged-address-]: #IGovernable-RealmChanged-address-
+[IGovernable-RealmAdministratorAdded-address-]: #IGovernable-RealmAdministratorAdded-address-
+[IGovernable-RealmAdministratorRemoved-address-]: #IGovernable-RealmAdministratorRemoved-address-
 [GovernableTokenMock]: #GovernableTokenMock
 [GovernableTokenMock-realm--]: #GovernableTokenMock-realm--
 [GovernableTokenMock-setRealm-address-]: #GovernableTokenMock-setRealm-address-
 [GovernableTokenMock-trustedIntermediaries--]: #GovernableTokenMock-trustedIntermediaries--
 [GovernableTokenMock-setTrustedIntermediaries-address---]: #GovernableTokenMock-setTrustedIntermediaries-address---
+[GovernableTokenMock-isRealmAdministrator-address-]: #GovernableTokenMock-isRealmAdministrator-address-
+[GovernableTokenMock-addRealmAdministrator-address-]: #GovernableTokenMock-addRealmAdministrator-address-
+[GovernableTokenMock-removeRealmAdministrator-address-]: #GovernableTokenMock-removeRealmAdministrator-address-
 [IGovernable-TrustedIntermediariesChanged-address---]: #IGovernable-TrustedIntermediariesChanged-address---
 [IGovernable-RealmChanged-address-]: #IGovernable-RealmChanged-address-
+[IGovernable-RealmAdministratorAdded-address-]: #IGovernable-RealmAdministratorAdded-address-
+[IGovernable-RealmAdministratorRemoved-address-]: #IGovernable-RealmAdministratorRemoved-address-
 [OperatorMock]: #OperatorMock
 [OperatorMock-initialize-address-]: #OperatorMock-initialize-address-
 [OperatorMock-normalAction--]: #OperatorMock-normalAction--
@@ -382,8 +394,9 @@
 [ComplianceRegistry-yearlyOutTransfers-address-address---address-]: #ComplianceRegistry-yearlyOutTransfers-address-address---address-
 [ComplianceRegistry-addOnHoldTransfer-address-address-address-address-uint256-]: #ComplianceRegistry-addOnHoldTransfer-address-address-address-address-uint256-
 [ComplianceRegistry-getOnHoldTransfers-address-]: #ComplianceRegistry-getOnHoldTransfers-address-
-[ComplianceRegistry-processOnHoldTransfers-uint256---uint8---]: #ComplianceRegistry-processOnHoldTransfers-uint256---uint8---
-[ComplianceRegistry-cancelOnHoldTransfers-address-uint256---]: #ComplianceRegistry-cancelOnHoldTransfers-address-uint256---
+[ComplianceRegistry-processOnHoldTransfers-uint256---uint8---bool-]: #ComplianceRegistry-processOnHoldTransfers-uint256---uint8---bool-
+[ComplianceRegistry-updateOnHoldMinBoundary-uint256-]: #ComplianceRegistry-updateOnHoldMinBoundary-uint256-
+[ComplianceRegistry-cancelOnHoldTransfers-address-uint256---bool-]: #ComplianceRegistry-cancelOnHoldTransfers-address-uint256---bool-
 [ComplianceRegistry-_approveOnHoldTransfer-uint256-]: #ComplianceRegistry-_approveOnHoldTransfer-uint256-
 [ComplianceRegistry-_rejectOnHoldTransfer-uint256-]: #ComplianceRegistry-_rejectOnHoldTransfer-uint256-
 [ComplianceRegistry-_updateTransfers-address-address-address-uint256-]: #ComplianceRegistry-_updateTransfers-address-address-address-uint256-
@@ -398,6 +411,7 @@
 [ComplianceRegistry-_yearlyOutTransfers-address-address---address-]: #ComplianceRegistry-_yearlyOutTransfers-address-address---address-
 [ComplianceRegistry-_getUser-address---address-]: #ComplianceRegistry-_getUser-address---address-
 [ComplianceRegistry-_getMonth-uint256-]: #ComplianceRegistry-_getMonth-uint256-
+[ComplianceRegistry-_updateOnHoldMinBoundary-address-uint256-uint256-]: #ComplianceRegistry-_updateOnHoldMinBoundary-address-uint256-uint256-
 [Operator-isOperator-address-]: #Operator-isOperator-address-
 [Operator-addOperator-address-]: #Operator-addOperator-address-
 [Operator-removeOperator-address-]: #Operator-removeOperator-address-
@@ -420,13 +434,13 @@
 [IComplianceRegistry-TransferCancelled-address-address-address-address-uint256-]: #IComplianceRegistry-TransferCancelled-address-address-address-address-uint256-
 [PriceOracle]: #PriceOracle
 [PriceOracle-initialize-address-]: #PriceOracle-initialize-address-
-[PriceOracle-setPrices-bytes32---uint256---uint8---]: #PriceOracle-setPrices-bytes32---uint256---uint8---
-[PriceOracle-setPrice-bytes32-uint256-uint8-]: #PriceOracle-setPrice-bytes32-uint256-uint8-
-[PriceOracle-getPrice-bytes32-]: #PriceOracle-getPrice-bytes32-
+[PriceOracle-setPrices-bytes32---bytes32---uint256---uint8---]: #PriceOracle-setPrices-bytes32---bytes32---uint256---uint8---
+[PriceOracle-setPrice-bytes32-bytes32-uint256-uint8-]: #PriceOracle-setPrice-bytes32-bytes32-uint256-uint8-
+[PriceOracle-getPrice-bytes32-bytes32-]: #PriceOracle-getPrice-bytes32-bytes32-
 [PriceOracle-getPrice-string-string-]: #PriceOracle-getPrice-string-string-
-[PriceOracle-getLastUpdated-bytes32-]: #PriceOracle-getLastUpdated-bytes32-
-[PriceOracle-getDecimals-bytes32-]: #PriceOracle-getDecimals-bytes32-
-[PriceOracle-_getPair-string-string-]: #PriceOracle-_getPair-string-string-
+[PriceOracle-getLastUpdated-bytes32-bytes32-]: #PriceOracle-getLastUpdated-bytes32-bytes32-
+[PriceOracle-getDecimals-bytes32-bytes32-]: #PriceOracle-getDecimals-bytes32-bytes32-
+[PriceOracle-_asBytes32-string-]: #PriceOracle-_asBytes32-string-
 [Operator-isOperator-address-]: #Operator-isOperator-address-
 [Operator-addOperator-address-]: #Operator-addOperator-address-
 [Operator-removeOperator-address-]: #Operator-removeOperator-address-
@@ -441,7 +455,7 @@
 [Operator-OperatorAdded-address-]: #Operator-OperatorAdded-address-
 [Operator-OperatorRemoved-address-]: #Operator-OperatorRemoved-address-
 [Ownable-OwnershipTransferred-address-address-]: #Ownable-OwnershipTransferred-address-address-
-[IPriceOracle-PriceSet-bytes32-uint256-uint8-uint256-]: #IPriceOracle-PriceSet-bytes32-uint256-uint8-uint256-
+[IPriceOracle-PriceSet-bytes32-bytes32-uint256-uint8-uint256-]: #IPriceOracle-PriceSet-bytes32-bytes32-uint256-uint8-uint256-
 [Processor]: #Processor
 [Processor-initialize-address-contract-IRuleEngine-]: #Processor-initialize-address-contract-IRuleEngine-
 [Processor-setRuleEngine-contract-IRuleEngine-]: #Processor-setRuleEngine-contract-IRuleEngine-
@@ -501,10 +515,9 @@
 [Ownable-OwnershipTransferred-address-address-]: #Ownable-OwnershipTransferred-address-address-
 [GlobalFreezeRule]: #GlobalFreezeRule
 [GlobalFreezeRule-initialize-address-]: #GlobalFreezeRule-initialize-address-
+[GlobalFreezeRule-unfreezeAll--]: #GlobalFreezeRule-unfreezeAll--
 [GlobalFreezeRule-freezeAll-uint256-]: #GlobalFreezeRule-freezeAll-uint256-
 [GlobalFreezeRule-isTransferValid-address-address-address-uint256-uint256-]: #GlobalFreezeRule-isTransferValid-address-address-address-uint256-uint256-
-[GlobalFreezeRule-beforeTransferHook-address-address-address-uint256-uint256-]: #GlobalFreezeRule-beforeTransferHook-address-address-address-uint256-uint256-
-[GlobalFreezeRule-afterTransferHook-address-address-address-uint256-uint256-]: #GlobalFreezeRule-afterTransferHook-address-address-address-uint256-uint256-
 [GlobalFreezeRule-_isFrozen--]: #GlobalFreezeRule-_isFrozen--
 [Operator-isOperator-address-]: #Operator-isOperator-address-
 [Operator-addOperator-address-]: #Operator-addOperator-address-
@@ -517,14 +530,16 @@
 [Context-constructor--]: #Context-constructor--
 [Context-_msgSender--]: #Context-_msgSender--
 [Context-_msgData--]: #Context-_msgData--
+[AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-]: #AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-
+[AbstractRule-afterTransferHook-address-address-address-uint256-uint256-]: #AbstractRule-afterTransferHook-address-address-address-uint256-uint256-
 [GlobalFreezeRule-GlobalFreeze-uint256-]: #GlobalFreezeRule-GlobalFreeze-uint256-
+[GlobalFreezeRule-GlobalUnfreeze--]: #GlobalFreezeRule-GlobalUnfreeze--
 [Operator-OperatorAdded-address-]: #Operator-OperatorAdded-address-
 [Operator-OperatorRemoved-address-]: #Operator-OperatorRemoved-address-
 [Ownable-OwnershipTransferred-address-address-]: #Ownable-OwnershipTransferred-address-address-
 [HardTransferLimitRule]: #HardTransferLimitRule
 [HardTransferLimitRule-initialize-address-contract-IComplianceRegistry-]: #HardTransferLimitRule-initialize-address-contract-IComplianceRegistry-
 [HardTransferLimitRule-isTransferValid-address-address-address-uint256-uint256-]: #HardTransferLimitRule-isTransferValid-address-address-address-uint256-uint256-
-[HardTransferLimitRule-beforeTransferHook-address-address-address-uint256-uint256-]: #HardTransferLimitRule-beforeTransferHook-address-address-address-uint256-uint256-
 [HardTransferLimitRule-afterTransferHook-address-address-address-uint256-uint256-]: #HardTransferLimitRule-afterTransferHook-address-address-address-uint256-uint256-
 [HardTransferLimitRule-_isTransferValid-address-address-address---address-address-uint256-uint256-]: #HardTransferLimitRule-_isTransferValid-address-address-address---address-address-uint256-uint256-
 [HardTransferLimitRule-_isTransferFromValid-address-address---address-uint256-uint256-]: #HardTransferLimitRule-_isTransferFromValid-address-address---address-uint256-uint256-
@@ -541,17 +556,18 @@
 [Context-constructor--]: #Context-constructor--
 [Context-_msgSender--]: #Context-_msgSender--
 [Context-_msgData--]: #Context-_msgData--
+[AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-]: #AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-
 [Operator-OperatorAdded-address-]: #Operator-OperatorAdded-address-
 [Operator-OperatorRemoved-address-]: #Operator-OperatorRemoved-address-
 [Ownable-OwnershipTransferred-address-address-]: #Ownable-OwnershipTransferred-address-address-
 [MaxTransferRule]: #MaxTransferRule
 [MaxTransferRule-isTransferValid-address-address-address-uint256-uint256-]: #MaxTransferRule-isTransferValid-address-address-address-uint256-uint256-
-[MaxTransferRule-beforeTransferHook-address-address-address-uint256-uint256-]: #MaxTransferRule-beforeTransferHook-address-address-address-uint256-uint256-
-[MaxTransferRule-afterTransferHook-address-address-address-uint256-uint256-]: #MaxTransferRule-afterTransferHook-address-address-address-uint256-uint256-
+[AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-]: #AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-
+[AbstractRule-afterTransferHook-address-address-address-uint256-uint256-]: #AbstractRule-afterTransferHook-address-address-address-uint256-uint256-
 [MinTransferRule]: #MinTransferRule
 [MinTransferRule-isTransferValid-address-address-address-uint256-uint256-]: #MinTransferRule-isTransferValid-address-address-address-uint256-uint256-
-[MinTransferRule-beforeTransferHook-address-address-address-uint256-uint256-]: #MinTransferRule-beforeTransferHook-address-address-address-uint256-uint256-
-[MinTransferRule-afterTransferHook-address-address-address-uint256-uint256-]: #MinTransferRule-afterTransferHook-address-address-address-uint256-uint256-
+[AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-]: #AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-
+[AbstractRule-afterTransferHook-address-address-address-uint256-uint256-]: #AbstractRule-afterTransferHook-address-address-address-uint256-uint256-
 [SoftTransferLimitRule]: #SoftTransferLimitRule
 [SoftTransferLimitRule-initialize-address-contract-IComplianceRegistry-]: #SoftTransferLimitRule-initialize-address-contract-IComplianceRegistry-
 [SoftTransferLimitRule-isTransferValid-address-address-address-uint256-uint256-]: #SoftTransferLimitRule-isTransferValid-address-address-address-uint256-uint256-
@@ -578,39 +594,43 @@
 [UserFreezeRule]: #UserFreezeRule
 [UserFreezeRule-initialize-contract-IComplianceRegistry-]: #UserFreezeRule-initialize-contract-IComplianceRegistry-
 [UserFreezeRule-isTransferValid-address-address-address-uint256-uint256-]: #UserFreezeRule-isTransferValid-address-address-address-uint256-uint256-
-[UserFreezeRule-beforeTransferHook-address-address-address-uint256-uint256-]: #UserFreezeRule-beforeTransferHook-address-address-address-uint256-uint256-
-[UserFreezeRule-afterTransferHook-address-address-address-uint256-uint256-]: #UserFreezeRule-afterTransferHook-address-address-address-uint256-uint256-
-[UserFreezeRule-_canSend-address---address-]: #UserFreezeRule-_canSend-address---address-
-[UserFreezeRule-_canReceive-address---address-]: #UserFreezeRule-_canReceive-address---address-
+[UserFreezeRule-_canSend-address---address-bool-]: #UserFreezeRule-_canSend-address---address-bool-
+[UserFreezeRule-_canReceive-address---address-bool-]: #UserFreezeRule-_canReceive-address---address-bool-
+[AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-]: #AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-
+[AbstractRule-afterTransferHook-address-address-address-uint256-uint256-]: #AbstractRule-afterTransferHook-address-address-address-uint256-uint256-
 [UserKycThresholdBothRule]: #UserKycThresholdBothRule
 [UserKycThresholdBothRule-initialize-contract-IComplianceRegistry-]: #UserKycThresholdBothRule-initialize-contract-IComplianceRegistry-
 [UserKycThresholdBothRule-isTransferValid-address-address-address-uint256-uint256-]: #UserKycThresholdBothRule-isTransferValid-address-address-address-uint256-uint256-
-[UserKycThresholdBothRule-beforeTransferHook-address-address-address-uint256-uint256-]: #UserKycThresholdBothRule-beforeTransferHook-address-address-address-uint256-uint256-
-[UserKycThresholdBothRule-afterTransferHook-address-address-address-uint256-uint256-]: #UserKycThresholdBothRule-afterTransferHook-address-address-address-uint256-uint256-
+[AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-]: #AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-
+[AbstractRule-afterTransferHook-address-address-address-uint256-uint256-]: #AbstractRule-afterTransferHook-address-address-address-uint256-uint256-
 [UserKycThresholdFromRule]: #UserKycThresholdFromRule
 [UserKycThresholdFromRule-initialize-contract-IComplianceRegistry-]: #UserKycThresholdFromRule-initialize-contract-IComplianceRegistry-
 [UserKycThresholdFromRule-isTransferValid-address-address-address-uint256-uint256-]: #UserKycThresholdFromRule-isTransferValid-address-address-address-uint256-uint256-
-[UserKycThresholdFromRule-beforeTransferHook-address-address-address-uint256-uint256-]: #UserKycThresholdFromRule-beforeTransferHook-address-address-address-uint256-uint256-
-[UserKycThresholdFromRule-afterTransferHook-address-address-address-uint256-uint256-]: #UserKycThresholdFromRule-afterTransferHook-address-address-address-uint256-uint256-
+[AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-]: #AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-
+[AbstractRule-afterTransferHook-address-address-address-uint256-uint256-]: #AbstractRule-afterTransferHook-address-address-address-uint256-uint256-
 [UserKycThresholdToRule]: #UserKycThresholdToRule
 [UserKycThresholdToRule-initialize-contract-IComplianceRegistry-]: #UserKycThresholdToRule-initialize-contract-IComplianceRegistry-
 [UserKycThresholdToRule-isTransferValid-address-address-address-uint256-uint256-]: #UserKycThresholdToRule-isTransferValid-address-address-address-uint256-uint256-
-[UserKycThresholdToRule-beforeTransferHook-address-address-address-uint256-uint256-]: #UserKycThresholdToRule-beforeTransferHook-address-address-address-uint256-uint256-
-[UserKycThresholdToRule-afterTransferHook-address-address-address-uint256-uint256-]: #UserKycThresholdToRule-afterTransferHook-address-address-address-uint256-uint256-
+[AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-]: #AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-
+[AbstractRule-afterTransferHook-address-address-address-uint256-uint256-]: #AbstractRule-afterTransferHook-address-address-address-uint256-uint256-
 [UserValidRule]: #UserValidRule
 [UserValidRule-initialize-contract-IComplianceRegistry-]: #UserValidRule-initialize-contract-IComplianceRegistry-
 [UserValidRule-isTransferValid-address-address-address-uint256-uint256-]: #UserValidRule-isTransferValid-address-address-address-uint256-uint256-
-[UserValidRule-beforeTransferHook-address-address-address-uint256-uint256-]: #UserValidRule-beforeTransferHook-address-address-address-uint256-uint256-
-[UserValidRule-afterTransferHook-address-address-address-uint256-uint256-]: #UserValidRule-afterTransferHook-address-address-address-uint256-uint256-
+[AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-]: #AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-
+[AbstractRule-afterTransferHook-address-address-address-uint256-uint256-]: #AbstractRule-afterTransferHook-address-address-address-uint256-uint256-
 [YesNoRule]: #YesNoRule
 [YesNoRule-isTransferValid-address-address-address-uint256-uint256-]: #YesNoRule-isTransferValid-address-address-address-uint256-uint256-
-[YesNoRule-beforeTransferHook-address-address-address-uint256-uint256-]: #YesNoRule-beforeTransferHook-address-address-address-uint256-uint256-
-[YesNoRule-afterTransferHook-address-address-address-uint256-uint256-]: #YesNoRule-afterTransferHook-address-address-address-uint256-uint256-
+[AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-]: #AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-
+[AbstractRule-afterTransferHook-address-address-address-uint256-uint256-]: #AbstractRule-afterTransferHook-address-address-address-uint256-uint256-
 [YesNoUpdateRule]: #YesNoUpdateRule
 [YesNoUpdateRule-initialize--]: #YesNoUpdateRule-initialize--
 [YesNoUpdateRule-isTransferValid-address-address-address-uint256-uint256-]: #YesNoUpdateRule-isTransferValid-address-address-address-uint256-uint256-
-[YesNoUpdateRule-beforeTransferHook-address-address-address-uint256-uint256-]: #YesNoUpdateRule-beforeTransferHook-address-address-address-uint256-uint256-
 [YesNoUpdateRule-afterTransferHook-address-address-address-uint256-uint256-]: #YesNoUpdateRule-afterTransferHook-address-address-address-uint256-uint256-
+[AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-]: #AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-
+[AbstractRule]: #AbstractRule
+[AbstractRule-isTransferValid-address-address-address-uint256-uint256-]: #AbstractRule-isTransferValid-address-address-address-uint256-uint256-
+[AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-]: #AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-
+[AbstractRule-afterTransferHook-address-address-address-uint256-uint256-]: #AbstractRule-afterTransferHook-address-address-address-uint256-uint256-
 [TokenSale]: #TokenSale
 [TokenSale-initialize-address-contract-BridgeToken-address-payable-address-string-uint8-]: #TokenSale-initialize-address-contract-BridgeToken-address-payable-address-string-uint8-
 [TokenSale-setMaxEtherBalance-uint256-]: #TokenSale-setMaxEtherBalance-uint256-
@@ -672,6 +692,9 @@
 [BridgeERC20-setRealm-address-]: #BridgeERC20-setRealm-address-
 [BridgeERC20-trustedIntermediaries--]: #BridgeERC20-trustedIntermediaries--
 [BridgeERC20-setTrustedIntermediaries-address---]: #BridgeERC20-setTrustedIntermediaries-address---
+[BridgeERC20-isRealmAdministrator-address-]: #BridgeERC20-isRealmAdministrator-address-
+[BridgeERC20-addRealmAdministrator-address-]: #BridgeERC20-addRealmAdministrator-address-
+[BridgeERC20-removeRealmAdministrator-address-]: #BridgeERC20-removeRealmAdministrator-address-
 [BridgeERC20-priceOracle--]: #BridgeERC20-priceOracle--
 [BridgeERC20-setPriceOracle-contract-IPriceOracle-]: #BridgeERC20-setPriceOracle-contract-IPriceOracle-
 [BridgeERC20-convertTo-uint256-string-uint8-]: #BridgeERC20-convertTo-uint256-string-uint8-
@@ -703,6 +726,8 @@
 [IPriceable-PriceOracleChanged-address-]: #IPriceable-PriceOracleChanged-address-
 [IGovernable-TrustedIntermediariesChanged-address---]: #IGovernable-TrustedIntermediariesChanged-address---
 [IGovernable-RealmChanged-address-]: #IGovernable-RealmChanged-address-
+[IGovernable-RealmAdministratorAdded-address-]: #IGovernable-RealmAdministratorAdded-address-
+[IGovernable-RealmAdministratorRemoved-address-]: #IGovernable-RealmAdministratorRemoved-address-
 [IAdministrable-AdministratorAdded-address-]: #IAdministrable-AdministratorAdded-address-
 [IAdministrable-AdministratorRemoved-address-]: #IAdministrable-AdministratorRemoved-address-
 [Ownable-OwnershipTransferred-address-address-]: #Ownable-OwnershipTransferred-address-address-
@@ -737,6 +762,9 @@
 [BridgeERC20-setRealm-address-]: #BridgeERC20-setRealm-address-
 [BridgeERC20-trustedIntermediaries--]: #BridgeERC20-trustedIntermediaries--
 [BridgeERC20-setTrustedIntermediaries-address---]: #BridgeERC20-setTrustedIntermediaries-address---
+[BridgeERC20-isRealmAdministrator-address-]: #BridgeERC20-isRealmAdministrator-address-
+[BridgeERC20-addRealmAdministrator-address-]: #BridgeERC20-addRealmAdministrator-address-
+[BridgeERC20-removeRealmAdministrator-address-]: #BridgeERC20-removeRealmAdministrator-address-
 [BridgeERC20-priceOracle--]: #BridgeERC20-priceOracle--
 [BridgeERC20-setPriceOracle-contract-IPriceOracle-]: #BridgeERC20-setPriceOracle-contract-IPriceOracle-
 [BridgeERC20-convertTo-uint256-string-uint8-]: #BridgeERC20-convertTo-uint256-string-uint8-
@@ -768,6 +796,8 @@
 [IPriceable-PriceOracleChanged-address-]: #IPriceable-PriceOracleChanged-address-
 [IGovernable-TrustedIntermediariesChanged-address---]: #IGovernable-TrustedIntermediariesChanged-address---
 [IGovernable-RealmChanged-address-]: #IGovernable-RealmChanged-address-
+[IGovernable-RealmAdministratorAdded-address-]: #IGovernable-RealmAdministratorAdded-address-
+[IGovernable-RealmAdministratorRemoved-address-]: #IGovernable-RealmAdministratorRemoved-address-
 [IAdministrable-AdministratorAdded-address-]: #IAdministrable-AdministratorAdded-address-
 [IAdministrable-AdministratorRemoved-address-]: #IAdministrable-AdministratorRemoved-address-
 [Ownable-OwnershipTransferred-address-address-]: #Ownable-OwnershipTransferred-address-address-
@@ -802,6 +832,9 @@
 [BridgeERC20-setRealm-address-]: #BridgeERC20-setRealm-address-
 [BridgeERC20-trustedIntermediaries--]: #BridgeERC20-trustedIntermediaries--
 [BridgeERC20-setTrustedIntermediaries-address---]: #BridgeERC20-setTrustedIntermediaries-address---
+[BridgeERC20-isRealmAdministrator-address-]: #BridgeERC20-isRealmAdministrator-address-
+[BridgeERC20-addRealmAdministrator-address-]: #BridgeERC20-addRealmAdministrator-address-
+[BridgeERC20-removeRealmAdministrator-address-]: #BridgeERC20-removeRealmAdministrator-address-
 [BridgeERC20-priceOracle--]: #BridgeERC20-priceOracle--
 [BridgeERC20-setPriceOracle-contract-IPriceOracle-]: #BridgeERC20-setPriceOracle-contract-IPriceOracle-
 [BridgeERC20-convertTo-uint256-string-uint8-]: #BridgeERC20-convertTo-uint256-string-uint8-
@@ -833,6 +866,8 @@
 [IPriceable-PriceOracleChanged-address-]: #IPriceable-PriceOracleChanged-address-
 [IGovernable-TrustedIntermediariesChanged-address---]: #IGovernable-TrustedIntermediariesChanged-address---
 [IGovernable-RealmChanged-address-]: #IGovernable-RealmChanged-address-
+[IGovernable-RealmAdministratorAdded-address-]: #IGovernable-RealmAdministratorAdded-address-
+[IGovernable-RealmAdministratorRemoved-address-]: #IGovernable-RealmAdministratorRemoved-address-
 [IAdministrable-AdministratorAdded-address-]: #IAdministrable-AdministratorAdded-address-
 [IAdministrable-AdministratorRemoved-address-]: #IAdministrable-AdministratorRemoved-address-
 [Ownable-OwnershipTransferred-address-address-]: #Ownable-OwnershipTransferred-address-address-
@@ -868,6 +903,9 @@
 [BridgeERC20-setRealm-address-]: #BridgeERC20-setRealm-address-
 [BridgeERC20-trustedIntermediaries--]: #BridgeERC20-trustedIntermediaries--
 [BridgeERC20-setTrustedIntermediaries-address---]: #BridgeERC20-setTrustedIntermediaries-address---
+[BridgeERC20-isRealmAdministrator-address-]: #BridgeERC20-isRealmAdministrator-address-
+[BridgeERC20-addRealmAdministrator-address-]: #BridgeERC20-addRealmAdministrator-address-
+[BridgeERC20-removeRealmAdministrator-address-]: #BridgeERC20-removeRealmAdministrator-address-
 [BridgeERC20-priceOracle--]: #BridgeERC20-priceOracle--
 [BridgeERC20-setPriceOracle-contract-IPriceOracle-]: #BridgeERC20-setPriceOracle-contract-IPriceOracle-
 [BridgeERC20-convertTo-uint256-string-uint8-]: #BridgeERC20-convertTo-uint256-string-uint8-
@@ -899,6 +937,8 @@
 [IPriceable-PriceOracleChanged-address-]: #IPriceable-PriceOracleChanged-address-
 [IGovernable-TrustedIntermediariesChanged-address---]: #IGovernable-TrustedIntermediariesChanged-address---
 [IGovernable-RealmChanged-address-]: #IGovernable-RealmChanged-address-
+[IGovernable-RealmAdministratorAdded-address-]: #IGovernable-RealmAdministratorAdded-address-
+[IGovernable-RealmAdministratorRemoved-address-]: #IGovernable-RealmAdministratorRemoved-address-
 [IAdministrable-AdministratorAdded-address-]: #IAdministrable-AdministratorAdded-address-
 [IAdministrable-AdministratorRemoved-address-]: #IAdministrable-AdministratorRemoved-address-
 [Ownable-OwnershipTransferred-address-address-]: #Ownable-OwnershipTransferred-address-address-
@@ -919,6 +959,9 @@
 [BridgeERC20-setRealm-address-]: #BridgeERC20-setRealm-address-
 [BridgeERC20-trustedIntermediaries--]: #BridgeERC20-trustedIntermediaries--
 [BridgeERC20-setTrustedIntermediaries-address---]: #BridgeERC20-setTrustedIntermediaries-address---
+[BridgeERC20-isRealmAdministrator-address-]: #BridgeERC20-isRealmAdministrator-address-
+[BridgeERC20-addRealmAdministrator-address-]: #BridgeERC20-addRealmAdministrator-address-
+[BridgeERC20-removeRealmAdministrator-address-]: #BridgeERC20-removeRealmAdministrator-address-
 [BridgeERC20-priceOracle--]: #BridgeERC20-priceOracle--
 [BridgeERC20-setPriceOracle-contract-IPriceOracle-]: #BridgeERC20-setPriceOracle-contract-IPriceOracle-
 [BridgeERC20-convertTo-uint256-string-uint8-]: #BridgeERC20-convertTo-uint256-string-uint8-
@@ -950,6 +993,8 @@
 [IPriceable-PriceOracleChanged-address-]: #IPriceable-PriceOracleChanged-address-
 [IGovernable-TrustedIntermediariesChanged-address---]: #IGovernable-TrustedIntermediariesChanged-address---
 [IGovernable-RealmChanged-address-]: #IGovernable-RealmChanged-address-
+[IGovernable-RealmAdministratorAdded-address-]: #IGovernable-RealmAdministratorAdded-address-
+[IGovernable-RealmAdministratorRemoved-address-]: #IGovernable-RealmAdministratorRemoved-address-
 [IAdministrable-AdministratorAdded-address-]: #IAdministrable-AdministratorAdded-address-
 [IAdministrable-AdministratorRemoved-address-]: #IAdministrable-AdministratorRemoved-address-
 [Ownable-OwnershipTransferred-address-address-]: #Ownable-OwnershipTransferred-address-address-
@@ -966,6 +1011,9 @@
 [BridgeERC20-setRealm-address-]: #BridgeERC20-setRealm-address-
 [BridgeERC20-trustedIntermediaries--]: #BridgeERC20-trustedIntermediaries--
 [BridgeERC20-setTrustedIntermediaries-address---]: #BridgeERC20-setTrustedIntermediaries-address---
+[BridgeERC20-isRealmAdministrator-address-]: #BridgeERC20-isRealmAdministrator-address-
+[BridgeERC20-addRealmAdministrator-address-]: #BridgeERC20-addRealmAdministrator-address-
+[BridgeERC20-removeRealmAdministrator-address-]: #BridgeERC20-removeRealmAdministrator-address-
 [BridgeERC20-priceOracle--]: #BridgeERC20-priceOracle--
 [BridgeERC20-setPriceOracle-contract-IPriceOracle-]: #BridgeERC20-setPriceOracle-contract-IPriceOracle-
 [BridgeERC20-convertTo-uint256-string-uint8-]: #BridgeERC20-convertTo-uint256-string-uint8-
@@ -997,6 +1045,8 @@
 [IPriceable-PriceOracleChanged-address-]: #IPriceable-PriceOracleChanged-address-
 [IGovernable-TrustedIntermediariesChanged-address---]: #IGovernable-TrustedIntermediariesChanged-address---
 [IGovernable-RealmChanged-address-]: #IGovernable-RealmChanged-address-
+[IGovernable-RealmAdministratorAdded-address-]: #IGovernable-RealmAdministratorAdded-address-
+[IGovernable-RealmAdministratorRemoved-address-]: #IGovernable-RealmAdministratorRemoved-address-
 [IAdministrable-AdministratorAdded-address-]: #IAdministrable-AdministratorAdded-address-
 [IAdministrable-AdministratorRemoved-address-]: #IAdministrable-AdministratorRemoved-address-
 [Ownable-OwnershipTransferred-address-address-]: #Ownable-OwnershipTransferred-address-address-
@@ -1645,10 +1695,8 @@ Removes the operator right from the _operator address
 - [`ItemUpdated(uint256 id)`][IExchange-ItemUpdated-uint256-]
 - [`OrderTraded(uint256 payAmount, contract IERC20 payToken, uint256 buyAmount, contract IERC20 buyToken)`][IExchange-OrderTraded-uint256-contract-IERC20-uint256-contract-IERC20-]
 - [`OrderMade(bytes32 id, bytes32 pair, address maker, contract IERC20 payToken, contract IERC20 buyToken, uint256 payAmount, uint256 buyAmount, uint256 timestamp)`][IExchange-OrderMade-bytes32-bytes32-address-contract-IERC20-contract-IERC20-uint256-uint256-uint256-]
-- [`OrderBumped(bytes32 id, bytes32 pair, address maker, contract IERC20 payToken, contract IERC20 buyToken, uint256 payAmount, uint256 buyAmount, uint256 timestamp)`][IExchange-OrderBumped-bytes32-bytes32-address-contract-IERC20-contract-IERC20-uint256-uint256-uint256-]
 - [`OrderTaken(bytes32 id, bytes32 pair, address maker, contract IERC20 payToken, contract IERC20 buyToken, address taker, uint256 takeAmount, uint256 giveAmount, uint256 timestamp)`][IExchange-OrderTaken-bytes32-bytes32-address-contract-IERC20-contract-IERC20-address-uint256-uint256-uint256-]
 - [`OrderKilled(bytes32 id, bytes32 pair, address maker, contract IERC20 payToken, contract IERC20 buyToken, uint256 payAmount, uint256 buyAmount, uint256 timestamp)`][IExchange-OrderKilled-bytes32-bytes32-address-contract-IERC20-contract-IERC20-uint256-uint256-uint256-]
-- [`BuyEnabled(bool isEnabled)`][IExchange-BuyEnabled-bool-]
 - [`MinSellSet(contract IERC20 payToken, uint256 minAmount)`][IExchange-MinSellSet-contract-IERC20-uint256-]
 - [`UnsortedOffer(uint256 id)`][IExchange-UnsortedOffer-uint256-]
 - [`SortedOffer(uint256 id)`][IExchange-SortedOffer-uint256-]
@@ -1925,13 +1973,13 @@ IAdministrable interface*
 
 
 
-### <span id="IAdministrable-addAdministrator-address-"></span> `addAdministrator(address _administrator) → bool` (external)
+### <span id="IAdministrable-addAdministrator-address-"></span> `addAdministrator(address _administrator)` (external)
 
 
 
 
 
-### <span id="IAdministrable-removeAdministrator-address-"></span> `removeAdministrator(address _administrator) → bool` (external)
+### <span id="IAdministrable-removeAdministrator-address-"></span> `removeAdministrator(address _administrator)` (external)
 
 
 
@@ -1974,7 +2022,8 @@ IComplianceRegistry interface*
 - [`yearlyOutTransfers(address _realm, address[] _trustedIntermediaries, address _address)`][IComplianceRegistry-yearlyOutTransfers-address-address---address-]
 - [`addOnHoldTransfer(address trustedIntermediary, address token, address from, address to, uint256 amount)`][IComplianceRegistry-addOnHoldTransfer-address-address-address-address-uint256-]
 - [`getOnHoldTransfers(address trustedIntermediary)`][IComplianceRegistry-getOnHoldTransfers-address-]
-- [`processOnHoldTransfers(uint256[] transfers, uint8[] transferDecisions)`][IComplianceRegistry-processOnHoldTransfers-uint256---uint8---]
+- [`processOnHoldTransfers(uint256[] transfers, uint8[] transferDecisions, bool skipMinBoundaryUpdate)`][IComplianceRegistry-processOnHoldTransfers-uint256---uint8---bool-]
+- [`updateOnHoldMinBoundary(uint256 maxIterations)`][IComplianceRegistry-updateOnHoldMinBoundary-uint256-]
 - [`AddressAttached(address trustedIntermediary, uint256 userId, address address_)`][IComplianceRegistry-AddressAttached-address-uint256-address-]
 - [`AddressDetached(address trustedIntermediary, uint256 userId, address address_)`][IComplianceRegistry-AddressDetached-address-uint256-address-]
 - [`TransferOnHold(address trustedIntermediary, address token, address from, address to, uint256 amount)`][IComplianceRegistry-TransferOnHold-address-address-address-address-uint256-]
@@ -2065,7 +2114,7 @@ IComplianceRegistry interface*
 
 
 
-### <span id="IComplianceRegistry-updateTransfers-address-address-address-uint256-"></span> `updateTransfers(address _realm, address _from, address _to, uint256 _value) → bool` (external)
+### <span id="IComplianceRegistry-updateTransfers-address-address-address-uint256-"></span> `updateTransfers(address _realm, address _from, address _to, uint256 _value)` (external)
 
 
 
@@ -2107,7 +2156,7 @@ IComplianceRegistry interface*
 
 
 
-### <span id="IComplianceRegistry-addOnHoldTransfer-address-address-address-address-uint256-"></span> `addOnHoldTransfer(address trustedIntermediary, address token, address from, address to, uint256 amount) → bool` (external)
+### <span id="IComplianceRegistry-addOnHoldTransfer-address-address-address-address-uint256-"></span> `addOnHoldTransfer(address trustedIntermediary, address token, address from, address to, uint256 amount)` (external)
 
 
 
@@ -2119,7 +2168,13 @@ IComplianceRegistry interface*
 
 
 
-### <span id="IComplianceRegistry-processOnHoldTransfers-uint256---uint8---"></span> `processOnHoldTransfers(uint256[] transfers, uint8[] transferDecisions)` (external)
+### <span id="IComplianceRegistry-processOnHoldTransfers-uint256---uint8---bool-"></span> `processOnHoldTransfers(uint256[] transfers, uint8[] transferDecisions, bool skipMinBoundaryUpdate)` (external)
+
+
+
+
+
+### <span id="IComplianceRegistry-updateOnHoldMinBoundary-uint256-"></span> `updateOnHoldMinBoundary(uint256 maxIterations)` (external)
 
 
 
@@ -2237,10 +2292,8 @@ IERC20Detailed interface*
 - [`ItemUpdated(uint256 id)`][IExchange-ItemUpdated-uint256-]
 - [`OrderTraded(uint256 payAmount, contract IERC20 payToken, uint256 buyAmount, contract IERC20 buyToken)`][IExchange-OrderTraded-uint256-contract-IERC20-uint256-contract-IERC20-]
 - [`OrderMade(bytes32 id, bytes32 pair, address maker, contract IERC20 payToken, contract IERC20 buyToken, uint256 payAmount, uint256 buyAmount, uint256 timestamp)`][IExchange-OrderMade-bytes32-bytes32-address-contract-IERC20-contract-IERC20-uint256-uint256-uint256-]
-- [`OrderBumped(bytes32 id, bytes32 pair, address maker, contract IERC20 payToken, contract IERC20 buyToken, uint256 payAmount, uint256 buyAmount, uint256 timestamp)`][IExchange-OrderBumped-bytes32-bytes32-address-contract-IERC20-contract-IERC20-uint256-uint256-uint256-]
 - [`OrderTaken(bytes32 id, bytes32 pair, address maker, contract IERC20 payToken, contract IERC20 buyToken, address taker, uint256 takeAmount, uint256 giveAmount, uint256 timestamp)`][IExchange-OrderTaken-bytes32-bytes32-address-contract-IERC20-contract-IERC20-address-uint256-uint256-uint256-]
 - [`OrderKilled(bytes32 id, bytes32 pair, address maker, contract IERC20 payToken, contract IERC20 buyToken, uint256 payAmount, uint256 buyAmount, uint256 timestamp)`][IExchange-OrderKilled-bytes32-bytes32-address-contract-IERC20-contract-IERC20-uint256-uint256-uint256-]
-- [`BuyEnabled(bool isEnabled)`][IExchange-BuyEnabled-bool-]
 - [`MinSellSet(contract IERC20 payToken, uint256 minAmount)`][IExchange-MinSellSet-contract-IERC20-uint256-]
 - [`UnsortedOffer(uint256 id)`][IExchange-UnsortedOffer-uint256-]
 - [`SortedOffer(uint256 id)`][IExchange-SortedOffer-uint256-]
@@ -2258,19 +2311,11 @@ IERC20Detailed interface*
 
 
 
-### <span id="IExchange-OrderBumped-bytes32-bytes32-address-contract-IERC20-contract-IERC20-uint256-uint256-uint256-"></span> `OrderBumped(bytes32 id, bytes32 pair, address maker, contract IERC20 payToken, contract IERC20 buyToken, uint256 payAmount, uint256 buyAmount, uint256 timestamp)`
-
-
-
 ### <span id="IExchange-OrderTaken-bytes32-bytes32-address-contract-IERC20-contract-IERC20-address-uint256-uint256-uint256-"></span> `OrderTaken(bytes32 id, bytes32 pair, address maker, contract IERC20 payToken, contract IERC20 buyToken, address taker, uint256 takeAmount, uint256 giveAmount, uint256 timestamp)`
 
 
 
 ### <span id="IExchange-OrderKilled-bytes32-bytes32-address-contract-IERC20-contract-IERC20-uint256-uint256-uint256-"></span> `OrderKilled(bytes32 id, bytes32 pair, address maker, contract IERC20 payToken, contract IERC20 buyToken, uint256 payAmount, uint256 buyAmount, uint256 timestamp)`
-
-
-
-### <span id="IExchange-BuyEnabled-bool-"></span> `BuyEnabled(bool isEnabled)`
 
 
 
@@ -2302,10 +2347,15 @@ IGovernable interface*
 
 - [`realm()`][IGovernable-realm--]
 - [`setRealm(address _realm)`][IGovernable-setRealm-address-]
+- [`isRealmAdministrator(address _administrator)`][IGovernable-isRealmAdministrator-address-]
+- [`addRealmAdministrator(address _administrator)`][IGovernable-addRealmAdministrator-address-]
+- [`removeRealmAdministrator(address _administrator)`][IGovernable-removeRealmAdministrator-address-]
 - [`trustedIntermediaries()`][IGovernable-trustedIntermediaries--]
 - [`setTrustedIntermediaries(address[] _trustedIntermediaries)`][IGovernable-setTrustedIntermediaries-address---]
 - [`TrustedIntermediariesChanged(address[] newTrustedIntermediaries)`][IGovernable-TrustedIntermediariesChanged-address---]
 - [`RealmChanged(address newRealm)`][IGovernable-RealmChanged-address-]
+- [`RealmAdministratorAdded(address administrator)`][IGovernable-RealmAdministratorAdded-address-]
+- [`RealmAdministratorRemoved(address administrator)`][IGovernable-RealmAdministratorRemoved-address-]
 ### <span id="IGovernable-realm--"></span> `realm() → address` (external)
 
 
@@ -2313,6 +2363,24 @@ IGovernable interface*
 
 
 ### <span id="IGovernable-setRealm-address-"></span> `setRealm(address _realm)` (external)
+
+
+
+
+
+### <span id="IGovernable-isRealmAdministrator-address-"></span> `isRealmAdministrator(address _administrator) → bool` (external)
+
+
+
+
+
+### <span id="IGovernable-addRealmAdministrator-address-"></span> `addRealmAdministrator(address _administrator)` (external)
+
+
+
+
+
+### <span id="IGovernable-removeRealmAdministrator-address-"></span> `removeRealmAdministrator(address _administrator)` (external)
 
 
 
@@ -2338,6 +2406,14 @@ IGovernable interface*
 
 
 
+### <span id="IGovernable-RealmAdministratorAdded-address-"></span> `RealmAdministratorAdded(address administrator)`
+
+
+
+### <span id="IGovernable-RealmAdministratorRemoved-address-"></span> `RealmAdministratorRemoved(address administrator)`
+
+
+
 
 
 ## <span id="IMintable"></span> `IMintable`
@@ -2348,13 +2424,13 @@ IMintable interface
 - [`burn(address _from, uint256 _amount)`][IMintable-burn-address-uint256-]
 - [`Mint(address to, uint256 amount)`][IMintable-Mint-address-uint256-]
 - [`Burn(address from, uint256 amount)`][IMintable-Burn-address-uint256-]
-### <span id="IMintable-mint-address-uint256-"></span> `mint(address _to, uint256 _amount) → bool` (external)
+### <span id="IMintable-mint-address-uint256-"></span> `mint(address _to, uint256 _amount)` (external)
 
 
 
 
 
-### <span id="IMintable-burn-address-uint256-"></span> `burn(address _from, uint256 _amount) → bool` (external)
+### <span id="IMintable-burn-address-uint256-"></span> `burn(address _from, uint256 _amount)` (external)
 
 
 
@@ -2408,26 +2484,26 @@ IPriceOracle interface
   
 
 
-- [`setPrice(bytes32 _pair, uint256 _price, uint8 _decimals)`][IPriceOracle-setPrice-bytes32-uint256-uint8-]
-- [`setPrices(bytes32[] _pair, uint256[] _price, uint8[] _decimals)`][IPriceOracle-setPrices-bytes32---uint256---uint8---]
-- [`getPrice(bytes32 _pair)`][IPriceOracle-getPrice-bytes32-]
+- [`setPrice(bytes32 _currency1, bytes32 _currency2, uint256 _price, uint8 _decimals)`][IPriceOracle-setPrice-bytes32-bytes32-uint256-uint8-]
+- [`setPrices(bytes32[] _currency1, bytes32[] _currency2, uint256[] _price, uint8[] _decimals)`][IPriceOracle-setPrices-bytes32---bytes32---uint256---uint8---]
+- [`getPrice(bytes32 _currency1, bytes32 _currency2)`][IPriceOracle-getPrice-bytes32-bytes32-]
 - [`getPrice(string _currency1, string _currency2)`][IPriceOracle-getPrice-string-string-]
-- [`getLastUpdated(bytes32 _pair)`][IPriceOracle-getLastUpdated-bytes32-]
-- [`getDecimals(bytes32 _pair)`][IPriceOracle-getDecimals-bytes32-]
-- [`PriceSet(bytes32 pair, uint256 price, uint8 decimals, uint256 updateDate)`][IPriceOracle-PriceSet-bytes32-uint256-uint8-uint256-]
-### <span id="IPriceOracle-setPrice-bytes32-uint256-uint8-"></span> `setPrice(bytes32 _pair, uint256 _price, uint8 _decimals)` (external)
+- [`getLastUpdated(bytes32 _currency1, bytes32 _currency2)`][IPriceOracle-getLastUpdated-bytes32-bytes32-]
+- [`getDecimals(bytes32 _currency1, bytes32 _currency2)`][IPriceOracle-getDecimals-bytes32-bytes32-]
+- [`PriceSet(bytes32 currency1, bytes32 currency2, uint256 price, uint8 decimals, uint256 updateDate)`][IPriceOracle-PriceSet-bytes32-bytes32-uint256-uint8-uint256-]
+### <span id="IPriceOracle-setPrice-bytes32-bytes32-uint256-uint8-"></span> `setPrice(bytes32 _currency1, bytes32 _currency2, uint256 _price, uint8 _decimals)` (external)
 
 
 
 
 
-### <span id="IPriceOracle-setPrices-bytes32---uint256---uint8---"></span> `setPrices(bytes32[] _pair, uint256[] _price, uint8[] _decimals)` (external)
+### <span id="IPriceOracle-setPrices-bytes32---bytes32---uint256---uint8---"></span> `setPrices(bytes32[] _currency1, bytes32[] _currency2, uint256[] _price, uint8[] _decimals)` (external)
 
 
 
 
 
-### <span id="IPriceOracle-getPrice-bytes32-"></span> `getPrice(bytes32 _pair) → uint256, uint8` (external)
+### <span id="IPriceOracle-getPrice-bytes32-bytes32-"></span> `getPrice(bytes32 _currency1, bytes32 _currency2) → uint256, uint8` (external)
 
 
 
@@ -2439,19 +2515,19 @@ IPriceOracle interface
 
 
 
-### <span id="IPriceOracle-getLastUpdated-bytes32-"></span> `getLastUpdated(bytes32 _pair) → uint256` (external)
+### <span id="IPriceOracle-getLastUpdated-bytes32-bytes32-"></span> `getLastUpdated(bytes32 _currency1, bytes32 _currency2) → uint256` (external)
 
 
 
 
 
-### <span id="IPriceOracle-getDecimals-bytes32-"></span> `getDecimals(bytes32 _pair) → uint8` (external)
+### <span id="IPriceOracle-getDecimals-bytes32-bytes32-"></span> `getDecimals(bytes32 _currency1, bytes32 _currency2) → uint8` (external)
 
 
 
 
 
-### <span id="IPriceOracle-PriceSet-bytes32-uint256-uint8-uint256-"></span> `PriceSet(bytes32 pair, uint256 price, uint8 decimals, uint256 updateDate)`
+### <span id="IPriceOracle-PriceSet-bytes32-bytes32-uint256-uint8-uint256-"></span> `PriceSet(bytes32 currency1, bytes32 currency2, uint256 price, uint8 decimals, uint256 updateDate)`
 
 
 
@@ -2556,7 +2632,7 @@ IProcessor interface*
 
 
 
-### <span id="IProcessor-approve-address-address-uint256-"></span> `approve(address _owner, address _spender, uint256 _value) → bool` (external)
+### <span id="IProcessor-approve-address-address-uint256-"></span> `approve(address _owner, address _spender, uint256 _value)` (external)
 
 
 
@@ -2568,31 +2644,31 @@ IProcessor interface*
 
 
 
-### <span id="IProcessor-increaseApproval-address-address-uint256-"></span> `increaseApproval(address _owner, address _spender, uint256 _addedValue) → bool` (external)
+### <span id="IProcessor-increaseApproval-address-address-uint256-"></span> `increaseApproval(address _owner, address _spender, uint256 _addedValue)` (external)
 
 
 
 
 
-### <span id="IProcessor-decreaseApproval-address-address-uint256-"></span> `decreaseApproval(address _owner, address _spender, uint256 _subtractedValue) → bool` (external)
+### <span id="IProcessor-decreaseApproval-address-address-uint256-"></span> `decreaseApproval(address _owner, address _spender, uint256 _subtractedValue)` (external)
 
 
 
 
 
-### <span id="IProcessor-seize-address-address-uint256-"></span> `seize(address _caller, address _account, uint256 _value) → bool` (external)
+### <span id="IProcessor-seize-address-address-uint256-"></span> `seize(address _caller, address _account, uint256 _value)` (external)
 
 
 
 
 
-### <span id="IProcessor-mint-address-address-uint256-"></span> `mint(address _caller, address _to, uint256 _amount) → bool` (external)
+### <span id="IProcessor-mint-address-address-uint256-"></span> `mint(address _caller, address _to, uint256 _amount)` (external)
 
 
 
 
 
-### <span id="IProcessor-burn-address-address-uint256-"></span> `burn(address _caller, address _from, uint256 _amount) → bool` (external)
+### <span id="IProcessor-burn-address-address-uint256-"></span> `burn(address _caller, address _from, uint256 _amount)` (external)
 
 
 
@@ -2627,7 +2703,7 @@ IRulable interface*
 
 
 
-### <span id="IRulable-setRules-uint256---uint256---"></span> `setRules(uint256[] _rules, uint256[] _rulesParams) → bool` (external)
+### <span id="IRulable-setRules-uint256---uint256---"></span> `setRules(uint256[] _rules, uint256[] _rulesParams)` (external)
 
 
 
@@ -2724,19 +2800,19 @@ ISeizable interface*
 
 
 
-### <span id="ISeizable-addSeizer-address-"></span> `addSeizer(address _seizer) → bool` (external)
+### <span id="ISeizable-addSeizer-address-"></span> `addSeizer(address _seizer)` (external)
 
 
 
 
 
-### <span id="ISeizable-removeSeizer-address-"></span> `removeSeizer(address _seizer) → bool` (external)
+### <span id="ISeizable-removeSeizer-address-"></span> `removeSeizer(address _seizer)` (external)
 
 
 
 
 
-### <span id="ISeizable-seize-address-uint256-"></span> `seize(address _account, uint256 _value) → bool` (external)
+### <span id="ISeizable-seize-address-uint256-"></span> `seize(address _account, uint256 _value)` (external)
 
 
 
@@ -2771,13 +2847,13 @@ ISuppliable interface*
 
 
 
-### <span id="ISuppliable-addSupplier-address-"></span> `addSupplier(address _supplier) → bool` (external)
+### <span id="ISuppliable-addSupplier-address-"></span> `addSupplier(address _supplier)` (external)
 
 
 
 
 
-### <span id="ISuppliable-removeSupplier-address-"></span> `removeSupplier(address _supplier) → bool` (external)
+### <span id="ISuppliable-removeSupplier-address-"></span> `removeSupplier(address _supplier)` (external)
 
 
 
@@ -2892,6 +2968,9 @@ Mocks BridgeERC20 token, used for testing
 - [`setRealm(address newRealm)`][BridgeERC20Mock-setRealm-address-]
 - [`trustedIntermediaries()`][BridgeERC20Mock-trustedIntermediaries--]
 - [`setTrustedIntermediaries(address[] newTrustedIntermediaries)`][BridgeERC20Mock-setTrustedIntermediaries-address---]
+- [`isRealmAdministrator(address _administrator)`][BridgeERC20Mock-isRealmAdministrator-address-]
+- [`addRealmAdministrator(address _administrator)`][BridgeERC20Mock-addRealmAdministrator-address-]
+- [`removeRealmAdministrator(address _administrator)`][BridgeERC20Mock-removeRealmAdministrator-address-]
 - [`priceOracle()`][BridgeERC20Mock-priceOracle--]
 - [`setPriceOracle(contract IPriceOracle newPriceOracle)`][BridgeERC20Mock-setPriceOracle-contract-IPriceOracle-]
 - [`convertTo(uint256 _amount, string _currency, uint8 maxDecimals)`][BridgeERC20Mock-convertTo-uint256-string-uint8-]
@@ -2909,6 +2988,8 @@ Mocks BridgeERC20 token, used for testing
 - [`PriceOracleChanged(address newPriceOracle)`][IPriceable-PriceOracleChanged-address-]
 - [`TrustedIntermediariesChanged(address[] newTrustedIntermediaries)`][IGovernable-TrustedIntermediariesChanged-address---]
 - [`RealmChanged(address newRealm)`][IGovernable-RealmChanged-address-]
+- [`RealmAdministratorAdded(address administrator)`][IGovernable-RealmAdministratorAdded-address-]
+- [`RealmAdministratorRemoved(address administrator)`][IGovernable-RealmAdministratorRemoved-address-]
 ### <span id="BridgeERC20Mock-constructor-contract-IPriceOracle-string-string-uint8-"></span> `constructor(contract IPriceOracle priceOracle, string name, string symbol, uint8 decimals)` (public)
 
 
@@ -2934,6 +3015,24 @@ Mocks BridgeERC20 token, used for testing
 
 
 ### <span id="BridgeERC20Mock-setTrustedIntermediaries-address---"></span> `setTrustedIntermediaries(address[] newTrustedIntermediaries)` (external)
+
+
+
+
+
+### <span id="BridgeERC20Mock-isRealmAdministrator-address-"></span> `isRealmAdministrator(address _administrator) → bool` (public)
+
+
+
+
+
+### <span id="BridgeERC20Mock-addRealmAdministrator-address-"></span> `addRealmAdministrator(address _administrator)` (public)
+
+
+
+
+
+### <span id="BridgeERC20Mock-removeRealmAdministrator-address-"></span> `removeRealmAdministrator(address _administrator)` (public)
 
 
 
@@ -3021,8 +3120,13 @@ Mocks BridgeERC20 token, used for testing
 - [`setRealm(address newRealm)`][GovernableTokenMock-setRealm-address-]
 - [`trustedIntermediaries()`][GovernableTokenMock-trustedIntermediaries--]
 - [`setTrustedIntermediaries(address[] newTrustedIntermediaries)`][GovernableTokenMock-setTrustedIntermediaries-address---]
+- [`isRealmAdministrator(address _administrator)`][GovernableTokenMock-isRealmAdministrator-address-]
+- [`addRealmAdministrator(address _administrator)`][GovernableTokenMock-addRealmAdministrator-address-]
+- [`removeRealmAdministrator(address _administrator)`][GovernableTokenMock-removeRealmAdministrator-address-]
 - [`TrustedIntermediariesChanged(address[] newTrustedIntermediaries)`][IGovernable-TrustedIntermediariesChanged-address---]
 - [`RealmChanged(address newRealm)`][IGovernable-RealmChanged-address-]
+- [`RealmAdministratorAdded(address administrator)`][IGovernable-RealmAdministratorAdded-address-]
+- [`RealmAdministratorRemoved(address administrator)`][IGovernable-RealmAdministratorRemoved-address-]
 ### <span id="GovernableTokenMock-realm--"></span> `realm() → address` (public)
 
 
@@ -3042,6 +3146,24 @@ Mocks BridgeERC20 token, used for testing
 
 
 ### <span id="GovernableTokenMock-setTrustedIntermediaries-address---"></span> `setTrustedIntermediaries(address[] newTrustedIntermediaries)` (external)
+
+
+
+
+
+### <span id="GovernableTokenMock-isRealmAdministrator-address-"></span> `isRealmAdministrator(address _administrator) → bool` (public)
+
+
+
+
+
+### <span id="GovernableTokenMock-addRealmAdministrator-address-"></span> `addRealmAdministrator(address _administrator)` (public)
+
+
+
+
+
+### <span id="GovernableTokenMock-removeRealmAdministrator-address-"></span> `removeRealmAdministrator(address _administrator)` (public)
 
 
 
@@ -3104,7 +3226,8 @@ UR03: Users length does not match with addresses length
 UR04: Address is not attached  
 UR05: Attribute keys length does not match with attribute values length  
 UR06: Transfer and transfer decisions must have the same length  
-UR07: Only originator can cancel transfer
+UR07: Only originator can cancel transfer  
+UR08: Unsuccessful transfer
 
 - [`onlyOperator()`][Operator-onlyOperator--]
 - [`onlyOwner()`][Ownable-onlyOwner--]
@@ -3133,8 +3256,9 @@ UR07: Only originator can cancel transfer
 - [`yearlyOutTransfers(address _realm, address[] _trustedIntermediaries, address _address)`][ComplianceRegistry-yearlyOutTransfers-address-address---address-]
 - [`addOnHoldTransfer(address trustedIntermediary, address token, address from, address to, uint256 amount)`][ComplianceRegistry-addOnHoldTransfer-address-address-address-address-uint256-]
 - [`getOnHoldTransfers(address trustedIntermediary)`][ComplianceRegistry-getOnHoldTransfers-address-]
-- [`processOnHoldTransfers(uint256[] transfers, uint8[] transferDecisions)`][ComplianceRegistry-processOnHoldTransfers-uint256---uint8---]
-- [`cancelOnHoldTransfers(address trustedIntermediary, uint256[] transfers)`][ComplianceRegistry-cancelOnHoldTransfers-address-uint256---]
+- [`processOnHoldTransfers(uint256[] transfers, uint8[] transferDecisions, bool skipMinBoundaryUpdate)`][ComplianceRegistry-processOnHoldTransfers-uint256---uint8---bool-]
+- [`updateOnHoldMinBoundary(uint256 maxIterations)`][ComplianceRegistry-updateOnHoldMinBoundary-uint256-]
+- [`cancelOnHoldTransfers(address trustedIntermediary, uint256[] transfers, bool skipMinBoundaryUpdate)`][ComplianceRegistry-cancelOnHoldTransfers-address-uint256---bool-]
 - [`_approveOnHoldTransfer(uint256 transferIndex)`][ComplianceRegistry-_approveOnHoldTransfer-uint256-]
 - [`_rejectOnHoldTransfer(uint256 transferIndex)`][ComplianceRegistry-_rejectOnHoldTransfer-uint256-]
 - [`_updateTransfers(address _realm, address _from, address _to, uint256 _value)`][ComplianceRegistry-_updateTransfers-address-address-address-uint256-]
@@ -3149,6 +3273,7 @@ UR07: Only originator can cancel transfer
 - [`_yearlyOutTransfers(address _realm, address[] _trustedIntermediaries, address _address)`][ComplianceRegistry-_yearlyOutTransfers-address-address---address-]
 - [`_getUser(address[] _trustedIntermediaries, address _address)`][ComplianceRegistry-_getUser-address---address-]
 - [`_getMonth(uint256 offset)`][ComplianceRegistry-_getMonth-uint256-]
+- [`_updateOnHoldMinBoundary(address trustedIntermediary, uint256 minBoundary, uint256 maxBoundary)`][ComplianceRegistry-_updateOnHoldMinBoundary-address-uint256-uint256-]
 - [`isOperator(address _operator)`][Operator-isOperator-address-]
 - [`addOperator(address _operator)`][Operator-addOperator-address-]
 - [`removeOperator(address _operator)`][Operator-removeOperator-address-]
@@ -3391,7 +3516,7 @@ Ignores not found users
 - **_attributeValues**: array of values of attributes to set
 
 
-### <span id="ComplianceRegistry-updateTransfers-address-address-address-uint256-"></span> `updateTransfers(address _realm, address _from, address _to, uint256 _value) → bool` (public)
+### <span id="ComplianceRegistry-updateTransfers-address-address-address-uint256-"></span> `updateTransfers(address _realm, address _from, address _to, uint256 _value)` (public)
 
 Updates the transfer registry  
 Intended to ba called by transfer computing rules that has been granted the operator right  
@@ -3503,7 +3628,7 @@ Returns the CHF amount transfered (OUT) by an address for a 12 months period for
 #### *Returns*
 - **the**: CHF amount transfered (OUT) by an address for the period for a specific realm 
 
-### <span id="ComplianceRegistry-addOnHoldTransfer-address-address-address-address-uint256-"></span> `addOnHoldTransfer(address trustedIntermediary, address token, address from, address to, uint256 amount) → bool` (public)
+### <span id="ComplianceRegistry-addOnHoldTransfer-address-address-address-address-uint256-"></span> `addOnHoldTransfer(address trustedIntermediary, address token, address from, address to, uint256 amount)` (public)
 
 Adds a transfer to the on hold queue that will be processed by the trusted intermediary  
 Intended to ba called by transfer computing rules that has been granted the operator right  
@@ -3547,7 +3672,7 @@ Fetch on hold transfers to be processed by a specific trusted intermediary
 
 - **amount**: the array of amounts for on hold transfers
 
-### <span id="ComplianceRegistry-processOnHoldTransfers-uint256---uint8---"></span> `processOnHoldTransfers(uint256[] transfers, uint8[] transferDecisions)` (external)
+### <span id="ComplianceRegistry-processOnHoldTransfers-uint256---uint8---bool-"></span> `processOnHoldTransfers(uint256[] transfers, uint8[] transferDecisions, bool skipMinBoundaryUpdate)` (external)
 
 Processes on hold transfers  
 Intended to be called from a trusted intermediary key  
@@ -3555,6 +3680,7 @@ Transfer decision: 1 = Approve, 2 = Reject
 Emits either a TransferApproved or a TransferRejected event that can be listened by wallets for improved UX experience  
 When transfer is approved, tokens are transfered to the receiver of the tokens  
 When transfer is rejected, tokens are transfered back to the sender of the tokens  
+If transfer is not on-hold, it will be ignored without notification  
 
 
 #### *Parameters*
@@ -3562,8 +3688,21 @@ When transfer is rejected, tokens are transfered back to the sender of the token
 
 - **transferDecisions**: array of transfer decisions applied to transfers
 
+- **skipMinBoundaryUpdate**: whether to skip the minBoundary update or not. Updating minBoundary can result in out of gas exception.
+Skipping the update will process the transfers and the user will be able to update minBoundary by calling the updateOnHoldMinBoundary multiple times
 
-### <span id="ComplianceRegistry-cancelOnHoldTransfers-address-uint256---"></span> `cancelOnHoldTransfers(address trustedIntermediary, uint256[] transfers)` (external)
+
+### <span id="ComplianceRegistry-updateOnHoldMinBoundary-uint256-"></span> `updateOnHoldMinBoundary(uint256 maxIterations)` (public)
+
+Updates the minBoundary index but limiting iterations to avoid out of gas exceptions  
+Intended to be called from a trusted intermediary key  
+
+
+#### *Parameters*
+- **maxIterations**: number of iterations allowed for the loop
+
+
+### <span id="ComplianceRegistry-cancelOnHoldTransfers-address-uint256---bool-"></span> `cancelOnHoldTransfers(address trustedIntermediary, uint256[] transfers, bool skipMinBoundaryUpdate)` (external)
 
 Called by user to cancel transfers for a specific trusted intermediary and get his tokens back  
 Throws UR07 if any of the transfer does not have user address as the sender  
@@ -3575,10 +3714,14 @@ Emits a TransferCancelled event that can be listened by wallets for improved UX 
 
 - **transfers**: array of transfer ids on hold with the trusted intermediary
 
+- **skipMinBoundaryUpdate**: whether to skip the minBoundary update or not. Updating minBoundary can result in out of gas exception.
+Skipping the update will process the transfers and the user will be able to update minBoundary by calling the updateOnHoldMinBoundary multiple times
+
 
 ### <span id="ComplianceRegistry-_approveOnHoldTransfer-uint256-"></span> `_approveOnHoldTransfer(uint256 transferIndex)` (internal)
 
 Approves on hold transfer  
+Throws UR08 if token transfer is not successful  
 
 
 #### *Parameters*
@@ -3588,13 +3731,14 @@ Approves on hold transfer
 ### <span id="ComplianceRegistry-_rejectOnHoldTransfer-uint256-"></span> `_rejectOnHoldTransfer(uint256 transferIndex)` (internal)
 
 Rejects on hold transfer  
+Throws UR08 if token transfer is not successful  
 
 
 #### *Parameters*
 - **transferIndex**: the id of the transfer to reject
 
 
-### <span id="ComplianceRegistry-_updateTransfers-address-address-address-uint256-"></span> `_updateTransfers(address _realm, address _from, address _to, uint256 _value) → bool` (internal)
+### <span id="ComplianceRegistry-_updateTransfers-address-address-address-uint256-"></span> `_updateTransfers(address _realm, address _from, address _to, uint256 _value)` (internal)
 
 Updates transfer history registries  
 
@@ -3761,6 +3905,12 @@ As we compute 31 days long month, it is assumed that the month number will not b
 
 
 
+### <span id="ComplianceRegistry-_updateOnHoldMinBoundary-address-uint256-uint256-"></span> `_updateOnHoldMinBoundary(address trustedIntermediary, uint256 minBoundary, uint256 maxBoundary)` (internal)
+
+
+
+
+
 
 
 ## <span id="PriceOracle"></span> `PriceOracle`
@@ -3768,20 +3918,21 @@ As we compute 31 days long month, it is assumed that the month number will not b
 The Price Oracle stores price related data for currency/token price conversion  
   
 Error messages  
-PO01: Pair length does not match price length   
-PO02: Pair length does not match decimals length 
+PO01: Currency1 length does not match price length   
+PO02: Currency1 length does not match decimals length   
+PO03: Currency1 length does not match currency2 length
 
 - [`onlyOperator()`][Operator-onlyOperator--]
 - [`onlyOwner()`][Ownable-onlyOwner--]
 - [`initializer()`][Initializable-initializer--]
 - [`initialize(address owner)`][PriceOracle-initialize-address-]
-- [`setPrices(bytes32[] _pair, uint256[] _price, uint8[] _decimals)`][PriceOracle-setPrices-bytes32---uint256---uint8---]
-- [`setPrice(bytes32 _pair, uint256 _price, uint8 _decimals)`][PriceOracle-setPrice-bytes32-uint256-uint8-]
-- [`getPrice(bytes32 _pair)`][PriceOracle-getPrice-bytes32-]
+- [`setPrices(bytes32[] _currency1, bytes32[] _currency2, uint256[] _price, uint8[] _decimals)`][PriceOracle-setPrices-bytes32---bytes32---uint256---uint8---]
+- [`setPrice(bytes32 _currency1, bytes32 _currency2, uint256 _price, uint8 _decimals)`][PriceOracle-setPrice-bytes32-bytes32-uint256-uint8-]
+- [`getPrice(bytes32 _currency1, bytes32 _currency2)`][PriceOracle-getPrice-bytes32-bytes32-]
 - [`getPrice(string _currency1, string _currency2)`][PriceOracle-getPrice-string-string-]
-- [`getLastUpdated(bytes32 _pair)`][PriceOracle-getLastUpdated-bytes32-]
-- [`getDecimals(bytes32 _pair)`][PriceOracle-getDecimals-bytes32-]
-- [`_getPair(string _currency1, string _currency2)`][PriceOracle-_getPair-string-string-]
+- [`getLastUpdated(bytes32 _currency1, bytes32 _currency2)`][PriceOracle-getLastUpdated-bytes32-bytes32-]
+- [`getDecimals(bytes32 _currency1, bytes32 _currency2)`][PriceOracle-getDecimals-bytes32-bytes32-]
+- [`_asBytes32(string _currency)`][PriceOracle-_asBytes32-string-]
 - [`isOperator(address _operator)`][Operator-isOperator-address-]
 - [`addOperator(address _operator)`][Operator-addOperator-address-]
 - [`removeOperator(address _operator)`][Operator-removeOperator-address-]
@@ -3796,7 +3947,7 @@ PO02: Pair length does not match decimals length
 - [`OperatorAdded(address operator)`][Operator-OperatorAdded-address-]
 - [`OperatorRemoved(address operator)`][Operator-OperatorRemoved-address-]
 - [`OwnershipTransferred(address previousOwner, address newOwner)`][Ownable-OwnershipTransferred-address-address-]
-- [`PriceSet(bytes32 pair, uint256 price, uint8 decimals, uint256 updateDate)`][IPriceOracle-PriceSet-bytes32-uint256-uint8-uint256-]
+- [`PriceSet(bytes32 currency1, bytes32 currency2, uint256 price, uint8 decimals, uint256 updateDate)`][IPriceOracle-PriceSet-bytes32-bytes32-uint256-uint8-uint256-]
 ### <span id="PriceOracle-initialize-address-"></span> `initialize(address owner)` (public)
 
 Initializer (replaces constructor when contract is upgradable)  
@@ -3806,39 +3957,45 @@ Initializer (replaces constructor when contract is upgradable)
 - **owner**: the final owner of the contract
 
 
-### <span id="PriceOracle-setPrices-bytes32---uint256---uint8---"></span> `setPrices(bytes32[] _pair, uint256[] _price, uint8[] _decimals)` (external)
+### <span id="PriceOracle-setPrices-bytes32---bytes32---uint256---uint8---"></span> `setPrices(bytes32[] _currency1, bytes32[] _currency2, uint256[] _price, uint8[] _decimals)` (external)
 
 Set prices for multiple pairs at the same time  
 
 
 #### *Parameters*
-- **_pair**: array of pairs of tokens/currencies to update prices for
+- **_currency1**: array of source tokens/currencies to update prices for
+
+- **_currency2**: array of destination tokens/currencies to update prices for
 
 - **_price**: array of prices
 
 - **_decimals**: array of decimals of the price to be set
 
 
-### <span id="PriceOracle-setPrice-bytes32-uint256-uint8-"></span> `setPrice(bytes32 _pair, uint256 _price, uint8 _decimals)` (public)
+### <span id="PriceOracle-setPrice-bytes32-bytes32-uint256-uint8-"></span> `setPrice(bytes32 _currency1, bytes32 _currency2, uint256 _price, uint8 _decimals)` (public)
 
 Set prices for multiple pairs at the same time  
 
 
 #### *Parameters*
-- **_pair**: pair of tokens/currencies to update the price for
+- **_currency1**: source token/currency to update the price for
+
+- **_currency2**: destination token/currency to update the price for
 
 - **_price**: new price
 
 - **_decimals**: decimals of the price to be set
 
 
-### <span id="PriceOracle-getPrice-bytes32-"></span> `getPrice(bytes32 _pair) → uint256, uint8` (public)
+### <span id="PriceOracle-getPrice-bytes32-bytes32-"></span> `getPrice(bytes32 _currency1, bytes32 _currency2) → uint256, uint8` (public)
 
 Get the price information for a specific pair of tokens/currencies  
 
 
 #### *Parameters*
-- **_pair**: pair of tokens/currencies to retrieve the price for
+- **_currency1**: source token/currency to retrieve the price for
+
+- **_currency2**: destination token/currency to retrieve the price for
 
 
 #### *Returns*
@@ -3862,43 +4019,45 @@ Get the price information for a specific pair of tokens/currencies
 
 - **decimals**: number of decimals for the returns pair price
 
-### <span id="PriceOracle-getLastUpdated-bytes32-"></span> `getLastUpdated(bytes32 _pair) → uint256` (public)
+### <span id="PriceOracle-getLastUpdated-bytes32-bytes32-"></span> `getLastUpdated(bytes32 _currency1, bytes32 _currency2) → uint256` (public)
 
 Get the last update date for a specific pair of tokens/currencies  
 
 
 #### *Parameters*
-- **_pair**: pair of tokens/currencies to retrieve the last update date for
+- **_currency1**: source token/currency to retrieve the last update date for
+
+- **_currency2**: destination token/currency to retrieve the last update date for
 
 
 #### *Returns*
 - **lastUpdateDate**: last update date for the required pair
 
-### <span id="PriceOracle-getDecimals-bytes32-"></span> `getDecimals(bytes32 _pair) → uint8` (public)
+### <span id="PriceOracle-getDecimals-bytes32-bytes32-"></span> `getDecimals(bytes32 _currency1, bytes32 _currency2) → uint8` (public)
 
 Get the decimals for a specific pair of tokens/currencies  
 
 
 #### *Parameters*
-- **_pair**: pair of tokens/currencies to retrieve the decimals for
+- **_currency1**: source token/currency to retrieve the decimals for
+
+- **_currency2**: destination token/currency to retrieve the decimals for
 
 
 #### *Returns*
 - **decimals**: last update date for the required pair
 
-### <span id="PriceOracle-_getPair-string-string-"></span> `_getPair(string _currency1, string _currency2) → bytes32 result` (internal)
+### <span id="PriceOracle-_asBytes32-string-"></span> `_asBytes32(string _currency) → bytes32 result` (internal)
 
-Get the bytes32 representation of a pair from two strings  
+Get the bytes32 representation of a token/currency symbol string  
 
 
 #### *Parameters*
-- **_currency1**: First token/currency symbol string
-
-- **_currency2**: Second token/currency symbol string
+- **_currency**: token/currency symbol string
 
 
 #### *Returns*
-- **result**: the bytes32 representation of the concatenated strings
+- **result**: the bytes32 representation of the token/currency symbol string as bytes32
 
 
 
@@ -4096,7 +4255,7 @@ Throws RU03 if one of the rule rejects the transfer
 
 - **updatedValue**: The real amount of tokens sent
 
-### <span id="Processor-approve-address-address-uint256-"></span> `approve(address _owner, address _spender, uint256 _value) → bool` (public)
+### <span id="Processor-approve-address-address-uint256-"></span> `approve(address _owner, address _spender, uint256 _value)` (public)
 
 Approves a specific amount of tokens to be spent by a spender from an address  
 Intended to be called by the token contract  
@@ -4130,7 +4289,7 @@ Intended to be called by the token contract
 #### *Returns*
 - **The**: amount of tokens that can be spent by the spender from the owning address
 
-### <span id="Processor-increaseApproval-address-address-uint256-"></span> `increaseApproval(address _owner, address _spender, uint256 _addedValue) → bool` (public)
+### <span id="Processor-increaseApproval-address-address-uint256-"></span> `increaseApproval(address _owner, address _spender, uint256 _addedValue)` (public)
 
 Increases the spending approval of tokens to be spent by a spender from an address by a specific amount  
 Intended to be called by the token contract  
@@ -4149,7 +4308,7 @@ Throws ER03 if spender address is 0x0
 #### *Returns*
 - **True**: if the increase is successful, false otherwise
 
-### <span id="Processor-decreaseApproval-address-address-uint256-"></span> `decreaseApproval(address _owner, address _spender, uint256 _subtractedValue) → bool` (public)
+### <span id="Processor-decreaseApproval-address-address-uint256-"></span> `decreaseApproval(address _owner, address _spender, uint256 _subtractedValue)` (public)
 
 Decreases the spending approval of tokens to be spent by a spender from an address by a specific amount  
 Intended to be called by the token contract  
@@ -4168,7 +4327,7 @@ Throws ER03 if spender address is 0x0
 #### *Returns*
 - **True**: if the decrease is successful, false otherwise
 
-### <span id="Processor-seize-address-address-uint256-"></span> `seize(address _caller, address _account, uint256 _value) → bool` (public)
+### <span id="Processor-seize-address-address-uint256-"></span> `seize(address _caller, address _account, uint256 _value)` (public)
 
 Seizes a specific amount of tokens from an address and transfers it to the caller address  
 Intended to be called by the token contract  
@@ -4187,7 +4346,7 @@ Throws SE02 if the caller does not have the `Seizer` role
 #### *Returns*
 - **True**: if the seize operation is successful, false otherwise
 
-### <span id="Processor-mint-address-address-uint256-"></span> `mint(address _caller, address _to, uint256 _amount) → bool` (public)
+### <span id="Processor-mint-address-address-uint256-"></span> `mint(address _caller, address _to, uint256 _amount)` (public)
 
 Mints a specific amount of tokens to an address  
 Intended to be called by the token contract  
@@ -4205,7 +4364,7 @@ Throws SU01 if the caller does not have the `Supplier` role
 #### *Returns*
 - **True**: if the mint operation is successful, false otherwise
 
-### <span id="Processor-burn-address-address-uint256-"></span> `burn(address _caller, address _from, uint256 _amount) → bool` (public)
+### <span id="Processor-burn-address-address-uint256-"></span> `burn(address _caller, address _from, uint256 _amount)` (public)
 
 Burns a specific amount of tokens to an address  
 Intended to be called by the token contract  
@@ -4267,7 +4426,8 @@ Intended to be called by the token contract
 
 Rule Engine library defines rules that can be applied to all tokens restrict their transferability  
 Errors:  
-RE01: Rule id overflow*
+RE01: Rule id overflow  
+RE02: Rule keys does not have the same length as rule params*
 
 - [`onlyOperator()`][Operator-onlyOperator--]
 - [`onlyOwner()`][Ownable-onlyOwner--]
@@ -4379,6 +4539,7 @@ GlobalFreezeRule allows a legal authority to enforce a freeze of assets globally
   
 Error messages  
 RU02: Function cannot be called  
+GF01: end date of the freeze period cannot be in the past  
   
 Errors  
   
@@ -4388,10 +4549,9 @@ Errors
 - [`onlyOwner()`][Ownable-onlyOwner--]
 - [`initializer()`][Initializable-initializer--]
 - [`initialize(address owner)`][GlobalFreezeRule-initialize-address-]
+- [`unfreezeAll()`][GlobalFreezeRule-unfreezeAll--]
 - [`freezeAll(uint256 _until)`][GlobalFreezeRule-freezeAll-uint256-]
 - [`isTransferValid(address, address, address, uint256, uint256)`][GlobalFreezeRule-isTransferValid-address-address-address-uint256-uint256-]
-- [`beforeTransferHook(address, address, address, uint256, uint256)`][GlobalFreezeRule-beforeTransferHook-address-address-address-uint256-uint256-]
-- [`afterTransferHook(address, address, address, uint256, uint256)`][GlobalFreezeRule-afterTransferHook-address-address-address-uint256-uint256-]
 - [`_isFrozen()`][GlobalFreezeRule-_isFrozen--]
 - [`isOperator(address _operator)`][Operator-isOperator-address-]
 - [`addOperator(address _operator)`][Operator-addOperator-address-]
@@ -4404,7 +4564,10 @@ Errors
 - [`constructor()`][Context-constructor--]
 - [`_msgSender()`][Context-_msgSender--]
 - [`_msgData()`][Context-_msgData--]
+- [`beforeTransferHook(address, address, address, uint256, uint256)`][AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-]
+- [`afterTransferHook(address, address, address, uint256, uint256)`][AbstractRule-afterTransferHook-address-address-address-uint256-uint256-]
 - [`GlobalFreeze(uint256 until)`][GlobalFreezeRule-GlobalFreeze-uint256-]
+- [`GlobalUnfreeze()`][GlobalFreezeRule-GlobalUnfreeze--]
 - [`OperatorAdded(address operator)`][Operator-OperatorAdded-address-]
 - [`OperatorRemoved(address operator)`][Operator-OperatorRemoved-address-]
 - [`OwnershipTransferred(address previousOwner, address newOwner)`][Ownable-OwnershipTransferred-address-address-]
@@ -4417,9 +4580,17 @@ Initializer (replaces constructor when contract is upgradable)
 - **owner**: the final owner of the contract
 
 
+### <span id="GlobalFreezeRule-unfreezeAll--"></span> `unfreezeAll()` (public)
+
+unfreeze all transfers  
+Emits GlobalUnfreeze event
+
+
+
 ### <span id="GlobalFreezeRule-freezeAll-uint256-"></span> `freezeAll(uint256 _until)` (public)
 
 freeze all transfers until a specific date  
+Throws GF01 if end date is in the past  
 Emits GlobalFreeze event  
 
 
@@ -4438,22 +4609,6 @@ Validates a transfer if transfers are not globally frozen
 
 - **statusCode**: Code indicating that transfer is frozen when frozen, ok if not frozen
 
-### <span id="GlobalFreezeRule-beforeTransferHook-address-address-address-uint256-uint256-"></span> `beforeTransferHook(address, address, address, uint256, uint256) → uint256, address, uint256` (external)
-
-Dummy before transfer hook  
-Not intended to be called  
-Throws RU02 because this function is not intended to be called
-
-
-
-### <span id="GlobalFreezeRule-afterTransferHook-address-address-address-uint256-uint256-"></span> `afterTransferHook(address, address, address, uint256, uint256) → bool` (external)
-
-Dummy after transfer hook  
-Not intended to be called  
-Throws RU02 because this function is not intended to be called
-
-
-
 ### <span id="GlobalFreezeRule-_isFrozen--"></span> `_isFrozen() → bool` (public)
 
 Checks if frozen until date is greater than current time  
@@ -4467,6 +4622,10 @@ Checks if frozen until date is greater than current time
 
 GlobalFreeze event is sent when freezeAll is called to notify contract freeze  
 
+
+### <span id="GlobalFreezeRule-GlobalUnfreeze--"></span> `GlobalUnfreeze()`
+
+GlobalUnfreeze event is sent when unfreezeAll is called to notify contract unfreeze
 
 
 
@@ -4499,7 +4658,6 @@ Errors
 - [`initializer()`][Initializable-initializer--]
 - [`initialize(address owner, contract IComplianceRegistry _complianceRegistry)`][HardTransferLimitRule-initialize-address-contract-IComplianceRegistry-]
 - [`isTransferValid(address _token, address _from, address _to, uint256 _amount, uint256 _noCheckThreshold)`][HardTransferLimitRule-isTransferValid-address-address-address-uint256-uint256-]
-- [`beforeTransferHook(address, address, address, uint256, uint256)`][HardTransferLimitRule-beforeTransferHook-address-address-address-uint256-uint256-]
 - [`afterTransferHook(address _token, address _from, address _to, uint256 _amount, uint256)`][HardTransferLimitRule-afterTransferHook-address-address-address-uint256-uint256-]
 - [`_isTransferValid(address _token, address realm, address[] trustedIntermediaries, address _from, address _to, uint256 _amount, uint256 _noCheckThresholdDecimals)`][HardTransferLimitRule-_isTransferValid-address-address-address---address-address-uint256-uint256-]
 - [`_isTransferFromValid(address realm, address[] trustedIntermediaries, address _address, uint256 _amountInRefCurrency, uint256 _noCheckThresholdDecimals)`][HardTransferLimitRule-_isTransferFromValid-address-address---address-uint256-uint256-]
@@ -4516,6 +4674,7 @@ Errors
 - [`constructor()`][Context-constructor--]
 - [`_msgSender()`][Context-_msgSender--]
 - [`_msgData()`][Context-_msgData--]
+- [`beforeTransferHook(address, address, address, uint256, uint256)`][AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-]
 - [`OperatorAdded(address operator)`][Operator-OperatorAdded-address-]
 - [`OperatorRemoved(address operator)`][Operator-OperatorRemoved-address-]
 - [`OwnershipTransferred(address previousOwner, address newOwner)`][Ownable-OwnershipTransferred-address-address-]
@@ -4551,14 +4710,6 @@ Validates a transfer if transfer amounts (single, monthly, yearly) are below the
 - **transferStatus**: Invalid transfer when thresholds are broken, valid transfer with after hook action when transfer is allowed
 
 - **statusCode**: The reason of the transfer rejection indicating which threshold is broken
-
-### <span id="HardTransferLimitRule-beforeTransferHook-address-address-address-uint256-uint256-"></span> `beforeTransferHook(address, address, address, uint256, uint256) → uint256, address, uint256` (external)
-
-Dummy before transfer hook  
-Not intended to be called  
-Throws RU02 because this function is not intended to be called
-
-
 
 ### <span id="HardTransferLimitRule-afterTransferHook-address-address-address-uint256-uint256-"></span> `afterTransferHook(address _token, address _from, address _to, uint256 _amount, uint256) → bool` (external)
 
@@ -4607,11 +4758,11 @@ Errors:
 
 - [`initializer()`][Initializable-initializer--]
 - [`isTransferValid(address, address, address, uint256 _amount, uint256 _maxAmount)`][MaxTransferRule-isTransferValid-address-address-address-uint256-uint256-]
-- [`beforeTransferHook(address, address, address, uint256, uint256)`][MaxTransferRule-beforeTransferHook-address-address-address-uint256-uint256-]
-- [`afterTransferHook(address, address, address, uint256, uint256)`][MaxTransferRule-afterTransferHook-address-address-address-uint256-uint256-]
+- [`beforeTransferHook(address, address, address, uint256, uint256)`][AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-]
+- [`afterTransferHook(address, address, address, uint256, uint256)`][AbstractRule-afterTransferHook-address-address-address-uint256-uint256-]
 ### <span id="MaxTransferRule-isTransferValid-address-address-address-uint256-uint256-"></span> `isTransferValid(address, address, address, uint256 _amount, uint256 _maxAmount) → uint256, uint256` (public)
 
-Validates a transfer if transfers are not globally frozen  
+Validates a transfer if the amount of token is below _maxAmount  
 
 
 #### *Parameters*
@@ -4624,22 +4775,6 @@ Validates a transfer if transfers are not globally frozen
 - **transferStatus**: Invalid transfer when amount is above maximum amount, valid transfer without further action otherwise
 
 - **statusCode**: The reason of the transfer rejection indicating that maximum amount is reached
-
-### <span id="MaxTransferRule-beforeTransferHook-address-address-address-uint256-uint256-"></span> `beforeTransferHook(address, address, address, uint256, uint256) → uint256, address, uint256` (external)
-
-Dummy before transfer hook  
-Not intended to be called  
-Throws RU02 because this function is not intended to be called
-
-
-
-### <span id="MaxTransferRule-afterTransferHook-address-address-address-uint256-uint256-"></span> `afterTransferHook(address, address, address, uint256, uint256) → bool` (external)
-
-Dummy after transfer hook  
-Not intended to be called  
-Throws RU02 because this function is not intended to be called
-
-
 
 
 
@@ -4655,8 +4790,8 @@ Errors:
 
 - [`initializer()`][Initializable-initializer--]
 - [`isTransferValid(address, address, address, uint256 _amount, uint256 _minAmount)`][MinTransferRule-isTransferValid-address-address-address-uint256-uint256-]
-- [`beforeTransferHook(address, address, address, uint256, uint256)`][MinTransferRule-beforeTransferHook-address-address-address-uint256-uint256-]
-- [`afterTransferHook(address, address, address, uint256, uint256)`][MinTransferRule-afterTransferHook-address-address-address-uint256-uint256-]
+- [`beforeTransferHook(address, address, address, uint256, uint256)`][AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-]
+- [`afterTransferHook(address, address, address, uint256, uint256)`][AbstractRule-afterTransferHook-address-address-address-uint256-uint256-]
 ### <span id="MinTransferRule-isTransferValid-address-address-address-uint256-uint256-"></span> `isTransferValid(address, address, address, uint256 _amount, uint256 _minAmount) → uint256, uint256` (public)
 
 Validates a transfer if transfers are not globally frozen  
@@ -4672,22 +4807,6 @@ Validates a transfer if transfers are not globally frozen
 - **transferStatus**: Invalid transfer when amount is below minimum amount, valid transfer without further action otherwise
 
 - **statusCode**: The reason of the transfer rejection indicating that minimum amount is not reached
-
-### <span id="MinTransferRule-beforeTransferHook-address-address-address-uint256-uint256-"></span> `beforeTransferHook(address, address, address, uint256, uint256) → uint256, address, uint256` (external)
-
-Dummy before transfer hook  
-Not intended to be called  
-Throws RU02 because this function is not intended to be called
-
-
-
-### <span id="MinTransferRule-afterTransferHook-address-address-address-uint256-uint256-"></span> `afterTransferHook(address, address, address, uint256, uint256) → bool` (external)
-
-Dummy after transfer hook  
-Not intended to be called  
-Throws RU02 because this function is not intended to be called
-
-
 
 
 
@@ -4847,11 +4966,11 @@ Errors
 
 - [`initializer()`][Initializable-initializer--]
 - [`initialize(contract IComplianceRegistry _complianceRegistry)`][UserFreezeRule-initialize-contract-IComplianceRegistry-]
-- [`isTransferValid(address _token, address _from, address _to, uint256, uint256)`][UserFreezeRule-isTransferValid-address-address-address-uint256-uint256-]
-- [`beforeTransferHook(address, address, address, uint256, uint256)`][UserFreezeRule-beforeTransferHook-address-address-address-uint256-uint256-]
-- [`afterTransferHook(address, address, address, uint256, uint256)`][UserFreezeRule-afterTransferHook-address-address-address-uint256-uint256-]
-- [`_canSend(address[] trustedIntermediaries, address _from)`][UserFreezeRule-_canSend-address---address-]
-- [`_canReceive(address[] trustedIntermediaries, address _to)`][UserFreezeRule-_canReceive-address---address-]
+- [`isTransferValid(address _token, address _from, address _to, uint256, uint256 _allowNotFound)`][UserFreezeRule-isTransferValid-address-address-address-uint256-uint256-]
+- [`_canSend(address[] trustedIntermediaries, address _from, bool _allowNotFound)`][UserFreezeRule-_canSend-address---address-bool-]
+- [`_canReceive(address[] trustedIntermediaries, address _to, bool _allowNotFound)`][UserFreezeRule-_canReceive-address---address-bool-]
+- [`beforeTransferHook(address, address, address, uint256, uint256)`][AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-]
+- [`afterTransferHook(address, address, address, uint256, uint256)`][AbstractRule-afterTransferHook-address-address-address-uint256-uint256-]
 ### <span id="UserFreezeRule-initialize-contract-IComplianceRegistry-"></span> `initialize(contract IComplianceRegistry _complianceRegistry)` (public)
 
 Initializer (replaces constructor when contract is upgradable)  
@@ -4861,7 +4980,7 @@ Initializer (replaces constructor when contract is upgradable)
 - **_complianceRegistry**: The Compliance Registry address that will be used by this rule for compliance checks
 
 
-### <span id="UserFreezeRule-isTransferValid-address-address-address-uint256-uint256-"></span> `isTransferValid(address _token, address _from, address _to, uint256, uint256) → uint256, uint256` (public)
+### <span id="UserFreezeRule-isTransferValid-address-address-address-uint256-uint256-"></span> `isTransferValid(address _token, address _from, address _to, uint256, uint256 _allowNotFound) → uint256, uint256` (public)
 
 Validates a transfer if the from address can send the tokens (not frozen for send) and the to address can receive it (not frozen for receive)  
 
@@ -4873,29 +4992,15 @@ Validates a transfer if the from address can send the tokens (not frozen for sen
 
 - **_to**: Receiver address
 
+- **_allowNotFound**: whether the rule rejects the transfer if the sender or the receiver are not found in the user registry
+
 
 #### *Returns*
 - **transferStatus**: Invalid transfer if one of the address is frozen, valid transfer without further action otherwise
 
 - **statusCode**: The reason of the transfer rejection indicating which address is frozen
 
-### <span id="UserFreezeRule-beforeTransferHook-address-address-address-uint256-uint256-"></span> `beforeTransferHook(address, address, address, uint256, uint256) → uint256, address, uint256` (external)
-
-Dummy before transfer hook  
-Not intended to be called  
-Throws RU02 because this function is not intended to be called
-
-
-
-### <span id="UserFreezeRule-afterTransferHook-address-address-address-uint256-uint256-"></span> `afterTransferHook(address, address, address, uint256, uint256) → bool` (external)
-
-Dummy after transfer hook  
-Not intended to be called  
-Throws RU02 because this function is not intended to be called
-
-
-
-### <span id="UserFreezeRule-_canSend-address---address-"></span> `_canSend(address[] trustedIntermediaries, address _from) → bool` (internal)
+### <span id="UserFreezeRule-_canSend-address---address-bool-"></span> `_canSend(address[] trustedIntermediaries, address _from, bool _allowNotFound) → bool` (internal)
 
 Checks if an address can send tokens  
 
@@ -4909,7 +5014,7 @@ Checks if an address can send tokens
 #### *Returns*
 - **True**: if the address can send, false otherwise
 
-### <span id="UserFreezeRule-_canReceive-address---address-"></span> `_canReceive(address[] trustedIntermediaries, address _to) → bool` (internal)
+### <span id="UserFreezeRule-_canReceive-address---address-bool-"></span> `_canReceive(address[] trustedIntermediaries, address _to, bool _allowNotFound) → bool` (internal)
 
 Checks if an address can receive tokens  
 
@@ -4942,8 +5047,8 @@ Errors
 - [`initializer()`][Initializable-initializer--]
 - [`initialize(contract IComplianceRegistry _complianceRegistry)`][UserKycThresholdBothRule-initialize-contract-IComplianceRegistry-]
 - [`isTransferValid(address _token, address _from, address _to, uint256, uint256 _kycThreshold)`][UserKycThresholdBothRule-isTransferValid-address-address-address-uint256-uint256-]
-- [`beforeTransferHook(address, address, address, uint256, uint256)`][UserKycThresholdBothRule-beforeTransferHook-address-address-address-uint256-uint256-]
-- [`afterTransferHook(address, address, address, uint256, uint256)`][UserKycThresholdBothRule-afterTransferHook-address-address-address-uint256-uint256-]
+- [`beforeTransferHook(address, address, address, uint256, uint256)`][AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-]
+- [`afterTransferHook(address, address, address, uint256, uint256)`][AbstractRule-afterTransferHook-address-address-address-uint256-uint256-]
 ### <span id="UserKycThresholdBothRule-initialize-contract-IComplianceRegistry-"></span> `initialize(contract IComplianceRegistry _complianceRegistry)` (public)
 
 Initializer (replaces constructor when contract is upgradable)  
@@ -4973,22 +5078,6 @@ Validates a transfer if the from and to addresses KYC levels are above the defin
 
 - **statusCode**: The reason of the transfer rejection
 
-### <span id="UserKycThresholdBothRule-beforeTransferHook-address-address-address-uint256-uint256-"></span> `beforeTransferHook(address, address, address, uint256, uint256) → uint256, address, uint256` (external)
-
-Dummy before transfer hook  
-Not intended to be called  
-Throws RU02 because this function is not intended to be called
-
-
-
-### <span id="UserKycThresholdBothRule-afterTransferHook-address-address-address-uint256-uint256-"></span> `afterTransferHook(address, address, address, uint256, uint256) → bool` (external)
-
-Dummy after transfer hook  
-Not intended to be called  
-Throws RU02 because this function is not intended to be called
-
-
-
 
 
 ## <span id="UserKycThresholdFromRule"></span> `UserKycThresholdFromRule`
@@ -5006,8 +5095,8 @@ Errors
 - [`initializer()`][Initializable-initializer--]
 - [`initialize(contract IComplianceRegistry _complianceRegistry)`][UserKycThresholdFromRule-initialize-contract-IComplianceRegistry-]
 - [`isTransferValid(address _token, address _from, address, uint256, uint256 _kycThreshold)`][UserKycThresholdFromRule-isTransferValid-address-address-address-uint256-uint256-]
-- [`beforeTransferHook(address, address, address, uint256, uint256)`][UserKycThresholdFromRule-beforeTransferHook-address-address-address-uint256-uint256-]
-- [`afterTransferHook(address, address, address, uint256, uint256)`][UserKycThresholdFromRule-afterTransferHook-address-address-address-uint256-uint256-]
+- [`beforeTransferHook(address, address, address, uint256, uint256)`][AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-]
+- [`afterTransferHook(address, address, address, uint256, uint256)`][AbstractRule-afterTransferHook-address-address-address-uint256-uint256-]
 ### <span id="UserKycThresholdFromRule-initialize-contract-IComplianceRegistry-"></span> `initialize(contract IComplianceRegistry _complianceRegistry)` (public)
 
 Initializer (replaces constructor when contract is upgradable)  
@@ -5035,22 +5124,6 @@ Validates a transfer if the from address KYC level is above the defined threshol
 
 - **statusCode**: The reason of the transfer rejection
 
-### <span id="UserKycThresholdFromRule-beforeTransferHook-address-address-address-uint256-uint256-"></span> `beforeTransferHook(address, address, address, uint256, uint256) → uint256, address, uint256` (external)
-
-Dummy before transfer hook  
-Not intended to be called  
-Throws RU02 because this function is not intended to be called
-
-
-
-### <span id="UserKycThresholdFromRule-afterTransferHook-address-address-address-uint256-uint256-"></span> `afterTransferHook(address, address, address, uint256, uint256) → bool` (external)
-
-Dummy after transfer hook  
-Not intended to be called  
-Throws RU02 because this function is not intended to be called
-
-
-
 
 
 ## <span id="UserKycThresholdToRule"></span> `UserKycThresholdToRule`
@@ -5068,8 +5141,8 @@ Errors
 - [`initializer()`][Initializable-initializer--]
 - [`initialize(contract IComplianceRegistry _complianceRegistry)`][UserKycThresholdToRule-initialize-contract-IComplianceRegistry-]
 - [`isTransferValid(address _token, address, address _to, uint256, uint256 _kycThreshold)`][UserKycThresholdToRule-isTransferValid-address-address-address-uint256-uint256-]
-- [`beforeTransferHook(address, address, address, uint256, uint256)`][UserKycThresholdToRule-beforeTransferHook-address-address-address-uint256-uint256-]
-- [`afterTransferHook(address, address, address, uint256, uint256)`][UserKycThresholdToRule-afterTransferHook-address-address-address-uint256-uint256-]
+- [`beforeTransferHook(address, address, address, uint256, uint256)`][AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-]
+- [`afterTransferHook(address, address, address, uint256, uint256)`][AbstractRule-afterTransferHook-address-address-address-uint256-uint256-]
 ### <span id="UserKycThresholdToRule-initialize-contract-IComplianceRegistry-"></span> `initialize(contract IComplianceRegistry _complianceRegistry)` (public)
 
 Initializer (replaces constructor when contract is upgradable)  
@@ -5097,22 +5170,6 @@ Validates a transfer if the from address KYC level is above the defined threshol
 
 - **statusCode**: The reason of the transfer rejection
 
-### <span id="UserKycThresholdToRule-beforeTransferHook-address-address-address-uint256-uint256-"></span> `beforeTransferHook(address, address, address, uint256, uint256) → uint256, address, uint256` (external)
-
-Dummy before transfer hook  
-Not intended to be called  
-Throws RU02 because this function is not intended to be called
-
-
-
-### <span id="UserKycThresholdToRule-afterTransferHook-address-address-address-uint256-uint256-"></span> `afterTransferHook(address, address, address, uint256, uint256) → bool` (external)
-
-Dummy after transfer hook  
-Not intended to be called  
-Throws RU02 because this function is not intended to be called
-
-
-
 
 
 ## <span id="UserValidRule"></span> `UserValidRule`
@@ -5131,8 +5188,8 @@ Errors:
 - [`initializer()`][Initializable-initializer--]
 - [`initialize(contract IComplianceRegistry _complianceRegistry)`][UserValidRule-initialize-contract-IComplianceRegistry-]
 - [`isTransferValid(address _token, address _from, address _to, uint256, uint256 _userValidFlag)`][UserValidRule-isTransferValid-address-address-address-uint256-uint256-]
-- [`beforeTransferHook(address, address, address, uint256, uint256)`][UserValidRule-beforeTransferHook-address-address-address-uint256-uint256-]
-- [`afterTransferHook(address, address, address, uint256, uint256)`][UserValidRule-afterTransferHook-address-address-address-uint256-uint256-]
+- [`beforeTransferHook(address, address, address, uint256, uint256)`][AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-]
+- [`afterTransferHook(address, address, address, uint256, uint256)`][AbstractRule-afterTransferHook-address-address-address-uint256-uint256-]
 ### <span id="UserValidRule-initialize-contract-IComplianceRegistry-"></span> `initialize(contract IComplianceRegistry _complianceRegistry)` (public)
 
 Initializer (replaces constructor when contract is upgradable)  
@@ -5162,22 +5219,6 @@ Validates a transfer if from/to addresses are known and valid
 
 - **statusCode**: The reason of the transfer rejection
 
-### <span id="UserValidRule-beforeTransferHook-address-address-address-uint256-uint256-"></span> `beforeTransferHook(address, address, address, uint256, uint256) → uint256, address, uint256` (external)
-
-Dummy before transfer hook  
-Not intended to be called  
-Throws RU02 because this function is not intended to be called
-
-
-
-### <span id="UserValidRule-afterTransferHook-address-address-address-uint256-uint256-"></span> `afterTransferHook(address, address, address, uint256, uint256) → bool` (external)
-
-Dummy after transfer hook  
-Not intended to be called  
-Throws RU02 because this function is not intended to be called
-
-
-
 
 
 ## <span id="YesNoRule"></span> `YesNoRule`
@@ -5193,8 +5234,8 @@ Errors:
 
 - [`initializer()`][Initializable-initializer--]
 - [`isTransferValid(address, address, address, uint256, uint256 _yesNo)`][YesNoRule-isTransferValid-address-address-address-uint256-uint256-]
-- [`beforeTransferHook(address, address, address, uint256, uint256)`][YesNoRule-beforeTransferHook-address-address-address-uint256-uint256-]
-- [`afterTransferHook(address, address, address, uint256, uint256)`][YesNoRule-afterTransferHook-address-address-address-uint256-uint256-]
+- [`beforeTransferHook(address, address, address, uint256, uint256)`][AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-]
+- [`afterTransferHook(address, address, address, uint256, uint256)`][AbstractRule-afterTransferHook-address-address-address-uint256-uint256-]
 ### <span id="YesNoRule-isTransferValid-address-address-address-uint256-uint256-"></span> `isTransferValid(address, address, address, uint256, uint256 _yesNo) → uint256, uint256` (public)
 
 Validates a transfer is the _yesNo parameters is more than 0  
@@ -5208,22 +5249,6 @@ Validates a transfer is the _yesNo parameters is more than 0
 - **transferStatus**: Invalid transfer _yesNo is 0, valid transfer without further action otherwise
 
 - **statusCode**: The reason of the transfer rejection
-
-### <span id="YesNoRule-beforeTransferHook-address-address-address-uint256-uint256-"></span> `beforeTransferHook(address, address, address, uint256, uint256) → uint256, address, uint256` (external)
-
-Dummy before transfer hook  
-Not intended to be called  
-Throws RU02 because this function is not intended to be called
-
-
-
-### <span id="YesNoRule-afterTransferHook-address-address-address-uint256-uint256-"></span> `afterTransferHook(address, address, address, uint256, uint256) → bool` (external)
-
-Dummy after transfer hook  
-Not intended to be called  
-Throws RU02 because this function is not intended to be called
-
-
 
 
 
@@ -5243,8 +5268,8 @@ Errors:
 - [`initializer()`][Initializable-initializer--]
 - [`initialize()`][YesNoUpdateRule-initialize--]
 - [`isTransferValid(address, address, address, uint256, uint256 _yesNo)`][YesNoUpdateRule-isTransferValid-address-address-address-uint256-uint256-]
-- [`beforeTransferHook(address, address, address, uint256, uint256)`][YesNoUpdateRule-beforeTransferHook-address-address-address-uint256-uint256-]
 - [`afterTransferHook(address, address, address, uint256, uint256)`][YesNoUpdateRule-afterTransferHook-address-address-address-uint256-uint256-]
+- [`beforeTransferHook(address, address, address, uint256, uint256)`][AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-]
 ### <span id="YesNoUpdateRule-initialize--"></span> `initialize()` (public)
 
 Initializer (replaces constructor when contract is upgradable)  
@@ -5266,7 +5291,38 @@ Validates a transfer is the _yesNo parameters is more than 0
 
 - **statusCode**: The reason of the transfer rejection
 
-### <span id="YesNoUpdateRule-beforeTransferHook-address-address-address-uint256-uint256-"></span> `beforeTransferHook(address, address, address, uint256, uint256) → uint256, address, uint256` (external)
+### <span id="YesNoUpdateRule-afterTransferHook-address-address-address-uint256-uint256-"></span> `afterTransferHook(address, address, address, uint256, uint256) → bool` (external)
+
+Increment the update count for testing purposes
+
+
+
+
+
+## <span id="AbstractRule"></span> `AbstractRule`
+
+YesNoRule validates transfer if param _yesNo is more than 0  
+Useful for testing implementation  
+  
+Error messages  
+RU02: Function cannot be called  
+ 
+
+- [`isTransferValid(address, address, address, uint256, uint256)`][AbstractRule-isTransferValid-address-address-address-uint256-uint256-]
+- [`beforeTransferHook(address, address, address, uint256, uint256)`][AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-]
+- [`afterTransferHook(address, address, address, uint256, uint256)`][AbstractRule-afterTransferHook-address-address-address-uint256-uint256-]
+### <span id="AbstractRule-isTransferValid-address-address-address-uint256-uint256-"></span> `isTransferValid(address, address, address, uint256, uint256) → uint256, uint256` (public)
+
+Validates a transfer  
+
+
+
+#### *Returns*
+- **transferStatus**: Invalid transfer
+
+- **statusCode**: The reason of the transfer rejection
+
+### <span id="AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-"></span> `beforeTransferHook(address, address, address, uint256, uint256) → uint256, address, uint256` (external)
 
 Dummy before transfer hook  
 Not intended to be called  
@@ -5274,9 +5330,11 @@ Throws RU02 because this function is not intended to be called
 
 
 
-### <span id="YesNoUpdateRule-afterTransferHook-address-address-address-uint256-uint256-"></span> `afterTransferHook(address, address, address, uint256, uint256) → bool` (external)
+### <span id="AbstractRule-afterTransferHook-address-address-address-uint256-uint256-"></span> `afterTransferHook(address, address, address, uint256, uint256) → bool` (external)
 
-Increment the update count for testing purposes
+Dummy after transfer hook  
+Not intended to be called  
+Throws RU02 because this function is not intended to be called
 
 
 
@@ -5448,6 +5506,9 @@ Error messages*
 - [`setRealm(address newRealm)`][BridgeERC20-setRealm-address-]
 - [`trustedIntermediaries()`][BridgeERC20-trustedIntermediaries--]
 - [`setTrustedIntermediaries(address[] newTrustedIntermediaries)`][BridgeERC20-setTrustedIntermediaries-address---]
+- [`isRealmAdministrator(address _administrator)`][BridgeERC20-isRealmAdministrator-address-]
+- [`addRealmAdministrator(address _administrator)`][BridgeERC20-addRealmAdministrator-address-]
+- [`removeRealmAdministrator(address _administrator)`][BridgeERC20-removeRealmAdministrator-address-]
 - [`priceOracle()`][BridgeERC20-priceOracle--]
 - [`setPriceOracle(contract IPriceOracle newPriceOracle)`][BridgeERC20-setPriceOracle-contract-IPriceOracle-]
 - [`convertTo(uint256 _amount, string _currency, uint8 maxDecimals)`][BridgeERC20-convertTo-uint256-string-uint8-]
@@ -5479,6 +5540,8 @@ Error messages*
 - [`PriceOracleChanged(address newPriceOracle)`][IPriceable-PriceOracleChanged-address-]
 - [`TrustedIntermediariesChanged(address[] newTrustedIntermediaries)`][IGovernable-TrustedIntermediariesChanged-address---]
 - [`RealmChanged(address newRealm)`][IGovernable-RealmChanged-address-]
+- [`RealmAdministratorAdded(address administrator)`][IGovernable-RealmAdministratorAdded-address-]
+- [`RealmAdministratorRemoved(address administrator)`][IGovernable-RealmAdministratorRemoved-address-]
 - [`AdministratorAdded(address administrator)`][IAdministrable-AdministratorAdded-address-]
 - [`AdministratorRemoved(address administrator)`][IAdministrable-AdministratorRemoved-address-]
 - [`OwnershipTransferred(address previousOwner, address newOwner)`][Ownable-OwnershipTransferred-address-address-]
@@ -5535,6 +5598,9 @@ RE01: Rule id overflow*
 - [`setRealm(address newRealm)`][BridgeERC20-setRealm-address-]
 - [`trustedIntermediaries()`][BridgeERC20-trustedIntermediaries--]
 - [`setTrustedIntermediaries(address[] newTrustedIntermediaries)`][BridgeERC20-setTrustedIntermediaries-address---]
+- [`isRealmAdministrator(address _administrator)`][BridgeERC20-isRealmAdministrator-address-]
+- [`addRealmAdministrator(address _administrator)`][BridgeERC20-addRealmAdministrator-address-]
+- [`removeRealmAdministrator(address _administrator)`][BridgeERC20-removeRealmAdministrator-address-]
 - [`priceOracle()`][BridgeERC20-priceOracle--]
 - [`setPriceOracle(contract IPriceOracle newPriceOracle)`][BridgeERC20-setPriceOracle-contract-IPriceOracle-]
 - [`convertTo(uint256 _amount, string _currency, uint8 maxDecimals)`][BridgeERC20-convertTo-uint256-string-uint8-]
@@ -5566,6 +5632,8 @@ RE01: Rule id overflow*
 - [`PriceOracleChanged(address newPriceOracle)`][IPriceable-PriceOracleChanged-address-]
 - [`TrustedIntermediariesChanged(address[] newTrustedIntermediaries)`][IGovernable-TrustedIntermediariesChanged-address---]
 - [`RealmChanged(address newRealm)`][IGovernable-RealmChanged-address-]
+- [`RealmAdministratorAdded(address administrator)`][IGovernable-RealmAdministratorAdded-address-]
+- [`RealmAdministratorRemoved(address administrator)`][IGovernable-RealmAdministratorRemoved-address-]
 - [`AdministratorAdded(address administrator)`][IAdministrable-AdministratorAdded-address-]
 - [`AdministratorRemoved(address administrator)`][IAdministrable-AdministratorRemoved-address-]
 - [`OwnershipTransferred(address previousOwner, address newOwner)`][Ownable-OwnershipTransferred-address-address-]
@@ -5593,25 +5661,25 @@ RE01: Rule id overflow*
 
 
 
-### <span id="BridgeToken-addSupplier-address-"></span> `addSupplier(address _supplier) → bool` (public)
+### <span id="BridgeToken-addSupplier-address-"></span> `addSupplier(address _supplier)` (public)
 
 
 
 
 
-### <span id="BridgeToken-removeSupplier-address-"></span> `removeSupplier(address _supplier) → bool` (public)
+### <span id="BridgeToken-removeSupplier-address-"></span> `removeSupplier(address _supplier)` (public)
 
 
 
 
 
-### <span id="BridgeToken-mint-address-uint256-"></span> `mint(address _to, uint256 _amount) → bool` (public)
+### <span id="BridgeToken-mint-address-uint256-"></span> `mint(address _to, uint256 _amount)` (public)
 
 
 
 
 
-### <span id="BridgeToken-burn-address-uint256-"></span> `burn(address _from, uint256 _amount) → bool` (public)
+### <span id="BridgeToken-burn-address-uint256-"></span> `burn(address _from, uint256 _amount)` (public)
 
 
 
@@ -5635,7 +5703,7 @@ RE01: Rule id overflow*
 
 
 
-### <span id="BridgeToken-setRules-uint256---uint256---"></span> `setRules(uint256[] newRules, uint256[] newRulesParams) → bool` (external)
+### <span id="BridgeToken-setRules-uint256---uint256---"></span> `setRules(uint256[] newRules, uint256[] newRulesParams)` (external)
 
 
 
@@ -5677,6 +5745,9 @@ Error messages*
 - [`setRealm(address newRealm)`][BridgeERC20-setRealm-address-]
 - [`trustedIntermediaries()`][BridgeERC20-trustedIntermediaries--]
 - [`setTrustedIntermediaries(address[] newTrustedIntermediaries)`][BridgeERC20-setTrustedIntermediaries-address---]
+- [`isRealmAdministrator(address _administrator)`][BridgeERC20-isRealmAdministrator-address-]
+- [`addRealmAdministrator(address _administrator)`][BridgeERC20-addRealmAdministrator-address-]
+- [`removeRealmAdministrator(address _administrator)`][BridgeERC20-removeRealmAdministrator-address-]
 - [`priceOracle()`][BridgeERC20-priceOracle--]
 - [`setPriceOracle(contract IPriceOracle newPriceOracle)`][BridgeERC20-setPriceOracle-contract-IPriceOracle-]
 - [`convertTo(uint256 _amount, string _currency, uint8 maxDecimals)`][BridgeERC20-convertTo-uint256-string-uint8-]
@@ -5708,6 +5779,8 @@ Error messages*
 - [`PriceOracleChanged(address newPriceOracle)`][IPriceable-PriceOracleChanged-address-]
 - [`TrustedIntermediariesChanged(address[] newTrustedIntermediaries)`][IGovernable-TrustedIntermediariesChanged-address---]
 - [`RealmChanged(address newRealm)`][IGovernable-RealmChanged-address-]
+- [`RealmAdministratorAdded(address administrator)`][IGovernable-RealmAdministratorAdded-address-]
+- [`RealmAdministratorRemoved(address administrator)`][IGovernable-RealmAdministratorRemoved-address-]
 - [`AdministratorAdded(address administrator)`][IAdministrable-AdministratorAdded-address-]
 - [`AdministratorRemoved(address administrator)`][IAdministrable-AdministratorRemoved-address-]
 - [`OwnershipTransferred(address previousOwner, address newOwner)`][Ownable-OwnershipTransferred-address-address-]
@@ -5762,6 +5835,9 @@ Error messages*
 - [`setRealm(address newRealm)`][BridgeERC20-setRealm-address-]
 - [`trustedIntermediaries()`][BridgeERC20-trustedIntermediaries--]
 - [`setTrustedIntermediaries(address[] newTrustedIntermediaries)`][BridgeERC20-setTrustedIntermediaries-address---]
+- [`isRealmAdministrator(address _administrator)`][BridgeERC20-isRealmAdministrator-address-]
+- [`addRealmAdministrator(address _administrator)`][BridgeERC20-addRealmAdministrator-address-]
+- [`removeRealmAdministrator(address _administrator)`][BridgeERC20-removeRealmAdministrator-address-]
 - [`priceOracle()`][BridgeERC20-priceOracle--]
 - [`setPriceOracle(contract IPriceOracle newPriceOracle)`][BridgeERC20-setPriceOracle-contract-IPriceOracle-]
 - [`convertTo(uint256 _amount, string _currency, uint8 maxDecimals)`][BridgeERC20-convertTo-uint256-string-uint8-]
@@ -5793,6 +5869,8 @@ Error messages*
 - [`PriceOracleChanged(address newPriceOracle)`][IPriceable-PriceOracleChanged-address-]
 - [`TrustedIntermediariesChanged(address[] newTrustedIntermediaries)`][IGovernable-TrustedIntermediariesChanged-address---]
 - [`RealmChanged(address newRealm)`][IGovernable-RealmChanged-address-]
+- [`RealmAdministratorAdded(address administrator)`][IGovernable-RealmAdministratorAdded-address-]
+- [`RealmAdministratorRemoved(address administrator)`][IGovernable-RealmAdministratorRemoved-address-]
 - [`AdministratorAdded(address administrator)`][IAdministrable-AdministratorAdded-address-]
 - [`AdministratorRemoved(address administrator)`][IAdministrable-AdministratorRemoved-address-]
 - [`OwnershipTransferred(address previousOwner, address newOwner)`][Ownable-OwnershipTransferred-address-address-]
@@ -5835,6 +5913,9 @@ KI01: Caller of setRealm has to be owner or administrator of initial token addre
 - [`setRealm(address newRealm)`][BridgeERC20-setRealm-address-]
 - [`trustedIntermediaries()`][BridgeERC20-trustedIntermediaries--]
 - [`setTrustedIntermediaries(address[] newTrustedIntermediaries)`][BridgeERC20-setTrustedIntermediaries-address---]
+- [`isRealmAdministrator(address _administrator)`][BridgeERC20-isRealmAdministrator-address-]
+- [`addRealmAdministrator(address _administrator)`][BridgeERC20-addRealmAdministrator-address-]
+- [`removeRealmAdministrator(address _administrator)`][BridgeERC20-removeRealmAdministrator-address-]
 - [`priceOracle()`][BridgeERC20-priceOracle--]
 - [`setPriceOracle(contract IPriceOracle newPriceOracle)`][BridgeERC20-setPriceOracle-contract-IPriceOracle-]
 - [`convertTo(uint256 _amount, string _currency, uint8 maxDecimals)`][BridgeERC20-convertTo-uint256-string-uint8-]
@@ -5866,6 +5947,8 @@ KI01: Caller of setRealm has to be owner or administrator of initial token addre
 - [`PriceOracleChanged(address newPriceOracle)`][IPriceable-PriceOracleChanged-address-]
 - [`TrustedIntermediariesChanged(address[] newTrustedIntermediaries)`][IGovernable-TrustedIntermediariesChanged-address---]
 - [`RealmChanged(address newRealm)`][IGovernable-RealmChanged-address-]
+- [`RealmAdministratorAdded(address administrator)`][IGovernable-RealmAdministratorAdded-address-]
+- [`RealmAdministratorRemoved(address administrator)`][IGovernable-RealmAdministratorRemoved-address-]
 - [`AdministratorAdded(address administrator)`][IAdministrable-AdministratorAdded-address-]
 - [`AdministratorRemoved(address administrator)`][IAdministrable-AdministratorRemoved-address-]
 - [`OwnershipTransferred(address previousOwner, address newOwner)`][Ownable-OwnershipTransferred-address-address-]
@@ -5889,13 +5972,13 @@ Initialization function that replaces constructor in the case of upgradable cont
 
 
 
-### <span id="BridgeERC20-addAdministrator-address-"></span> `addAdministrator(address _administrator) → bool` (public)
+### <span id="BridgeERC20-addAdministrator-address-"></span> `addAdministrator(address _administrator)` (public)
 
 
 
 
 
-### <span id="BridgeERC20-removeAdministrator-address-"></span> `removeAdministrator(address _administrator) → bool` (public)
+### <span id="BridgeERC20-removeAdministrator-address-"></span> `removeAdministrator(address _administrator)` (public)
 
 
 
@@ -5920,6 +6003,24 @@ Initialization function that replaces constructor in the case of upgradable cont
 
 
 ### <span id="BridgeERC20-setTrustedIntermediaries-address---"></span> `setTrustedIntermediaries(address[] newTrustedIntermediaries)` (external)
+
+
+
+
+
+### <span id="BridgeERC20-isRealmAdministrator-address-"></span> `isRealmAdministrator(address _administrator) → bool` (public)
+
+
+
+
+
+### <span id="BridgeERC20-addRealmAdministrator-address-"></span> `addRealmAdministrator(address _administrator)` (public)
+
+
+
+
+
+### <span id="BridgeERC20-removeRealmAdministrator-address-"></span> `removeRealmAdministrator(address _administrator)` (public)
 
 
 
@@ -6064,7 +6165,7 @@ Function to check the amount of tokens that an owner allowed to a spender.
 #### *Returns*
 - **A**: uint256 specifying the amount of tokens still available for the spender.
 
-### <span id="BridgeERC20-increaseApproval-address-uint256-"></span> `increaseApproval(address _spender, uint256 _addedValue) → bool` (public)
+### <span id="BridgeERC20-increaseApproval-address-uint256-"></span> `increaseApproval(address _spender, uint256 _addedValue)` (public)
 
 Increase the amount of tokens that an owner allowed to a spender.  
   
@@ -6132,6 +6233,9 @@ SE02: Caller is not seizer*
 - [`setRealm(address newRealm)`][BridgeERC20-setRealm-address-]
 - [`trustedIntermediaries()`][BridgeERC20-trustedIntermediaries--]
 - [`setTrustedIntermediaries(address[] newTrustedIntermediaries)`][BridgeERC20-setTrustedIntermediaries-address---]
+- [`isRealmAdministrator(address _administrator)`][BridgeERC20-isRealmAdministrator-address-]
+- [`addRealmAdministrator(address _administrator)`][BridgeERC20-addRealmAdministrator-address-]
+- [`removeRealmAdministrator(address _administrator)`][BridgeERC20-removeRealmAdministrator-address-]
 - [`priceOracle()`][BridgeERC20-priceOracle--]
 - [`setPriceOracle(contract IPriceOracle newPriceOracle)`][BridgeERC20-setPriceOracle-contract-IPriceOracle-]
 - [`convertTo(uint256 _amount, string _currency, uint8 maxDecimals)`][BridgeERC20-convertTo-uint256-string-uint8-]
@@ -6163,6 +6267,8 @@ SE02: Caller is not seizer*
 - [`PriceOracleChanged(address newPriceOracle)`][IPriceable-PriceOracleChanged-address-]
 - [`TrustedIntermediariesChanged(address[] newTrustedIntermediaries)`][IGovernable-TrustedIntermediariesChanged-address---]
 - [`RealmChanged(address newRealm)`][IGovernable-RealmChanged-address-]
+- [`RealmAdministratorAdded(address administrator)`][IGovernable-RealmAdministratorAdded-address-]
+- [`RealmAdministratorRemoved(address administrator)`][IGovernable-RealmAdministratorRemoved-address-]
 - [`AdministratorAdded(address administrator)`][IAdministrable-AdministratorAdded-address-]
 - [`AdministratorRemoved(address administrator)`][IAdministrable-AdministratorRemoved-address-]
 - [`OwnershipTransferred(address previousOwner, address newOwner)`][Ownable-OwnershipTransferred-address-address-]
@@ -6185,19 +6291,19 @@ SE02: Caller is not seizer*
 
 
 
-### <span id="SeizableBridgeERC20-addSeizer-address-"></span> `addSeizer(address _seizer) → bool` (public)
+### <span id="SeizableBridgeERC20-addSeizer-address-"></span> `addSeizer(address _seizer)` (public)
 
 
 
 
 
-### <span id="SeizableBridgeERC20-removeSeizer-address-"></span> `removeSeizer(address _seizer) → bool` (public)
+### <span id="SeizableBridgeERC20-removeSeizer-address-"></span> `removeSeizer(address _seizer)` (public)
 
 
 
 
 
-### <span id="SeizableBridgeERC20-seize-address-uint256-"></span> `seize(address _account, uint256 _value) → bool` (public)
+### <span id="SeizableBridgeERC20-seize-address-uint256-"></span> `seize(address _account, uint256 _value)` (public)
 
 called by the owner to seize value from the account  
 
@@ -6518,10 +6624,13 @@ VO07: Resolution id overflow
 VO08: Proposal id overflow  
 VO09: Proposal already voted  
 VO10: Voting session is not open  
-VO11: Voting session has already been open
+VO11: Voting session has already been open  
+VO12: Start date cannot be 0  
+VO13: End date has to be greater than start date
 
 - [`whenVotingSessionOpen()`][VotingSession-whenVotingSessionOpen--]
 - [`beforeVotingSession()`][VotingSession-beforeVotingSession--]
+- [`isVoter()`][VotingSession-isVoter--]
 - [`onlyOperator()`][Operator-onlyOperator--]
 - [`onlyOwner()`][Ownable-onlyOwner--]
 - [`initializer()`][Initializable-initializer--]
@@ -6559,6 +6668,10 @@ Throws VO10 if called when voting is not open yet
 ### <span id="VotingSession-beforeVotingSession--"></span> `beforeVotingSession()`
 
 Throws VO11 if called after voting session starts
+
+### <span id="VotingSession-isVoter--"></span> `isVoter()`
+
+Throws VO14 if caller is not voter
 
 ### <span id="VotingSession-initialize-address-"></span> `initialize(address owner)` (public)
 
