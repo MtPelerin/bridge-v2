@@ -8,6 +8,10 @@ The BRIDGE aims to provide a solution to this problem by being a cross-token com
 
 Moreover, for regulatory compliance, the BRIDGE provides features that would allow authorities to transfer tokens from one address to another in case of exceptional events (loss of keys, legal constraints, locked assets, ...)
 
+## Audit
+
+Contracts have been thoroughly audited by Chain Security: [Read the final report](https://chainsecurity.com/security-audit/mt-pelerin-bridge/)
+
 ## Overall overview
 
 ![Overall overview](docs/assets/overview.png "Overall overview")
