@@ -43,6 +43,7 @@ import "./abstract/SeizableBridgeERC20.sol";
 import "../interfaces/IRulable.sol";
 import "../interfaces/ISuppliable.sol";
 import "../interfaces/IMintable.sol";
+import "../interfaces/IContactable.sol";
 import "../interfaces/IProcessor.sol";
 
 /**
@@ -56,12 +57,13 @@ import "../interfaces/IProcessor.sol";
 **/
 
 
-contract BridgeToken is Initializable, IRulable, ISuppliable, IMintable, SeizableBridgeERC20 {
+contract BridgeToken is Initializable, IContactable, IRulable, ISuppliable, IMintable, SeizableBridgeERC20 {
   using Roles for Roles.Role;
   
   Roles.Role internal _suppliers;
   uint256[] internal _rules;
   uint256[] internal _rulesParams;
+  string public contact;
 
   function initialize(
     address owner,
@@ -143,5 +145,11 @@ contract BridgeToken is Initializable, IRulable, ISuppliable, IMintable, Seizabl
     _rules = newRules;
     _rulesParams = newRulesParams;
     emit RulesChanged(_rules, _rulesParams);
+  }
+
+  /* Contactable */
+  function setContact(string calldata _contact) external onlyAdministrator {
+    contact = _contact;
+    emit ContactSet(_contact);
   }
 }

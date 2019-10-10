@@ -241,6 +241,17 @@ contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1
       this.events.RulesChanged.returnValues.newRulesParams[1].should.equal('0');
     });
 
+    it('can set contact', async function () {
+      (await this.contract.methods.contact().call()).should.equal('');
+      ({events: this.events} = await this.contract.methods.setContact('hello@mtpelerin.com').send({from: administrator}));
+      (await this.contract.methods.contact().call()).should.equal('hello@mtpelerin.com');
+    }); 
+
+    it('emits a ContactSet event', function () {
+      this.events.should.have.property('ContactSet');
+      this.events.ContactSet.returnValues.should.have.property('contact', 'hello@mtpelerin.com');
+    });
+
     it('reverts if trying to add administrator', async function () {
       await shouldFail.reverting(this.contract.methods.addAdministrator(administrator).send({from: administrator}));
     });
@@ -374,6 +385,10 @@ contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1
       await shouldFail.reverting.withMessage(this.contract.methods.setRules([0, 1], [1, 0]).send({from: supplier}), "AD01");
     });
 
+    it('reverts if trying to set contact', async function () {
+      await shouldFail.reverting.withMessage(this.contract.methods.setContact('hello@mtpelerin.com').send({from: supplier}), "AD01");
+    });
+
     it('reverts if trying to seize tokens', async function () {
       await shouldFail.reverting.withMessage(this.contract.methods.seize(address1, 10000).send({from: supplier}), "SE02");
     });
@@ -467,6 +482,10 @@ contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1
 
     it('reverts if trying to set rules', async function () {
       await shouldFail.reverting.withMessage(this.contract.methods.setRules([0, 1], [1, 0]).send({from: seizer}), "AD01");
+    });
+
+    it('reverts if trying to set contact', async function () {
+      await shouldFail.reverting.withMessage(this.contract.methods.setContact('hello@mtpelerin.com').send({from: seizer}), "AD01");
     });
 
     it('reverts if trying to mint tokens', async function () {
@@ -728,6 +747,10 @@ contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1
 
       it('reverts if trying to set rules', async function () {
         await shouldFail.reverting.withMessage(this.contract.methods.setRules([0, 1], [1, 0]).send({from: address2}), "AD01");
+      });
+
+      it('reverts if trying to set contact', async function () {
+        await shouldFail.reverting.withMessage(this.contract.methods.setContact('hello@mtpelerin.com').send({from: address2}), "AD01");
       });
 
       it('reverts if trying to mint tokens', async function () {

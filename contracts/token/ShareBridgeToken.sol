@@ -40,6 +40,7 @@ pragma solidity 0.5.2;
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "./BridgeToken.sol";
 import "../interfaces/IProcessor.sol";
+import "../interfaces/IVotable.sol";
 
 /**
  * @title ShareBridgeToken
@@ -49,27 +50,65 @@ import "../interfaces/IProcessor.sol";
 **/
 
 
-contract ShareBridgeToken is Initializable, BridgeToken {
-  uint8 public tokenizedSharePercentage;
+contract ShareBridgeToken is Initializable, IVotable, BridgeToken {
+  /**
+  * Purpose:
+  * This event is emitted when the percentage of shares that are tokenized is changed
+  *
+  * @param tokenizedSharePercentage - new percentage of shares that are tokenized
+  */
+  event TokenizedSharePercentageSet(uint16 tokenizedSharePercentage);
 
+  uint16 public tokenizedSharePercentage;
+  address public votingSession;
+
+  /**
+  * @dev Initializer (replaces constructor when contract is upgradable)
+  * @param owner the final owner of the contract
+  * @param processor core processing contract
+  * @param name name of the token
+  * @param symbol symbol of the token
+  * @param trustedIntermediaries array of trusted intermediaries addresses
+  * @param _tokenizedSharePercentage percentage of shares that have been tokenized
+  */
   function initialize(
     address owner,
     IProcessor processor,
     string memory name,
     string memory symbol,
     address[] memory trustedIntermediaries,
-    uint8 _tokenizedSharePercentage
-  ) 
-    public initializer 
+    uint16 _tokenizedSharePercentage
+  )
+    public initializer
   {
     BridgeToken.initialize(
-      owner, 
-      processor, 
-      name, 
-      symbol, 
+      owner,
+      processor,
+      name,
+      symbol,
       0,
       trustedIntermediaries
     );
     tokenizedSharePercentage = _tokenizedSharePercentage;
+    emit TokenizedSharePercentageSet(_tokenizedSharePercentage);
+  }
+
+  /**
+  * @dev Set the percentage of shares that are tokenized
+  * @param _tokenizedSharePercentage the percentage of shares that are tokenized
+  */
+  function setTokenizedSharePercentage(uint16 _tokenizedSharePercentage) public onlyAdministrator {
+    tokenizedSharePercentage = _tokenizedSharePercentage;
+    emit TokenizedSharePercentageSet(_tokenizedSharePercentage);
+  }
+
+  /* Votable */
+  /**
+  * @dev Set the voting session contract address (used for general meetings)
+  * @param _votingSession the voting session contract address
+  */
+  function setVotingSession(address _votingSession) public onlyAdministrator {
+    votingSession = _votingSession;
+    emit VotingSessionSet(_votingSession);
   }
 }
