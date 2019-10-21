@@ -58,6 +58,10 @@ contract('UserValidRule', function ([_, tokenOwner, owner, trustedIntermediary1,
     await this.governableTokenMock.setTrustedIntermediaries([trustedIntermediary1, trustedIntermediary2]);
   });
 
+  it('can get the contract version', async function () {
+    (await this.contract.methods.VERSION().call()).should.equal('1');
+  });
+
   context('Check transfer validity', function () {
     it('returns that transfer is valid if both addresses are valid and flag is USER_VALID_FLAG_BOTH', async function () {
       const ret = await this.contract.methods.isTransferValid(token, address1, address2, 20000, 0).call();

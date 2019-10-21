@@ -53,6 +53,8 @@ import "./abstract/AbstractRule.sol";
 
 
 contract MaxTransferRule is Initializable, AbstractRule {
+  
+  uint256 public constant VERSION = 1;
 
   uint256 internal constant REASON_AMOUNT_EXCEEDS_MAX_AMOUNT = 1;
 

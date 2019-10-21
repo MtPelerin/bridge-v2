@@ -56,6 +56,8 @@ import "../interfaces/IGovernable.sol";
 
 
 contract UserFreezeRule is Initializable, AbstractRule {
+  
+  uint256 public constant VERSION = 1;
 
   uint256 constant internal USER_TRANSFER_FREEZE_DIRECTION_KEY = 120;
   uint256 constant internal USER_TRANSFER_FREEZE_START_KEY = 121;

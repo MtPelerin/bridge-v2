@@ -54,6 +54,8 @@ import "../access/Operator.sol";
 
 contract PriceOracle is Initializable, IPriceOracle, Operator {
 
+  uint256 public constant VERSION = 1;
+
   mapping(bytes32 => mapping(bytes32 => Price)) _prices;
 
   /**

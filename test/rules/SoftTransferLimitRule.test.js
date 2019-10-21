@@ -85,6 +85,10 @@ contract('SoftTransferLimitRule', function ([_, tokenOwner, owner, operator, tru
     await this.EUR.setRealm(realm);
   });
 
+  it('can get the contract version', async function () {
+    (await this.contract.methods.VERSION().call()).should.equal('1');
+  });
+
   context('When owner', function () {
     it('has proper owner', async function () {
       (await this.contract.methods.owner().call()).should.equal(owner);

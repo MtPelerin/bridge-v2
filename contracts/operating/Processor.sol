@@ -73,6 +73,8 @@ import "../access/Operator.sol";
 contract Processor is Initializable, IProcessor, Operator {
   using SafeMath for uint256;
 
+  uint256 public constant VERSION = 1;
+
   uint256 internal constant TRANSFER_INVALID = 0;
   uint256 internal constant TRANSFER_VALID_WITH_NO_HOOK = 1;
   uint256 internal constant TRANSFER_VALID_WITH_BEFORE_HOOK = 2;

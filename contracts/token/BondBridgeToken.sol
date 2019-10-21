@@ -50,6 +50,8 @@ import "../interfaces/IProcessor.sol";
 
 
 contract BondBridgeToken is Initializable, BridgeToken {
+  uint256 public constant VERSION = 1;
+  
   function initialize(
     address owner,
     IProcessor processor,

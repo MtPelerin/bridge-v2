@@ -56,6 +56,7 @@ import "./abstract/AbstractRule.sol";
 
 
 contract YesNoUpdateRule is Initializable, AbstractRule {
+  uint256 public constant VERSION = 1;
   uint256 public updateCount;
 
   uint256 internal constant REASON_YES_NO_IS_ZERO = 1;

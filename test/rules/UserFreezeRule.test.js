@@ -61,6 +61,10 @@ contract('UserFreezeRule', function ([_, owner, tokenOwner,  trustedIntermediary
     await this.EUR.setTrustedIntermediaries([trustedIntermediary]);
   });
 
+  it('can get the contract version', async function () {
+    (await this.contract.methods.VERSION().call()).should.equal('1');
+  });
+
   context('When no addresses are registered', function () {
     it('allows transfers if addresses are not found but allow not found is set', async function () {
       const ret = await this.contract.methods.isTransferValid(this.EUR.address, address1, address2, 100, 1).call();

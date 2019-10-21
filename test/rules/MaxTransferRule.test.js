@@ -50,6 +50,10 @@ contract('MaxTransferRule', function ([_, token, address1, address2]) {
     this.contract = await this.project.createProxy(Contract, {initArgs: []});
   });
 
+  it('can get the contract version', async function () {
+    (await this.contract.methods.VERSION().call()).should.equal('1');
+  });
+
   context('Check transfer validity', function () {
     it('returns that transfer is valid if amount is less than maxAmount', async function () {
       const ret = await this.contract.methods.isTransferValid(token, address1, address2, 10000, 15000).call();

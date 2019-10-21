@@ -54,6 +54,8 @@ import "../access/Operator.sol";
 
 contract RuleEngine is Initializable, Operator {
 
+  uint256 public constant VERSION = 1;
+
   IRule[] internal _rules;
 
   /**

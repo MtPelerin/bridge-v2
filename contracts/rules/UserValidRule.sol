@@ -59,6 +59,7 @@ import "../interfaces/IGovernable.sol";
 
 contract UserValidRule is Initializable, AbstractRule {
 
+  uint256 public constant VERSION = 1;
   IComplianceRegistry public complianceRegistry;
   uint256 public constant USER_VALID_FLAG_BOTH = 0;
   uint256 public constant USER_VALID_FLAG_FROM = 1;

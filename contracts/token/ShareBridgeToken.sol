@@ -59,6 +59,8 @@ contract ShareBridgeToken is Initializable, IVotable, BridgeToken {
   */
   event TokenizedSharePercentageSet(uint16 tokenizedSharePercentage);
 
+  uint256 public constant VERSION = 1;
+  
   uint16 public tokenizedSharePercentage;
   address public votingSession;
 

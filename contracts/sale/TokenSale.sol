@@ -64,6 +64,8 @@ import "../access/Operator.sol";
 contract TokenSale is Initializable, Pausable, Operator {
   using SafeMath for uint256;
 
+  uint256 public constant VERSION = 1;
+
   BridgeToken public token;
   address payable public etherVault;
   address public tokenVault;

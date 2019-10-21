@@ -178,6 +178,10 @@ contract('VotingSession', function ([_, owner, operator, address1, address2, add
       await this.contract.methods.registerVoters([address1, address2, address3, address4], [100, 200, 300, 400]).send({from: operator, gas: 500000})
     });
 
+    it('can get the contract version', async function () {
+      (await this.contract.methods.VERSION().call()).should.equal('1');
+    });
+
     context('Resolutions', function () {
       it('can get resolution count', async function () {
         (await this.contract.methods.resolutionCount().call()).should.equal('2');

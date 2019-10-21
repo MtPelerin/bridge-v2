@@ -219,6 +219,9 @@ contract('TokenSale', function ([_, owner, operator, administrator, supplier, et
     it('has the proper reference currency decimals parameter', async function () {
       (await this.contract.methods.refCurrencyDecimals().call()).should.equal('2');
     });
+    it('can get the contract version', async function () {
+      (await this.contract.methods.VERSION().call()).should.equal('1');
+    });
     context('Security model', function () {
       it('reverts if trying to set max Ether balance', async function () {
         await shouldFail.reverting.withMessage(this.contract.methods.setMaxEtherBalance(1000).send({from: address1}), "OP01");

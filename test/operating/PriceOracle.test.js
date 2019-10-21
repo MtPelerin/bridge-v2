@@ -58,6 +58,10 @@ contract('PriceOracle', function ([_, owner, operator, address1]) {
     this.contract = await this.project.createProxy(Contract, {initArgs: [owner]});
   });
 
+  it('can get the contract version', async function () {
+    (await this.contract.methods.VERSION().call()).should.equal('1');
+  });
+
   context('When owner', function () {
     it('has proper owner', async function () {
       (await this.contract.methods.owner().call()).should.equal(owner);

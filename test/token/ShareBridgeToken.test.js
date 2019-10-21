@@ -107,6 +107,10 @@ contract('ShareBridgeToken', function ([_, owner, administrator, trustedIntermed
   });
 
   context('When standard user', function () {
+    it('can get the contract version', async function () {
+      (await this.contract.methods.VERSION().call()).should.equal('1');
+    });
+
     context('Security model', function () {
       it('reverts if trying to set the tokenized share percentage', async function () {
         await shouldFail.reverting.withMessage(this.contract.methods.setTokenizedSharePercentage(NEW_TOKENIZED_SHARE_PERCENTAGE).send({from: address2}), "AD01");

@@ -54,6 +54,10 @@ contract('RuleEngine', function ([_, initializer, owner, processor, token1, addr
     this.yesNoUpdate = await this.project.createProxy(YesNoUpdateRule);
   });
 
+  it('can get the contract version', async function () {
+    (await this.contract.methods.VERSION().call()).should.equal('1');
+  });
+
   context('When owner', function () {
     it('can set rules', async function () {
       (await this.contract.methods.ruleLength().call()).should.equal('0');

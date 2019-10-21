@@ -60,6 +60,10 @@ contract('UserKycThresholdFromRule', function ([_, tokenOwner, owner, trustedInt
     await this.governableTokenMock.setTrustedIntermediaries([trustedIntermediary1, trustedIntermediary2]);
   });
 
+  it('can get the contract version', async function () {
+    (await this.contract.methods.VERSION().call()).should.equal('1');
+  });
+
   context('Check transfer validity', function () {
     it('returns that transfer is valid if kyc level is more than kycThreshold', async function () {
       const ret = await this.contract.methods.isTransferValid(token, address1, address3, 20000, 0).call();

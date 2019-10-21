@@ -57,6 +57,8 @@ import "./abstract/AbstractRule.sol";
 
 contract GlobalFreezeRule is Initializable, AbstractRule, Operator {
 
+  uint256 public constant VERSION = 1;
+
   /**
   * @dev GlobalFreeze event is sent when freezeAll is called to notify contract freeze
   * @param until end date (UNIX timestamp) of the freeze period

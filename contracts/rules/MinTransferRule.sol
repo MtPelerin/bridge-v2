@@ -54,6 +54,8 @@ import "./abstract/AbstractRule.sol";
 
 contract MinTransferRule is Initializable, AbstractRule {
 
+  uint256 public constant VERSION = 1;
+
   uint256 internal constant REASON_AMOUNT_LESS_THAN_MIN_AMOUNT = 1;
 
   /**

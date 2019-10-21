@@ -78,6 +78,8 @@ import "../access/Operator.sol";
 
 contract Exchange is IExchange, DSMath, Operator {
 
+  uint256 public constant VERSION = 1;
+  
   struct SortInfo {
     uint256 next;  //points to id of next higher offer
     uint256 prev;  //points to id of previous lower offer

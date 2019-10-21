@@ -75,6 +75,8 @@ import "../access/Operator.sol";
 contract HardTransferLimitRule is Initializable, AbstractRule, Operator {
   using SafeMath for uint256;
 
+  uint256 public constant VERSION = 1;
+
   IComplianceRegistry public complianceRegistry;
 
   uint8 constant internal MAX_DECIMALS = 20;

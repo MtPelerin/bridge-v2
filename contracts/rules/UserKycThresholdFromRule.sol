@@ -58,6 +58,8 @@ import "../interfaces/IGovernable.sol";
 
  
 contract UserKycThresholdFromRule is Initializable, AbstractRule {
+  
+  uint256 public constant VERSION = 1;
 
   IComplianceRegistry public complianceRegistry;
 

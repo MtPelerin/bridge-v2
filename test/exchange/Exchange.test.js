@@ -61,6 +61,10 @@ contract('Exchange', function ([_, tokenOwner, owner, operator, address1, addres
     this.contract = await this.project.createProxy(Contract, {initArgs: [owner], gas: 100000});
   });
 
+  it('can get the contract version', async function () {
+    (await this.contract.methods.VERSION().call()).should.equal('1');
+  });
+
   context('When owner', function () {
     it('has proper owner', async function () {
       (await this.contract.methods.owner().call()).should.equal(owner);

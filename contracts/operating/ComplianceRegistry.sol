@@ -63,6 +63,8 @@ import "../access/Operator.sol";
 contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
   using SafeMath for uint256;
 
+  uint256 public constant VERSION = 1;
+
   uint256 constant internal MONTH = 31 days;
   uint8 constant internal TRANSFER_ONHOLD = 0;
   uint8 constant internal TRANSFER_APPROVE = 1;

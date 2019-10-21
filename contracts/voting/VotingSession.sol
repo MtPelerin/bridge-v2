@@ -65,6 +65,8 @@ import "../access/Operator.sol";
 contract VotingSession is Initializable, Operator {
   using SafeMath for uint256;
 
+  uint256 public constant VERSION = 1;
+
   event ResolutionAdded(bytes32 indexed name, bytes32 url, uint256 proposalCount);
   event VoterRegistered(address indexed voter, uint256 weight);
   event VotingPeriodSet(uint256 votingStart, uint256 votingEnd);
