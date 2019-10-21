@@ -96,4 +96,7 @@ contract SeizableBridgeERC20 is Initializable, ISeizable, BridgeERC20 {
     emit Seize(_account, _value);
     emit Transfer(_account, msg.sender, _value); 
   }
+
+  /* Reserved slots for future use: https://docs.openzeppelin.com/sdk/2.5/writing-contracts.html#modifying-your-contracts */
+  uint256[50] private ______gap;
 }

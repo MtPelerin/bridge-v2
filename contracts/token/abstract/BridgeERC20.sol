@@ -365,4 +365,7 @@ contract BridgeERC20 is Initializable, Ownable, IAdministrable, IGovernable, IPr
     uint256 allowed = _processor.allowance(msg.sender, _spender);
     emit Approval(msg.sender, _spender, allowed);
   }
+
+  /* Reserved slots for future use: https://docs.openzeppelin.com/sdk/2.5/writing-contracts.html#modifying-your-contracts */
+  uint256[50] private ______gap;
 }

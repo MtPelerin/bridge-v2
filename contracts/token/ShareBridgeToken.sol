@@ -111,4 +111,7 @@ contract ShareBridgeToken is Initializable, IVotable, BridgeToken {
     votingSession = _votingSession;
     emit VotingSessionSet(_votingSession);
   }
+
+  /* Reserved slots for future use: https://docs.openzeppelin.com/sdk/2.5/writing-contracts.html#modifying-your-contracts */
+  uint256[50] private ______gap;
 }

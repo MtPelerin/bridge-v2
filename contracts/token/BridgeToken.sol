@@ -152,4 +152,7 @@ contract BridgeToken is Initializable, IContactable, IRulable, ISuppliable, IMin
     contact = _contact;
     emit ContactSet(_contact);
   }
+
+  /* Reserved slots for future use: https://docs.openzeppelin.com/sdk/2.5/writing-contracts.html#modifying-your-contracts */
+  uint256[50] private ______gap;
 }

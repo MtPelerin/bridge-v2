@@ -69,4 +69,7 @@ contract BondBridgeToken is Initializable, BridgeToken {
       trustedIntermediaries
     );
   }
+
+  /* Reserved slots for future use: https://docs.openzeppelin.com/sdk/2.5/writing-contracts.html#modifying-your-contracts */
+  uint256[50] private ______gap;
 }
