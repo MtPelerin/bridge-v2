@@ -54,7 +54,7 @@ import "../access/Operator.sol";
 * VO06: voter has not been invited to vote
 * VO07: Resolution id overflow
 * VO08: Proposal id overflow
-* VO09: Proposal already voted
+* VO09: Resolution already voted
 * VO10: Voting session is not open
 * VO11: Voting session has already been open
 * VO12: Start date cannot be 0
