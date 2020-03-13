@@ -43,6 +43,8 @@ import "../interfaces/IGovernable.sol";
 import "../interfaces/IERC20Detailed.sol";
 import "../interfaces/IPriceOracle.sol";
 import "../interfaces/IPriceable.sol";
+import "../interfaces/IAdministrable.sol";
+import "../interfaces/IMintable.sol";
 
 /**
 * @title BridgeERC20Mock
@@ -50,18 +52,20 @@ import "../interfaces/IPriceable.sol";
 */
 
 
-contract BridgeERC20Mock is IGovernable, IPriceable, IERC20Detailed {
+contract BridgeERC20Mock is IGovernable, IPriceable, IMintable, IAdministrable, IERC20Detailed {
   using Roles for Roles.Role;
   using SafeMath for uint256;
   
+  mapping (address => uint256) internal _balances;
+  uint256 internal _totalSupply;
   address internal _realm;
   address[] internal _trustedIntermediaries;
+  Roles.Role internal _administrators;
   Roles.Role internal _realmAdministrators;
   string internal _name;
   string internal _symbol;
   uint8 internal _decimals;
   IPriceOracle internal _priceOracle;
-
 
   constructor(
     IPriceOracle priceOracle, 
@@ -105,6 +109,34 @@ contract BridgeERC20Mock is IGovernable, IPriceable, IERC20Detailed {
   function removeRealmAdministrator(address _administrator) public {
     _realmAdministrators.remove(_administrator);
     emit RealmAdministratorRemoved(_administrator);
+  }
+
+  /* Administrable */
+  function isAdministrator(address _administrator) public view returns (bool) {
+    return _administrators.has(_administrator);
+  }
+
+  function addAdministrator(address _administrator) public {
+    _administrators.add(_administrator);
+    emit AdministratorAdded(_administrator);
+  }
+
+  function removeAdministrator(address _administrator) public {
+    _administrators.remove(_administrator);
+    emit AdministratorRemoved(_administrator);
+  }
+
+  /* Mintable */
+  function mint(address _to, uint256 _amount) public
+  {
+    _totalSupply = _totalSupply.add(_amount);
+    _balances[_to] = _balances[_to].add(_amount);
+  }
+
+  function burn(address _from, uint256 _amount) public
+  {
+    _totalSupply = _totalSupply.sub(_amount);
+    _balances[_from] = _balances[_from].sub(_amount);
   }
 
   function priceOracle() public view returns (IPriceOracle) {
@@ -162,11 +194,11 @@ contract BridgeERC20Mock is IGovernable, IPriceable, IERC20Detailed {
   }
 
   function totalSupply() external view returns (uint256) {
-    return 1000000 * 10 ** uint256(_decimals);
+    return _totalSupply;
   }
 
-  function balanceOf(address /* who */) external view returns (uint256) {
-    return 0;
+  function balanceOf(address account) external view returns (uint256) {
+    return _balances[account];
   }
 
   function allowance(address /* owner */, address /* spender */) external view returns (uint256) {
