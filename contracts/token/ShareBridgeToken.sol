@@ -59,10 +59,20 @@ contract ShareBridgeToken is Initializable, IVotable, BridgeToken {
   */
   event TokenizedSharePercentageSet(uint16 tokenizedSharePercentage);
 
+  /**
+  * Purpose:
+  * This event is emitted when the board resolution url is changed
+  *
+  * @param boardResolutionDocumentHash - hash of board resolution document
+  */
+  event BoardResolutionDocumentSet(bytes32 boardResolutionDocumentHash);
+
   uint256 public constant VERSION = 1;
   
   uint16 public tokenizedSharePercentage;
   address public votingSession;
+  string public boardResolutionDocumentUrl;
+  bytes32 public boardResolutionDocumentHash;
 
   /**
   * @dev Initializer (replaces constructor when contract is upgradable)
@@ -102,6 +112,17 @@ contract ShareBridgeToken is Initializable, IVotable, BridgeToken {
   function setTokenizedSharePercentage(uint16 _tokenizedSharePercentage) public onlyAdministrator {
     tokenizedSharePercentage = _tokenizedSharePercentage;
     emit TokenizedSharePercentageSet(_tokenizedSharePercentage);
+  }
+
+  /**
+  * @dev Set the board resolution url and the board resolution document hash
+  * @param _boardResolutionDocumentUrl the url on which the board resolution document can be downloaded
+  * @param _boardResolutionDocumentHash the hash of the board resolution document for authenticity check
+  */
+  function setBoardResolutionDocument(string calldata _boardResolutionDocumentUrl, bytes32 _boardResolutionDocumentHash) external onlyAdministrator {
+    boardResolutionDocumentUrl = _boardResolutionDocumentUrl;
+    boardResolutionDocumentHash = _boardResolutionDocumentHash;
+    emit BoardResolutionDocumentSet(_boardResolutionDocumentHash);
   }
 
   /* Votable */

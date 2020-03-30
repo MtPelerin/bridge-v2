@@ -52,6 +52,9 @@ const YesNoUpdateRule = Contracts.getFromLocal('YesNoUpdateRule');
 const zero = '0x0000000000000000000000000000000000000000';
 const INITIAL_TOKENIZED_SHARE_PERCENTAGE = '5528' // 55.28%
 const NEW_TOKENIZED_SHARE_PERCENTAGE = '6745' // 67.45%
+const BOARD_DOCUMENT_URL = 'https://www.mtpelerin.com/board-resolution.pdf';
+const BOARD_DOCUMENT_HASH = '0x175fca35aac7905c1f5c599ae921ed0e19921406cd117be5825717c8c3357b49';
+const ZERO_HASH = '0x0000000000000000000000000000000000000000000000000000000000000000';
 
 contract('ShareBridgeToken', function ([_, owner, administrator, trustedIntermediary1, trustedIntermediary2, votingSession, address2]) {
   beforeEach(async function () {
@@ -78,6 +81,19 @@ contract('ShareBridgeToken', function ([_, owner, administrator, trustedIntermed
     it('emits a TokenizedSharePercentageSet event', function () {
       this.events.should.have.property('TokenizedSharePercentageSet');
       this.events.TokenizedSharePercentageSet.returnValues.should.have.property('tokenizedSharePercentage', NEW_TOKENIZED_SHARE_PERCENTAGE);
+    });
+
+    it('can set the board resolution document attributes', async function () {
+      (await this.contract.methods.boardResolutionDocumentUrl().call()).should.equal("");
+      (await this.contract.methods.boardResolutionDocumentHash().call()).should.equal(ZERO_HASH);
+      ({events: this.events} = await this.contract.methods.setBoardResolutionDocument(BOARD_DOCUMENT_URL, BOARD_DOCUMENT_HASH).send({from: administrator, gas: 200000}));
+      (await this.contract.methods.boardResolutionDocumentUrl().call()).should.equal(BOARD_DOCUMENT_URL);
+      (await this.contract.methods.boardResolutionDocumentHash().call()).should.equal(BOARD_DOCUMENT_HASH);
+    }); 
+
+    it('emits a BoardResolutionDocumentSet event', function () {
+      this.events.should.have.property('BoardResolutionDocumentSet');
+      this.events.BoardResolutionDocumentSet.returnValues.should.have.property('boardResolutionDocumentHash', BOARD_DOCUMENT_HASH);
     });
 
     it('can set the voting session contract address', async function () {
@@ -114,6 +130,10 @@ contract('ShareBridgeToken', function ([_, owner, administrator, trustedIntermed
     context('Security model', function () {
       it('reverts if trying to set the tokenized share percentage', async function () {
         await shouldFail.reverting.withMessage(this.contract.methods.setTokenizedSharePercentage(NEW_TOKENIZED_SHARE_PERCENTAGE).send({from: address2}), "AD01");
+      });
+
+      it('reverts if trying to set the board resolution document', async function () {
+        await shouldFail.reverting.withMessage(this.contract.methods.setBoardResolutionDocument(BOARD_DOCUMENT_URL, BOARD_DOCUMENT_HASH).send({from: address2}), "AD01");
       });
 
       it('reverts if trying to set the voting session contract address', async function () {
