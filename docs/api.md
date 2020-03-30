@@ -194,6 +194,10 @@
 [IComplianceRegistry-TransferApproved-address-address-address-address-uint256-]: #IComplianceRegistry-TransferApproved-address-address-address-address-uint256-
 [IComplianceRegistry-TransferRejected-address-address-address-address-uint256-]: #IComplianceRegistry-TransferRejected-address-address-address-address-uint256-
 [IComplianceRegistry-TransferCancelled-address-address-address-address-uint256-]: #IComplianceRegistry-TransferCancelled-address-address-address-address-uint256-
+[IContactable]: #IContactable
+[IContactable-contact--]: #IContactable-contact--
+[IContactable-setContact-string-]: #IContactable-setContact-string-
+[IContactable-ContactSet-string-]: #IContactable-ContactSet-string-
 [IERC20Detailed]: #IERC20Detailed
 [IERC20Detailed-name--]: #IERC20Detailed-name--
 [IERC20Detailed-symbol--]: #IERC20Detailed-symbol--
@@ -298,6 +302,10 @@
 [ISuppliable-removeSupplier-address-]: #ISuppliable-removeSupplier-address-
 [ISuppliable-SupplierAdded-address-]: #ISuppliable-SupplierAdded-address-
 [ISuppliable-SupplierRemoved-address-]: #ISuppliable-SupplierRemoved-address-
+[IVotable]: #IVotable
+[IVotable-votingSession--]: #IVotable-votingSession--
+[IVotable-setVotingSession-address-]: #IVotable-setVotingSession-address-
+[IVotable-VotingSessionSet-address-]: #IVotable-VotingSessionSet-address-
 [DSMath]: #DSMath
 [DSMath-add-uint256-uint256-]: #DSMath-add-uint256-uint256-
 [DSMath-sub-uint256-uint256-]: #DSMath-sub-uint256-uint256-
@@ -320,6 +328,11 @@
 [BridgeERC20Mock-isRealmAdministrator-address-]: #BridgeERC20Mock-isRealmAdministrator-address-
 [BridgeERC20Mock-addRealmAdministrator-address-]: #BridgeERC20Mock-addRealmAdministrator-address-
 [BridgeERC20Mock-removeRealmAdministrator-address-]: #BridgeERC20Mock-removeRealmAdministrator-address-
+[BridgeERC20Mock-isAdministrator-address-]: #BridgeERC20Mock-isAdministrator-address-
+[BridgeERC20Mock-addAdministrator-address-]: #BridgeERC20Mock-addAdministrator-address-
+[BridgeERC20Mock-removeAdministrator-address-]: #BridgeERC20Mock-removeAdministrator-address-
+[BridgeERC20Mock-mint-address-uint256-]: #BridgeERC20Mock-mint-address-uint256-
+[BridgeERC20Mock-burn-address-uint256-]: #BridgeERC20Mock-burn-address-uint256-
 [BridgeERC20Mock-priceOracle--]: #BridgeERC20Mock-priceOracle--
 [BridgeERC20Mock-setPriceOracle-contract-IPriceOracle-]: #BridgeERC20Mock-setPriceOracle-contract-IPriceOracle-
 [BridgeERC20Mock-convertTo-uint256-string-uint8-]: #BridgeERC20Mock-convertTo-uint256-string-uint8-
@@ -334,6 +347,10 @@
 [BridgeERC20Mock-allowance-address-address-]: #BridgeERC20Mock-allowance-address-address-
 [IERC20Detailed-Transfer-address-address-uint256-]: #IERC20Detailed-Transfer-address-address-uint256-
 [IERC20Detailed-Approval-address-address-uint256-]: #IERC20Detailed-Approval-address-address-uint256-
+[IAdministrable-AdministratorAdded-address-]: #IAdministrable-AdministratorAdded-address-
+[IAdministrable-AdministratorRemoved-address-]: #IAdministrable-AdministratorRemoved-address-
+[IMintable-Mint-address-uint256-]: #IMintable-Mint-address-uint256-
+[IMintable-Burn-address-uint256-]: #IMintable-Burn-address-uint256-
 [IPriceable-PriceOracleChanged-address-]: #IPriceable-PriceOracleChanged-address-
 [IGovernable-TrustedIntermediariesChanged-address---]: #IGovernable-TrustedIntermediariesChanged-address---
 [IGovernable-RealmChanged-address-]: #IGovernable-RealmChanged-address-
@@ -513,6 +530,12 @@
 [Operator-OperatorAdded-address-]: #Operator-OperatorAdded-address-
 [Operator-OperatorRemoved-address-]: #Operator-OperatorRemoved-address-
 [Ownable-OwnershipTransferred-address-address-]: #Ownable-OwnershipTransferred-address-address-
+[AddressThresholdLockRule]: #AddressThresholdLockRule
+[AddressThresholdLockRule-isTransferValid-address-address-address-uint256-uint256-]: #AddressThresholdLockRule-isTransferValid-address-address-address-uint256-uint256-
+[AddressThresholdLockRule-addressLockThreshold-address-address-]: #AddressThresholdLockRule-addressLockThreshold-address-address-
+[AddressThresholdLockRule-setAddressLockThreshold-address-address-uint256-]: #AddressThresholdLockRule-setAddressLockThreshold-address-address-uint256-
+[AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-]: #AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-
+[AbstractRule-afterTransferHook-address-address-address-uint256-uint256-]: #AbstractRule-afterTransferHook-address-address-address-uint256-uint256-
 [GlobalFreezeRule]: #GlobalFreezeRule
 [GlobalFreezeRule-initialize-address-]: #GlobalFreezeRule-initialize-address-
 [GlobalFreezeRule-unfreezeAll--]: #GlobalFreezeRule-unfreezeAll--
@@ -680,6 +703,7 @@
 [BridgeToken-rule-uint256-]: #BridgeToken-rule-uint256-
 [BridgeToken-canTransfer-address-address-uint256-]: #BridgeToken-canTransfer-address-address-uint256-
 [BridgeToken-setRules-uint256---uint256---]: #BridgeToken-setRules-uint256---uint256---
+[BridgeToken-setContact-string-]: #BridgeToken-setContact-string-
 [SeizableBridgeERC20-initialize-address-contract-IProcessor-]: #SeizableBridgeERC20-initialize-address-contract-IProcessor-
 [SeizableBridgeERC20-isSeizer-address-]: #SeizableBridgeERC20-isSeizer-address-
 [SeizableBridgeERC20-addSeizer-address-]: #SeizableBridgeERC20-addSeizer-address-
@@ -720,6 +744,7 @@
 [Context-constructor--]: #Context-constructor--
 [Context-_msgSender--]: #Context-_msgSender--
 [Context-_msgData--]: #Context-_msgData--
+[IContactable-contact--]: #IContactable-contact--
 [BridgeERC20-ProcessorChanged-address-]: #BridgeERC20-ProcessorChanged-address-
 [IERC20Detailed-Transfer-address-address-uint256-]: #IERC20Detailed-Transfer-address-address-uint256-
 [IERC20Detailed-Approval-address-address-uint256-]: #IERC20Detailed-Approval-address-address-uint256-
@@ -739,6 +764,7 @@
 [ISuppliable-SupplierAdded-address-]: #ISuppliable-SupplierAdded-address-
 [ISuppliable-SupplierRemoved-address-]: #ISuppliable-SupplierRemoved-address-
 [IRulable-RulesChanged-uint256---uint256---]: #IRulable-RulesChanged-uint256---uint256---
+[IContactable-ContactSet-string-]: #IContactable-ContactSet-string-
 [BridgeToken]: #BridgeToken
 [BridgeToken-initialize-address-contract-IProcessor-string-string-uint8-address---]: #BridgeToken-initialize-address-contract-IProcessor-string-string-uint8-address---
 [BridgeToken-isSupplier-address-]: #BridgeToken-isSupplier-address-
@@ -750,6 +776,7 @@
 [BridgeToken-rule-uint256-]: #BridgeToken-rule-uint256-
 [BridgeToken-canTransfer-address-address-uint256-]: #BridgeToken-canTransfer-address-address-uint256-
 [BridgeToken-setRules-uint256---uint256---]: #BridgeToken-setRules-uint256---uint256---
+[BridgeToken-setContact-string-]: #BridgeToken-setContact-string-
 [SeizableBridgeERC20-initialize-address-contract-IProcessor-]: #SeizableBridgeERC20-initialize-address-contract-IProcessor-
 [SeizableBridgeERC20-isSeizer-address-]: #SeizableBridgeERC20-isSeizer-address-
 [SeizableBridgeERC20-addSeizer-address-]: #SeizableBridgeERC20-addSeizer-address-
@@ -790,6 +817,7 @@
 [Context-constructor--]: #Context-constructor--
 [Context-_msgSender--]: #Context-_msgSender--
 [Context-_msgData--]: #Context-_msgData--
+[IContactable-contact--]: #IContactable-contact--
 [BridgeERC20-ProcessorChanged-address-]: #BridgeERC20-ProcessorChanged-address-
 [IERC20Detailed-Transfer-address-address-uint256-]: #IERC20Detailed-Transfer-address-address-uint256-
 [IERC20Detailed-Approval-address-address-uint256-]: #IERC20Detailed-Approval-address-address-uint256-
@@ -809,6 +837,7 @@
 [ISuppliable-SupplierAdded-address-]: #ISuppliable-SupplierAdded-address-
 [ISuppliable-SupplierRemoved-address-]: #ISuppliable-SupplierRemoved-address-
 [IRulable-RulesChanged-uint256---uint256---]: #IRulable-RulesChanged-uint256---uint256---
+[IContactable-ContactSet-string-]: #IContactable-ContactSet-string-
 [CoinBridgeToken]: #CoinBridgeToken
 [CoinBridgeToken-initialize-address-contract-IProcessor-string-string-uint8-address---]: #CoinBridgeToken-initialize-address-contract-IProcessor-string-string-uint8-address---
 [BridgeToken-isSupplier-address-]: #BridgeToken-isSupplier-address-
@@ -820,6 +849,7 @@
 [BridgeToken-rule-uint256-]: #BridgeToken-rule-uint256-
 [BridgeToken-canTransfer-address-address-uint256-]: #BridgeToken-canTransfer-address-address-uint256-
 [BridgeToken-setRules-uint256---uint256---]: #BridgeToken-setRules-uint256---uint256---
+[BridgeToken-setContact-string-]: #BridgeToken-setContact-string-
 [SeizableBridgeERC20-initialize-address-contract-IProcessor-]: #SeizableBridgeERC20-initialize-address-contract-IProcessor-
 [SeizableBridgeERC20-isSeizer-address-]: #SeizableBridgeERC20-isSeizer-address-
 [SeizableBridgeERC20-addSeizer-address-]: #SeizableBridgeERC20-addSeizer-address-
@@ -860,6 +890,7 @@
 [Context-constructor--]: #Context-constructor--
 [Context-_msgSender--]: #Context-_msgSender--
 [Context-_msgData--]: #Context-_msgData--
+[IContactable-contact--]: #IContactable-contact--
 [BridgeERC20-ProcessorChanged-address-]: #BridgeERC20-ProcessorChanged-address-
 [IERC20Detailed-Transfer-address-address-uint256-]: #IERC20Detailed-Transfer-address-address-uint256-
 [IERC20Detailed-Approval-address-address-uint256-]: #IERC20Detailed-Approval-address-address-uint256-
@@ -879,8 +910,12 @@
 [ISuppliable-SupplierAdded-address-]: #ISuppliable-SupplierAdded-address-
 [ISuppliable-SupplierRemoved-address-]: #ISuppliable-SupplierRemoved-address-
 [IRulable-RulesChanged-uint256---uint256---]: #IRulable-RulesChanged-uint256---uint256---
+[IContactable-ContactSet-string-]: #IContactable-ContactSet-string-
 [ShareBridgeToken]: #ShareBridgeToken
-[ShareBridgeToken-initialize-address-contract-IProcessor-string-string-address---uint8-]: #ShareBridgeToken-initialize-address-contract-IProcessor-string-string-address---uint8-
+[ShareBridgeToken-initialize-address-contract-IProcessor-string-string-address---uint16-]: #ShareBridgeToken-initialize-address-contract-IProcessor-string-string-address---uint16-
+[ShareBridgeToken-setTokenizedSharePercentage-uint16-]: #ShareBridgeToken-setTokenizedSharePercentage-uint16-
+[ShareBridgeToken-setBoardResolutionDocument-string-bytes32-]: #ShareBridgeToken-setBoardResolutionDocument-string-bytes32-
+[ShareBridgeToken-setVotingSession-address-]: #ShareBridgeToken-setVotingSession-address-
 [BridgeToken-initialize-address-contract-IProcessor-string-string-uint8-address---]: #BridgeToken-initialize-address-contract-IProcessor-string-string-uint8-address---
 [BridgeToken-isSupplier-address-]: #BridgeToken-isSupplier-address-
 [BridgeToken-addSupplier-address-]: #BridgeToken-addSupplier-address-
@@ -891,6 +926,7 @@
 [BridgeToken-rule-uint256-]: #BridgeToken-rule-uint256-
 [BridgeToken-canTransfer-address-address-uint256-]: #BridgeToken-canTransfer-address-address-uint256-
 [BridgeToken-setRules-uint256---uint256---]: #BridgeToken-setRules-uint256---uint256---
+[BridgeToken-setContact-string-]: #BridgeToken-setContact-string-
 [SeizableBridgeERC20-initialize-address-contract-IProcessor-]: #SeizableBridgeERC20-initialize-address-contract-IProcessor-
 [SeizableBridgeERC20-isSeizer-address-]: #SeizableBridgeERC20-isSeizer-address-
 [SeizableBridgeERC20-addSeizer-address-]: #SeizableBridgeERC20-addSeizer-address-
@@ -931,6 +967,10 @@
 [Context-constructor--]: #Context-constructor--
 [Context-_msgSender--]: #Context-_msgSender--
 [Context-_msgData--]: #Context-_msgData--
+[IContactable-contact--]: #IContactable-contact--
+[IVotable-votingSession--]: #IVotable-votingSession--
+[ShareBridgeToken-TokenizedSharePercentageSet-uint16-]: #ShareBridgeToken-TokenizedSharePercentageSet-uint16-
+[ShareBridgeToken-BoardResolutionDocumentSet-bytes32-]: #ShareBridgeToken-BoardResolutionDocumentSet-bytes32-
 [BridgeERC20-ProcessorChanged-address-]: #BridgeERC20-ProcessorChanged-address-
 [IERC20Detailed-Transfer-address-address-uint256-]: #IERC20Detailed-Transfer-address-address-uint256-
 [IERC20Detailed-Approval-address-address-uint256-]: #IERC20Detailed-Approval-address-address-uint256-
@@ -950,6 +990,8 @@
 [ISuppliable-SupplierAdded-address-]: #ISuppliable-SupplierAdded-address-
 [ISuppliable-SupplierRemoved-address-]: #ISuppliable-SupplierRemoved-address-
 [IRulable-RulesChanged-uint256---uint256---]: #IRulable-RulesChanged-uint256---uint256---
+[IContactable-ContactSet-string-]: #IContactable-ContactSet-string-
+[IVotable-VotingSessionSet-address-]: #IVotable-VotingSessionSet-address-
 [BridgeERC20]: #BridgeERC20
 [BridgeERC20-initialize-address-contract-IProcessor-]: #BridgeERC20-initialize-address-contract-IProcessor-
 [BridgeERC20-isAdministrator-address-]: #BridgeERC20-isAdministrator-address-
@@ -1073,6 +1115,8 @@
 [DSMath-wdiv-uint256-uint256-]: #DSMath-wdiv-uint256-uint256-
 [DSMath-rdiv-uint256-uint256-]: #DSMath-rdiv-uint256-uint256-
 [DSMath-rpow-uint256-uint256-]: #DSMath-rpow-uint256-uint256-
+[ProofOfAddress]: #ProofOfAddress
+[ProofOfAddress-fallback--]: #ProofOfAddress-fallback--
 [Token]: #Token
 [Token-balanceOf-address-]: #Token-balanceOf-address-
 [Token-transfer-address-uint256-]: #Token-transfer-address-uint256-
@@ -2206,6 +2250,31 @@ IComplianceRegistry interface*
 
 
 
+## <span id="IContactable"></span> `IContactable`
+
+IContactable interface*
+
+- [`contact()`][IContactable-contact--]
+- [`setContact(string _contact)`][IContactable-setContact-string-]
+- [`ContactSet(string contact)`][IContactable-ContactSet-string-]
+### <span id="IContactable-contact--"></span> `contact() → string` (external)
+
+
+
+
+
+### <span id="IContactable-setContact-string-"></span> `setContact(string _contact)` (external)
+
+
+
+
+
+### <span id="IContactable-ContactSet-string-"></span> `ContactSet(string contact)`
+
+
+
+
+
 ## <span id="IERC20Detailed"></span> `IERC20Detailed`
 
 IERC20Detailed interface*
@@ -2869,6 +2938,31 @@ ISuppliable interface*
 
 
 
+## <span id="IVotable"></span> `IVotable`
+
+IVotable interface*
+
+- [`votingSession()`][IVotable-votingSession--]
+- [`setVotingSession(address _votingSession)`][IVotable-setVotingSession-address-]
+- [`VotingSessionSet(address votingSession)`][IVotable-VotingSessionSet-address-]
+### <span id="IVotable-votingSession--"></span> `votingSession() → address` (external)
+
+
+
+
+
+### <span id="IVotable-setVotingSession-address-"></span> `setVotingSession(address _votingSession)` (external)
+
+
+
+
+
+### <span id="IVotable-VotingSessionSet-address-"></span> `VotingSessionSet(address votingSession)`
+
+
+
+
+
 ## <span id="DSMath"></span> `DSMath`
 
 
@@ -2971,6 +3065,11 @@ Mocks BridgeERC20 token, used for testing
 - [`isRealmAdministrator(address _administrator)`][BridgeERC20Mock-isRealmAdministrator-address-]
 - [`addRealmAdministrator(address _administrator)`][BridgeERC20Mock-addRealmAdministrator-address-]
 - [`removeRealmAdministrator(address _administrator)`][BridgeERC20Mock-removeRealmAdministrator-address-]
+- [`isAdministrator(address _administrator)`][BridgeERC20Mock-isAdministrator-address-]
+- [`addAdministrator(address _administrator)`][BridgeERC20Mock-addAdministrator-address-]
+- [`removeAdministrator(address _administrator)`][BridgeERC20Mock-removeAdministrator-address-]
+- [`mint(address _to, uint256 _amount)`][BridgeERC20Mock-mint-address-uint256-]
+- [`burn(address _from, uint256 _amount)`][BridgeERC20Mock-burn-address-uint256-]
 - [`priceOracle()`][BridgeERC20Mock-priceOracle--]
 - [`setPriceOracle(contract IPriceOracle newPriceOracle)`][BridgeERC20Mock-setPriceOracle-contract-IPriceOracle-]
 - [`convertTo(uint256 _amount, string _currency, uint8 maxDecimals)`][BridgeERC20Mock-convertTo-uint256-string-uint8-]
@@ -2981,10 +3080,14 @@ Mocks BridgeERC20 token, used for testing
 - [`approve(address, uint256)`][BridgeERC20Mock-approve-address-uint256-]
 - [`transferFrom(address, address, uint256)`][BridgeERC20Mock-transferFrom-address-address-uint256-]
 - [`totalSupply()`][BridgeERC20Mock-totalSupply--]
-- [`balanceOf(address)`][BridgeERC20Mock-balanceOf-address-]
+- [`balanceOf(address account)`][BridgeERC20Mock-balanceOf-address-]
 - [`allowance(address, address)`][BridgeERC20Mock-allowance-address-address-]
 - [`Transfer(address from, address to, uint256 value)`][IERC20Detailed-Transfer-address-address-uint256-]
 - [`Approval(address owner, address spender, uint256 value)`][IERC20Detailed-Approval-address-address-uint256-]
+- [`AdministratorAdded(address administrator)`][IAdministrable-AdministratorAdded-address-]
+- [`AdministratorRemoved(address administrator)`][IAdministrable-AdministratorRemoved-address-]
+- [`Mint(address to, uint256 amount)`][IMintable-Mint-address-uint256-]
+- [`Burn(address from, uint256 amount)`][IMintable-Burn-address-uint256-]
 - [`PriceOracleChanged(address newPriceOracle)`][IPriceable-PriceOracleChanged-address-]
 - [`TrustedIntermediariesChanged(address[] newTrustedIntermediaries)`][IGovernable-TrustedIntermediariesChanged-address---]
 - [`RealmChanged(address newRealm)`][IGovernable-RealmChanged-address-]
@@ -3033,6 +3136,36 @@ Mocks BridgeERC20 token, used for testing
 
 
 ### <span id="BridgeERC20Mock-removeRealmAdministrator-address-"></span> `removeRealmAdministrator(address _administrator)` (public)
+
+
+
+
+
+### <span id="BridgeERC20Mock-isAdministrator-address-"></span> `isAdministrator(address _administrator) → bool` (public)
+
+
+
+
+
+### <span id="BridgeERC20Mock-addAdministrator-address-"></span> `addAdministrator(address _administrator)` (public)
+
+
+
+
+
+### <span id="BridgeERC20Mock-removeAdministrator-address-"></span> `removeAdministrator(address _administrator)` (public)
+
+
+
+
+
+### <span id="BridgeERC20Mock-mint-address-uint256-"></span> `mint(address _to, uint256 _amount)` (public)
+
+
+
+
+
+### <span id="BridgeERC20Mock-burn-address-uint256-"></span> `burn(address _from, uint256 _amount)` (public)
 
 
 
@@ -3098,7 +3231,7 @@ Mocks BridgeERC20 token, used for testing
 
 
 
-### <span id="BridgeERC20Mock-balanceOf-address-"></span> `balanceOf(address) → uint256` (external)
+### <span id="BridgeERC20Mock-balanceOf-address-"></span> `balanceOf(address account) → uint256` (external)
 
 
 
@@ -4533,6 +4666,68 @@ Check if a transfer is valid according to the rules and rule parameters passed i
 
 
 
+## <span id="AddressThresholdLockRule"></span> `AddressThresholdLockRule`
+
+FreezeRule allows trusted authorities to enforce a freeze of assets for specific addresses  
+  
+Error messages  
+RU02: Function cannot be called  
+AD01: Caller is not token administrator  
+  
+Errors  
+1: Locked threshold reached
+
+- [`initializer()`][Initializable-initializer--]
+- [`isTransferValid(address _token, address _from, address, uint256 _amount, uint256)`][AddressThresholdLockRule-isTransferValid-address-address-address-uint256-uint256-]
+- [`addressLockThreshold(address _token, address _address)`][AddressThresholdLockRule-addressLockThreshold-address-address-]
+- [`setAddressLockThreshold(address _token, address _addressToLock, uint256 _lockThreshold)`][AddressThresholdLockRule-setAddressLockThreshold-address-address-uint256-]
+- [`beforeTransferHook(address, address, address, uint256, uint256)`][AbstractRule-beforeTransferHook-address-address-address-uint256-uint256-]
+- [`afterTransferHook(address, address, address, uint256, uint256)`][AbstractRule-afterTransferHook-address-address-address-uint256-uint256-]
+### <span id="AddressThresholdLockRule-isTransferValid-address-address-address-uint256-uint256-"></span> `isTransferValid(address _token, address _from, address, uint256 _amount, uint256) → uint256, uint256` (public)
+
+Validates a transfer if the balance of token on the from address after transfer is still higher or equal to the address lock threshold  
+
+
+#### *Parameters*
+- **_token**: Address of the contract that represent the token to be transfered
+
+- **_from**: Sender address
+
+- **_amount**: The amount of tokens to send
+
+
+#### *Returns*
+- **transferStatus**: Invalid transfer if the balance of token on the from address after transfer is lower than the address lock threshold, valid transfer without further action otherwise
+
+- **statusCode**: The reason of the transfer rejection indicating than the lock threshold is reached
+
+### <span id="AddressThresholdLockRule-addressLockThreshold-address-address-"></span> `addressLockThreshold(address _token, address _address) → uint256` (public)
+
+
+
+#### *Parameters*
+- **_token**: Address of the contract that represent the token to be transfered
+
+- **_address**: Address to be queried for lock threshold
+
+
+#### *Returns*
+- **threshold**: the amount of locked tokens
+
+### <span id="AddressThresholdLockRule-setAddressLockThreshold-address-address-uint256-"></span> `setAddressLockThreshold(address _token, address _addressToLock, uint256 _lockThreshold)` (public)
+
+
+
+#### *Parameters*
+- **_token**: Address of the contract that represent the token to be transfered
+
+- **_addressToLock**: Address to be queried for lock threshold
+
+- **_lockThreshold**: the amount of locked tokens for _addressToLock
+
+
+
+
 ## <span id="GlobalFreezeRule"></span> `GlobalFreezeRule`
 
 GlobalFreezeRule allows a legal authority to enforce a freeze of assets globally  
@@ -5494,6 +5689,7 @@ Error messages*
 - [`rule(uint256 ruleId)`][BridgeToken-rule-uint256-]
 - [`canTransfer(address _from, address _to, uint256 _amount)`][BridgeToken-canTransfer-address-address-uint256-]
 - [`setRules(uint256[] newRules, uint256[] newRulesParams)`][BridgeToken-setRules-uint256---uint256---]
+- [`setContact(string _contact)`][BridgeToken-setContact-string-]
 - [`initialize(address owner, contract IProcessor processor)`][SeizableBridgeERC20-initialize-address-contract-IProcessor-]
 - [`isSeizer(address _seizer)`][SeizableBridgeERC20-isSeizer-address-]
 - [`addSeizer(address _seizer)`][SeizableBridgeERC20-addSeizer-address-]
@@ -5534,6 +5730,7 @@ Error messages*
 - [`constructor()`][Context-constructor--]
 - [`_msgSender()`][Context-_msgSender--]
 - [`_msgData()`][Context-_msgData--]
+- [`contact()`][IContactable-contact--]
 - [`ProcessorChanged(address newProcessor)`][BridgeERC20-ProcessorChanged-address-]
 - [`Transfer(address from, address to, uint256 value)`][IERC20Detailed-Transfer-address-address-uint256-]
 - [`Approval(address owner, address spender, uint256 value)`][IERC20Detailed-Approval-address-address-uint256-]
@@ -5553,6 +5750,7 @@ Error messages*
 - [`SupplierAdded(address supplier)`][ISuppliable-SupplierAdded-address-]
 - [`SupplierRemoved(address supplier)`][ISuppliable-SupplierRemoved-address-]
 - [`RulesChanged(uint256[] newRules, uint256[] newRulesParams)`][IRulable-RulesChanged-uint256---uint256---]
+- [`ContactSet(string contact)`][IContactable-ContactSet-string-]
 ### <span id="BondBridgeToken-initialize-address-contract-IProcessor-string-string-uint8-address---"></span> `initialize(address owner, contract IProcessor processor, string name, string symbol, uint8 decimals, address[] trustedIntermediaries)` (public)
 
 
@@ -5586,6 +5784,7 @@ RE01: Rule id overflow*
 - [`rule(uint256 ruleId)`][BridgeToken-rule-uint256-]
 - [`canTransfer(address _from, address _to, uint256 _amount)`][BridgeToken-canTransfer-address-address-uint256-]
 - [`setRules(uint256[] newRules, uint256[] newRulesParams)`][BridgeToken-setRules-uint256---uint256---]
+- [`setContact(string _contact)`][BridgeToken-setContact-string-]
 - [`initialize(address owner, contract IProcessor processor)`][SeizableBridgeERC20-initialize-address-contract-IProcessor-]
 - [`isSeizer(address _seizer)`][SeizableBridgeERC20-isSeizer-address-]
 - [`addSeizer(address _seizer)`][SeizableBridgeERC20-addSeizer-address-]
@@ -5626,6 +5825,7 @@ RE01: Rule id overflow*
 - [`constructor()`][Context-constructor--]
 - [`_msgSender()`][Context-_msgSender--]
 - [`_msgData()`][Context-_msgData--]
+- [`contact()`][IContactable-contact--]
 - [`ProcessorChanged(address newProcessor)`][BridgeERC20-ProcessorChanged-address-]
 - [`Transfer(address from, address to, uint256 value)`][IERC20Detailed-Transfer-address-address-uint256-]
 - [`Approval(address owner, address spender, uint256 value)`][IERC20Detailed-Approval-address-address-uint256-]
@@ -5645,6 +5845,7 @@ RE01: Rule id overflow*
 - [`SupplierAdded(address supplier)`][ISuppliable-SupplierAdded-address-]
 - [`SupplierRemoved(address supplier)`][ISuppliable-SupplierRemoved-address-]
 - [`RulesChanged(uint256[] newRules, uint256[] newRulesParams)`][IRulable-RulesChanged-uint256---uint256---]
+- [`ContactSet(string contact)`][IContactable-ContactSet-string-]
 ### <span id="BridgeToken-onlySupplier--"></span> `onlySupplier()`
 
 
@@ -5709,6 +5910,12 @@ RE01: Rule id overflow*
 
 
 
+### <span id="BridgeToken-setContact-string-"></span> `setContact(string _contact)` (external)
+
+
+
+
+
 
 
 ## <span id="CoinBridgeToken"></span> `CoinBridgeToken`
@@ -5733,6 +5940,7 @@ Error messages*
 - [`rule(uint256 ruleId)`][BridgeToken-rule-uint256-]
 - [`canTransfer(address _from, address _to, uint256 _amount)`][BridgeToken-canTransfer-address-address-uint256-]
 - [`setRules(uint256[] newRules, uint256[] newRulesParams)`][BridgeToken-setRules-uint256---uint256---]
+- [`setContact(string _contact)`][BridgeToken-setContact-string-]
 - [`initialize(address owner, contract IProcessor processor)`][SeizableBridgeERC20-initialize-address-contract-IProcessor-]
 - [`isSeizer(address _seizer)`][SeizableBridgeERC20-isSeizer-address-]
 - [`addSeizer(address _seizer)`][SeizableBridgeERC20-addSeizer-address-]
@@ -5773,6 +5981,7 @@ Error messages*
 - [`constructor()`][Context-constructor--]
 - [`_msgSender()`][Context-_msgSender--]
 - [`_msgData()`][Context-_msgData--]
+- [`contact()`][IContactable-contact--]
 - [`ProcessorChanged(address newProcessor)`][BridgeERC20-ProcessorChanged-address-]
 - [`Transfer(address from, address to, uint256 value)`][IERC20Detailed-Transfer-address-address-uint256-]
 - [`Approval(address owner, address spender, uint256 value)`][IERC20Detailed-Approval-address-address-uint256-]
@@ -5792,6 +6001,7 @@ Error messages*
 - [`SupplierAdded(address supplier)`][ISuppliable-SupplierAdded-address-]
 - [`SupplierRemoved(address supplier)`][ISuppliable-SupplierRemoved-address-]
 - [`RulesChanged(uint256[] newRules, uint256[] newRulesParams)`][IRulable-RulesChanged-uint256---uint256---]
+- [`ContactSet(string contact)`][IContactable-ContactSet-string-]
 ### <span id="CoinBridgeToken-initialize-address-contract-IProcessor-string-string-uint8-address---"></span> `initialize(address owner, contract IProcessor processor, string name, string symbol, uint8 decimals, address[] trustedIntermediaries)` (public)
 
 
@@ -5812,7 +6022,10 @@ Error messages*
 - [`onlyAdministrator()`][BridgeERC20-onlyAdministrator--]
 - [`onlyOwner()`][Ownable-onlyOwner--]
 - [`initializer()`][Initializable-initializer--]
-- [`initialize(address owner, contract IProcessor processor, string name, string symbol, address[] trustedIntermediaries, uint8 _tokenizedSharePercentage)`][ShareBridgeToken-initialize-address-contract-IProcessor-string-string-address---uint8-]
+- [`initialize(address owner, contract IProcessor processor, string name, string symbol, address[] trustedIntermediaries, uint16 _tokenizedSharePercentage)`][ShareBridgeToken-initialize-address-contract-IProcessor-string-string-address---uint16-]
+- [`setTokenizedSharePercentage(uint16 _tokenizedSharePercentage)`][ShareBridgeToken-setTokenizedSharePercentage-uint16-]
+- [`setBoardResolutionDocument(string _boardResolutionDocumentUrl, bytes32 _boardResolutionDocumentHash)`][ShareBridgeToken-setBoardResolutionDocument-string-bytes32-]
+- [`setVotingSession(address _votingSession)`][ShareBridgeToken-setVotingSession-address-]
 - [`initialize(address owner, contract IProcessor processor, string name, string symbol, uint8 decimals, address[] trustedIntermediaries)`][BridgeToken-initialize-address-contract-IProcessor-string-string-uint8-address---]
 - [`isSupplier(address _supplier)`][BridgeToken-isSupplier-address-]
 - [`addSupplier(address _supplier)`][BridgeToken-addSupplier-address-]
@@ -5823,6 +6036,7 @@ Error messages*
 - [`rule(uint256 ruleId)`][BridgeToken-rule-uint256-]
 - [`canTransfer(address _from, address _to, uint256 _amount)`][BridgeToken-canTransfer-address-address-uint256-]
 - [`setRules(uint256[] newRules, uint256[] newRulesParams)`][BridgeToken-setRules-uint256---uint256---]
+- [`setContact(string _contact)`][BridgeToken-setContact-string-]
 - [`initialize(address owner, contract IProcessor processor)`][SeizableBridgeERC20-initialize-address-contract-IProcessor-]
 - [`isSeizer(address _seizer)`][SeizableBridgeERC20-isSeizer-address-]
 - [`addSeizer(address _seizer)`][SeizableBridgeERC20-addSeizer-address-]
@@ -5863,6 +6077,10 @@ Error messages*
 - [`constructor()`][Context-constructor--]
 - [`_msgSender()`][Context-_msgSender--]
 - [`_msgData()`][Context-_msgData--]
+- [`contact()`][IContactable-contact--]
+- [`votingSession()`][IVotable-votingSession--]
+- [`TokenizedSharePercentageSet(uint16 tokenizedSharePercentage)`][ShareBridgeToken-TokenizedSharePercentageSet-uint16-]
+- [`BoardResolutionDocumentSet(bytes32 boardResolutionDocumentHash)`][ShareBridgeToken-BoardResolutionDocumentSet-bytes32-]
 - [`ProcessorChanged(address newProcessor)`][BridgeERC20-ProcessorChanged-address-]
 - [`Transfer(address from, address to, uint256 value)`][IERC20Detailed-Transfer-address-address-uint256-]
 - [`Approval(address owner, address spender, uint256 value)`][IERC20Detailed-Approval-address-address-uint256-]
@@ -5882,9 +6100,61 @@ Error messages*
 - [`SupplierAdded(address supplier)`][ISuppliable-SupplierAdded-address-]
 - [`SupplierRemoved(address supplier)`][ISuppliable-SupplierRemoved-address-]
 - [`RulesChanged(uint256[] newRules, uint256[] newRulesParams)`][IRulable-RulesChanged-uint256---uint256---]
-### <span id="ShareBridgeToken-initialize-address-contract-IProcessor-string-string-address---uint8-"></span> `initialize(address owner, contract IProcessor processor, string name, string symbol, address[] trustedIntermediaries, uint8 _tokenizedSharePercentage)` (public)
+- [`ContactSet(string contact)`][IContactable-ContactSet-string-]
+- [`VotingSessionSet(address votingSession)`][IVotable-VotingSessionSet-address-]
+### <span id="ShareBridgeToken-initialize-address-contract-IProcessor-string-string-address---uint16-"></span> `initialize(address owner, contract IProcessor processor, string name, string symbol, address[] trustedIntermediaries, uint16 _tokenizedSharePercentage)` (public)
+
+Initializer (replaces constructor when contract is upgradable)  
 
 
+#### *Parameters*
+- **owner**: the final owner of the contract
+
+- **processor**: core processing contract
+
+- **name**: name of the token
+
+- **symbol**: symbol of the token
+
+- **trustedIntermediaries**: array of trusted intermediaries addresses
+
+- **_tokenizedSharePercentage**: percentage of shares that have been tokenized
+
+
+### <span id="ShareBridgeToken-setTokenizedSharePercentage-uint16-"></span> `setTokenizedSharePercentage(uint16 _tokenizedSharePercentage)` (public)
+
+Set the percentage of shares that are tokenized  
+
+
+#### *Parameters*
+- **_tokenizedSharePercentage**: the percentage of shares that are tokenized
+
+
+### <span id="ShareBridgeToken-setBoardResolutionDocument-string-bytes32-"></span> `setBoardResolutionDocument(string _boardResolutionDocumentUrl, bytes32 _boardResolutionDocumentHash)` (external)
+
+Set the board resolution url and the board resolution document hash  
+
+
+#### *Parameters*
+- **_boardResolutionDocumentUrl**: the url on which the board resolution document can be downloaded
+
+- **_boardResolutionDocumentHash**: the hash of the board resolution document for authenticity check
+
+
+### <span id="ShareBridgeToken-setVotingSession-address-"></span> `setVotingSession(address _votingSession)` (public)
+
+Set the voting session contract address (used for general meetings)  
+
+
+#### *Parameters*
+- **_votingSession**: the voting session contract address
+
+
+### <span id="ShareBridgeToken-TokenizedSharePercentageSet-uint16-"></span> `TokenizedSharePercentageSet(uint16 tokenizedSharePercentage)`
+
+
+
+### <span id="ShareBridgeToken-BoardResolutionDocumentSet-bytes32-"></span> `BoardResolutionDocumentSet(bytes32 boardResolutionDocumentHash)`
 
 
 
@@ -6380,6 +6650,23 @@ called by the owner to seize value from the account
 
 
 
+## <span id="ProofOfAddress"></span> `ProofOfAddress`
+
+ProofOfAddress rejects every transaction but is used to check a specific sent amount. Rejection minimises the amount of ETH spent  
+  
+Error messages  
+PA01: Test successful  
+
+
+- [`fallback()`][ProofOfAddress-fallback--]
+### <span id="ProofOfAddress-fallback--"></span> `fallback()` (external)
+
+
+
+
+
+
+
 ## <span id="Token"></span> `Token`
 
 
@@ -6622,7 +6909,7 @@ VO05: caller not allowed has delegate
 VO06: voter has not been invited to vote  
 VO07: Resolution id overflow  
 VO08: Proposal id overflow  
-VO09: Proposal already voted  
+VO09: Resolution already voted  
 VO10: Voting session is not open  
 VO11: Voting session has already been open  
 VO12: Start date cannot be 0  

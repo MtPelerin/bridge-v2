@@ -46,10 +46,6 @@ const Contract = Contracts.getFromLocal('AddressThresholdLockRule');
 const PriceOracle = Contracts.getFromLocal('PriceOracle');
 const BridgeERC20Mock = artifacts.require('BridgeERC20Mock');
 
-const timestamp = function () {
-  return Math.floor(new Date().getTime()/1000);
-};
-
 contract('AddressThresholdLockRule', function ([_, owner, tokenAdministrator, address1, address2]) {
   beforeEach(async function () {
     this.project = await TestHelper();
