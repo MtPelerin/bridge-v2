@@ -467,7 +467,6 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
   * @param from the sender of the transfered tokens
   * @param to the receiver of the transfered tokens
   * @param amount the amount of transfered tokens
-  * @return true is successful, false otherwise
   */
   function addOnHoldTransfer(
     address trustedIntermediary,
