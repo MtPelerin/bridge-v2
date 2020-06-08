@@ -35,12 +35,11 @@
     address: hello@mtpelerin.com
 */
 
-pragma solidity 0.5.2;
+pragma solidity 0.6.2;
 
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/access/Roles.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "../../access/Roles.sol";
 import "../../interfaces/IERC20Detailed.sol";
 import "../../interfaces/IAdministrable.sol";
 import "../../interfaces/IGovernable.sol";
@@ -61,7 +60,7 @@ import "../../interfaces/IPriceOracle.sol";
 **/
 
 
-contract BridgeERC20 is Initializable, Ownable, IAdministrable, IGovernable, IPriceable, IERC20Detailed {
+contract BridgeERC20 is Initializable, OwnableUpgradeSafe, IAdministrable, IGovernable, IPriceable, IERC20Detailed {
   using Roles for Roles.Role;
   using SafeMath for uint256;
 
@@ -77,8 +76,9 @@ contract BridgeERC20 is Initializable, Ownable, IAdministrable, IGovernable, IPr
   /** 
   * @dev Initialization function that replaces constructor in the case of upgradable contracts
   **/
-  function initialize(address owner, IProcessor processor) public initializer {
-    Ownable.initialize(owner);
+  function initialize(address owner, IProcessor processor) public virtual initializer {
+    __Ownable_init();
+    transferOwnership(owner);
     _processor = processor;
     _realm = address(this);
     emit ProcessorChanged(address(processor));
@@ -91,66 +91,66 @@ contract BridgeERC20 is Initializable, Ownable, IAdministrable, IGovernable, IPr
   }
 
   modifier onlyAdministrator() {
-    require(isOwner() || isAdministrator(msg.sender), "AD01");
+    require(owner() == _msgSender() || isAdministrator(_msgSender()), "AD01");
     _;
   }
 
   /* Administrable */
-  function isAdministrator(address _administrator) public view returns (bool) {
+  function isAdministrator(address _administrator) public override view returns (bool) {
     return _administrators.has(_administrator);
   }
 
-  function addAdministrator(address _administrator) public onlyOwner {
+  function addAdministrator(address _administrator) public override onlyOwner {
     _administrators.add(_administrator);
     emit AdministratorAdded(_administrator);
   }
 
-  function removeAdministrator(address _administrator) public onlyOwner {
+  function removeAdministrator(address _administrator) public override onlyOwner {
     _administrators.remove(_administrator);
     emit AdministratorRemoved(_administrator);
   }
 
   /* Governable */
-  function realm() public view returns (address) {
+  function realm() public override view returns (address) {
     return _realm;
   }
 
-  function setRealm(address newRealm) public onlyAdministrator {
+  function setRealm(address newRealm) public override onlyAdministrator {
     BridgeERC20 king = BridgeERC20(newRealm);
-    require(king.owner() == msg.sender || king.isRealmAdministrator(msg.sender), "KI01");
+    require(king.owner() == _msgSender() || king.isRealmAdministrator(_msgSender()), "KI01");
     _realm = newRealm;
     emit RealmChanged(newRealm);
   }
 
-  function trustedIntermediaries() public view returns (address[] memory) {
+  function trustedIntermediaries() public override view returns (address[] memory) {
     return _trustedIntermediaries;
   }
 
-  function setTrustedIntermediaries(address[] calldata newTrustedIntermediaries) external onlyAdministrator {
+  function setTrustedIntermediaries(address[] calldata newTrustedIntermediaries) external override onlyAdministrator {
     _trustedIntermediaries = newTrustedIntermediaries;
     emit TrustedIntermediariesChanged(newTrustedIntermediaries);
   }
 
-  function isRealmAdministrator(address _administrator) public view returns (bool) {
+  function isRealmAdministrator(address _administrator) public override view returns (bool) {
     return _realmAdministrators.has(_administrator);
   }
 
-  function addRealmAdministrator(address _administrator) public onlyAdministrator {
+  function addRealmAdministrator(address _administrator) public override onlyAdministrator {
     _realmAdministrators.add(_administrator);
     emit RealmAdministratorAdded(_administrator);
   }
 
-  function removeRealmAdministrator(address _administrator) public onlyAdministrator {
+  function removeRealmAdministrator(address _administrator) public override onlyAdministrator {
     _realmAdministrators.remove(_administrator);
     emit RealmAdministratorRemoved(_administrator);
   }
 
   /* Priceable */
-  function priceOracle() public view returns (IPriceOracle) {
+  function priceOracle() public override view returns (IPriceOracle) {
     return _priceOracle;
   }
 
-  function setPriceOracle(IPriceOracle newPriceOracle) public onlyAdministrator {
+  function setPriceOracle(IPriceOracle newPriceOracle) public override onlyAdministrator {
     _priceOracle = newPriceOracle;
     emit PriceOracleChanged(address(newPriceOracle));
   }
@@ -158,7 +158,7 @@ contract BridgeERC20 is Initializable, Ownable, IAdministrable, IGovernable, IPr
   function convertTo(
     uint256 _amount, string calldata _currency, uint8 maxDecimals
   ) 
-    external hasProcessor view returns(uint256) 
+    external override hasProcessor view returns(uint256) 
   {
     require(address(_priceOracle) != address(0), "PO03");
     uint256 amountToConvert = _amount;
@@ -196,28 +196,28 @@ contract BridgeERC20 is Initializable, Ownable, IAdministrable, IGovernable, IPr
   /**
   * @return the name of the token.
   */
-  function name() public view hasProcessor returns (string memory) {
+  function name() public override view hasProcessor returns (string memory) {
     return _processor.name();
   }
 
   /**
   * @return the symbol of the token.
   */
-  function symbol() public view hasProcessor returns (string memory) {
+  function symbol() public override view hasProcessor returns (string memory) {
     return _processor.symbol();
   }
 
   /**
   * @return the number of decimals of the token.
   */
-  function decimals() public view hasProcessor returns (uint8) {
+  function decimals() public override view hasProcessor returns (uint8) {
     return _processor.decimals();
   }
 
   /**
   * @return total number of tokens in existence
   */
-  function totalSupply() public view hasProcessor returns (uint256) {
+  function totalSupply() public override view hasProcessor returns (uint256) {
     return _processor.totalSupply();
   }
 
@@ -227,18 +227,18 @@ contract BridgeERC20 is Initializable, Ownable, IAdministrable, IGovernable, IPr
   * @param _value The amount to be transferred.
   * @return true if transfer is successful, false otherwise
   */
-  function transfer(address _to, uint256 _value) public hasProcessor 
+  function transfer(address _to, uint256 _value) public override hasProcessor 
     returns (bool) 
   {
     bool success;
     address updatedTo;
     uint256 updatedAmount;
     (success, updatedTo, updatedAmount) = _processor.transferFrom(
-      msg.sender, 
+      _msgSender(), 
       _to, 
       _value
     );
-    emit Transfer(msg.sender, updatedTo, updatedAmount);
+    emit Transfer(_msgSender(), updatedTo, updatedAmount);
     return true;
   }
 
@@ -247,7 +247,7 @@ contract BridgeERC20 is Initializable, Ownable, IAdministrable, IGovernable, IPr
   * @param _owner The address to query the the balance of.
   * @return An uint256 representing the amount owned by the passed address.
   */
-  function balanceOf(address _owner) public view hasProcessor 
+  function balanceOf(address _owner) public override view hasProcessor 
     returns (uint256) 
   {
     return _processor.balanceOf(_owner);
@@ -266,10 +266,11 @@ contract BridgeERC20 is Initializable, Ownable, IAdministrable, IGovernable, IPr
     uint256 _value
   )
     public
+    override
     hasProcessor
     returns (bool)
   {
-    require(_value <= _processor.allowance(_from, msg.sender), "AL01"); 
+    require(_value <= _processor.allowance(_from, _msgSender()), "AL01"); 
     bool success;
     address updatedTo;
     uint256 updatedAmount;
@@ -278,13 +279,13 @@ contract BridgeERC20 is Initializable, Ownable, IAdministrable, IGovernable, IPr
       _to, 
       _value
     );
-    _processor.decreaseApproval(_from, msg.sender, updatedAmount);
+    _processor.decreaseApproval(_from, _msgSender(), updatedAmount);
     emit Transfer(_from, updatedTo, updatedAmount);
     return true;
   }
 
   /**
-   * @dev Approve the passed address to spend the specified amount of tokens on behalf of msg.sender.
+   * @dev Approve the passed address to spend the specified amount of tokens on behalf of _msgSender().
    *
    * Beware that changing an allowance with this method brings the risk that someone may use both the old
    * and the new allowance by unfortunate transaction ordering. One possible solution to mitigate this
@@ -294,10 +295,10 @@ contract BridgeERC20 is Initializable, Ownable, IAdministrable, IGovernable, IPr
    * @param _value The amount of tokens to be spent.
    * @return true if approval is successful, false otherwise
    */
-  function approve(address _spender, uint256 _value) public hasProcessor returns (bool)
+  function approve(address _spender, uint256 _value) public override hasProcessor returns (bool)
   {
-    _processor.approve(msg.sender, _spender, _value);
-    emit Approval(msg.sender, _spender, _value);
+    _processor.approve(_msgSender(), _spender, _value);
+    emit Approval(_msgSender(), _spender, _value);
     return true;
   }
 
@@ -312,6 +313,7 @@ contract BridgeERC20 is Initializable, Ownable, IAdministrable, IGovernable, IPr
     address _spender
    )
     public
+    override
     view
     hasProcessor
     returns (uint256)
@@ -328,7 +330,6 @@ contract BridgeERC20 is Initializable, Ownable, IAdministrable, IGovernable, IPr
    * From MonolithDAO Token.sol
    * @param _spender The address which will spend the funds.
    * @param _addedValue The amount of tokens to increase the allowance by.
-   * @return true if increase is successful, false otherwise
    */
   function increaseApproval(
     address _spender,
@@ -337,9 +338,9 @@ contract BridgeERC20 is Initializable, Ownable, IAdministrable, IGovernable, IPr
     public
     hasProcessor
   {
-    _processor.increaseApproval(msg.sender, _spender, _addedValue);
-    uint256 allowed = _processor.allowance(msg.sender, _spender);
-    emit Approval(msg.sender, _spender, allowed);
+    _processor.increaseApproval(_msgSender(), _spender, _addedValue);
+    uint256 allowed = _processor.allowance(_msgSender(), _spender);
+    emit Approval(_msgSender(), _spender, allowed);
   }
 
   /**
@@ -361,9 +362,9 @@ contract BridgeERC20 is Initializable, Ownable, IAdministrable, IGovernable, IPr
     hasProcessor
     returns (bool)
   {
-    _processor.decreaseApproval(msg.sender, _spender, _subtractedValue);
-    uint256 allowed = _processor.allowance(msg.sender, _spender);
-    emit Approval(msg.sender, _spender, allowed);
+    _processor.decreaseApproval(_msgSender(), _spender, _subtractedValue);
+    uint256 allowed = _processor.allowance(_msgSender(), _spender);
+    emit Approval(_msgSender(), _spender, allowed);
   }
 
   /* Reserved slots for future use: https://docs.openzeppelin.com/sdk/2.5/writing-contracts.html#modifying-your-contracts */

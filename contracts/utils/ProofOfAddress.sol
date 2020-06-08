@@ -35,7 +35,7 @@
     address: hello@mtpelerin.com
 */
 
-pragma solidity 0.5.2;
+pragma solidity 0.6.2;
 
 /**
 * @title ProofOfAddress
@@ -48,7 +48,7 @@ pragma solidity 0.5.2;
 
 
 contract ProofOfAddress {
-  function() external payable {
+  fallback () external payable {
     require(false, "PA01");
   }
 }

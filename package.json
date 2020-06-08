@@ -20,15 +20,16 @@
   "author": "Mt Pelerin",
   "license": "AGPL-3.0",
   "devDependencies": {
-    "@openzeppelin/cli": "^2.5.2",
-    "@openzeppelin/upgrades": "^2.5.2",
+    "@openzeppelin/cli": "^2.8.2",
+    "@openzeppelin/upgrades": "^2.8.0",
     "chai": "^4.2.0",
     "openzeppelin-test-helpers": "^0.3.2",
-    "solidity-coverage": "^0.6.3"
+    "solidity-coverage": "^0.7.5"
   },
   "dependencies": {
-    "@openzeppelin/contracts-ethereum-package": "^2.2.3",
-    "solc": "0.5.2",
+    "@opengsn/gsn": "^0.10.0",
+    "@openzeppelin/contracts-ethereum-package": "^3.0.0",
+    "solc": "^0.6.9",
     "solidity-docgen": "git+https://github.com/skrafft/solidity-docgen.git",
     "truffle": "^5.0.28"
   }

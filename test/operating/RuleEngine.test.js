@@ -61,13 +61,13 @@ contract('RuleEngine', function ([_, initializer, owner, processor, token1, addr
   context('When owner', function () {
     it('can set rules', async function () {
       (await this.contract.methods.ruleLength().call()).should.equal('0');
-      await this.contract.methods.setRules([this.yesNo.address, this.yesNoUpdate.address]).send({from: owner});
+      await this.contract.methods.setRules([this.yesNo.address, this.yesNoUpdate.address]).send({from: owner, gas: 100000});
       (await this.contract.methods.ruleLength().call()).should.equal('2');
       (await this.contract.methods.rule(0).call()).should.equal(this.yesNo.address);
       (await this.contract.methods.rule(1).call()).should.equal(this.yesNoUpdate.address);
     });
     it('can validate transfer', async function () {
-      await this.contract.methods.setRules([this.yesNo.address, this.yesNoUpdate.address]).send({from: owner});
+      await this.contract.methods.setRules([this.yesNo.address, this.yesNoUpdate.address]).send({from: owner, gas: 100000});
       const ret1 = await this.contract.methods.validateTransferWithRules([0, 1], [0, 1], token1, address1, address2, 10000).call();
       ret1['0'].should.equal(false);
       ret1['1'].should.equal('0');
@@ -86,7 +86,7 @@ contract('RuleEngine', function ([_, initializer, owner, processor, token1, addr
   context('When normal user', function () {
     beforeEach(async function () {
       await this.contract.methods.addOperator(processor).send({from: owner});
-      await this.contract.methods.setRules([this.yesNo.address, this.yesNoUpdate.address]).send({from: owner});
+      await this.contract.methods.setRules([this.yesNo.address, this.yesNoUpdate.address]).send({from: owner, gas: 100000});
     });
 
     it('can get a single rule', async function () {

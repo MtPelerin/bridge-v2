@@ -16,38 +16,38 @@
 
 */
 
-pragma solidity 0.5.2;
+pragma solidity 0.6.2;
 
 
-contract Token {
+abstract contract Token {
 
   /// @param _owner The address from which the balance will be retrieved
-  /// @return The balance
-  function balanceOf(address _owner) public view returns (uint balance);
+  /// @return balance The balance
+  function balanceOf(address _owner) public virtual view returns (uint balance);
 
   /// @notice send `_value` token to `_to` from `msg.sender`
   /// @param _to The address of the recipient
   /// @param _value The amount of token to be transferred
-  /// @return Whether the transfer was successful or not
-  function transfer(address _to, uint _value) public returns (bool success);
+  /// @return success Whether the transfer was successful or not
+  function transfer(address _to, uint _value) public virtual returns (bool success);
 
   /// @notice send `_value` token to `_to` from `_from` on the condition it is approved by `_from`
   /// @param _from The address of the sender
   /// @param _to The address of the recipient
   /// @param _value The amount of token to be transferred
-  /// @return Whether the transfer was successful or not
-  function transferFrom(address _from, address _to, uint _value) public returns (bool success);
+  /// @return success Whether the transfer was successful or not
+  function transferFrom(address _from, address _to, uint _value) public virtual returns (bool success);
 
   /// @notice `msg.sender` approves `_addr` to spend `_value` tokens
   /// @param _spender The address of the account able to transfer the tokens
   /// @param _value The amount of wei to be approved for transfer
-  /// @return Whether the approval was successful or not
-  function approve(address _spender, uint _value) public returns (bool success);
+  /// @return success Whether the approval was successful or not
+  function approve(address _spender, uint _value) public virtual returns (bool success);
 
   /// @param _owner The address of the account owning tokens
   /// @param _spender The address of the account able to transfer the tokens
-  /// @return Amount of remaining tokens allowed to spent
-  function allowance(address _owner, address _spender) public view returns (uint remaining);
+  /// @return remaining Amount of remaining tokens allowed to spent
+  function allowance(address _owner, address _spender) public virtual view returns (uint remaining);
 
   event Transfer(address indexed _from, address indexed _to, uint _value);
   event Approval(address indexed _owner, address indexed _spender, uint _value);
@@ -56,7 +56,7 @@ contract Token {
 
 contract StandardToken is Token {
 
-  function transfer(address _to, uint _value) public returns (bool) {
+  function transfer(address _to, uint _value) public virtual override returns (bool) {
     //Default assumes totalSupply can't be over max (2^256 - 1).
     if (balances[msg.sender] >= _value && balances[_to] + _value >= balances[_to]) {
       balances[msg.sender] -= _value;
@@ -68,7 +68,7 @@ contract StandardToken is Token {
     }
   }
 
-  function transferFrom(address _from, address _to, uint _value) public returns (bool) {
+  function transferFrom(address _from, address _to, uint _value) public virtual override returns (bool) {
     if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && balances[_to] + _value >= balances[_to]) {
       balances[_to] += _value;
       balances[_from] -= _value;
@@ -80,17 +80,17 @@ contract StandardToken is Token {
     }
   }
 
-  function balanceOf(address _owner) public view returns (uint) {
+  function balanceOf(address _owner) public view virtual override returns (uint) {
     return balances[_owner];
   }
 
-  function approve(address _spender, uint _value) public returns (bool) {
+  function approve(address _spender, uint _value) public virtual override returns (bool) {
     allowed[msg.sender][_spender] = _value;
     emit Approval(msg.sender, _spender, _value);
     return true;
   }
 
-  function allowance(address _owner, address _spender) public view returns (uint) {
+  function allowance(address _owner, address _spender) public virtual override view returns (uint) {
     return allowed[_owner][_spender];
   }
 
@@ -111,6 +111,7 @@ contract UnlimitedAllowanceToken is StandardToken {
   /// @return Success of transfer.
   function transferFrom(address _from, address _to, uint _value)
       public
+      override
       returns (bool)
   {
     uint allowance = allowed[_from][msg.sender];
@@ -180,7 +181,7 @@ contract EtherToken is UnlimitedAllowanceToken, SafeMath {
   uint8 constant public decimals = 18;
 
   /// @dev Fallback to calling deposit when ether is sent directly to contract.
-  function()
+  receive ()
       external
       payable
   {

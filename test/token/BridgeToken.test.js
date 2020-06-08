@@ -57,7 +57,7 @@ contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1
     this.ruleEngine = await this.project.createProxy(RuleEngine, {initArgs: [owner]});
     this.yesNo = await this.project.createProxy(YesNoRule);
     this.yesNoUpdate = await this.project.createProxy(YesNoUpdateRule);
-    await this.ruleEngine.methods.setRules([this.yesNo.address, this.yesNoUpdate.address]).send({from: owner});
+    await this.ruleEngine.methods.setRules([this.yesNo.address, this.yesNoUpdate.address]).send({from: owner, gas: 100000});
     this.processor = await this.project.createProxy(Processor, {initArgs: [owner, this.ruleEngine.address], gas: 100000});
     this.contract = await this.project.createProxy(Contract, {initArgs: [owner, this.processor.address, 'Test token', 'TST', 3, [trustedIntermediary1, trustedIntermediary2]], gas: 100000});
   });
@@ -669,7 +669,7 @@ contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1
     context('Price conversion', function () {
       beforeEach(async function () {
         this.priceOracle = await this.project.createProxy(PriceOracle, {initArgs: [owner]});
-        await this.priceOracle.methods.setPrice(web3.utils.fromAscii('TST'), web3.utils.fromAscii('CHF'), '500', 2).send({from: owner});
+        await this.priceOracle.methods.setPrice(web3.utils.fromAscii('TST'), web3.utils.fromAscii('CHF'), '500', 2).send({from: owner, gas: 100000});
         await this.contract.methods.setPriceOracle(this.priceOracle.address).send({from: owner});
       });
 

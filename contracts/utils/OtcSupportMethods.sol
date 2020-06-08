@@ -35,12 +35,12 @@
     address: hello@mtpelerin.com
 */
 
-pragma solidity 0.5.2;
+pragma solidity 0.6.2;
 
 import "../lib/ds-math/math.sol";
 
 
-contract OtcInterface {
+abstract contract OtcInterface {
   struct OfferInfo {
     uint              pay_amt;
     address           pay_gem;
@@ -50,8 +50,8 @@ contract OtcInterface {
     uint64            timestamp;
   }
   mapping (uint => OfferInfo) public offers;
-  function getBestOffer(address, address) public view returns (uint);
-  function getWorseOffer(uint) public view returns (uint);
+  function getBestOffer(address, address) public virtual view returns (uint);
+  function getWorseOffer(uint) public virtual view returns (uint);
 }
 
 

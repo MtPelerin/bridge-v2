@@ -35,9 +35,8 @@
     address: hello@mtpelerin.com
 */
 
-pragma solidity 0.5.2;
+pragma solidity 0.6.2;
 
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 import "../interfaces/IProcessor.sol";
 import "../interfaces/IRule.sol";
@@ -126,13 +125,13 @@ contract Processor is Initializable, IProcessor, Operator {
   * @param _symbol The token's symbol
   * @param _decimals The token's number of decimals
   */
-  function register(string calldata _name, string calldata _symbol, uint8 _decimals) external {
+  function register(string calldata _name, string calldata _symbol, uint8 _decimals) external override {
     require(keccak256(abi.encodePacked(_name)) != keccak256(""), "TR02");
     require(keccak256(abi.encodePacked(_symbol)) != keccak256(""), "TR03");
-    require(keccak256(abi.encodePacked(_tokens[msg.sender].name)) == keccak256(""), "TR01");
-    _tokens[msg.sender].name = _name;
-    _tokens[msg.sender].symbol = _symbol;
-    _tokens[msg.sender].decimals = _decimals;
+    require(keccak256(abi.encodePacked(_tokens[_msgSender()].name)) == keccak256(""), "TR01");
+    _tokens[_msgSender()].name = _name;
+    _tokens[_msgSender()].symbol = _symbol;
+    _tokens[_msgSender()].decimals = _decimals;
   }
 
   /* ERC20 */
@@ -141,8 +140,8 @@ contract Processor is Initializable, IProcessor, Operator {
   * @dev Intended to be called by the token contract
   * @return name The name of the token
   */
-  function name() public view returns (string memory) {
-    return _tokens[msg.sender].name;
+  function name() public override view returns (string memory) {
+    return _tokens[_msgSender()].name;
   }
 
   /**
@@ -150,8 +149,8 @@ contract Processor is Initializable, IProcessor, Operator {
   * @dev Intended to be called by the token contract
   * @return symbol The symbol of the token
   */
-  function symbol() public view returns (string memory) {
-    return _tokens[msg.sender].symbol;
+  function symbol() public override view returns (string memory) {
+    return _tokens[_msgSender()].symbol;
   }
 
   /**
@@ -161,8 +160,8 @@ contract Processor is Initializable, IProcessor, Operator {
   * be displayed to a user as `5,05` (`505 / 10 ** 2`).
   * @return decimals The decimals of the token
   */
-  function decimals() public view returns (uint8) {
-    return _tokens[msg.sender].decimals;
+  function decimals() public override view returns (uint8) {
+    return _tokens[_msgSender()].decimals;
   }
 
   /**
@@ -170,8 +169,8 @@ contract Processor is Initializable, IProcessor, Operator {
   * @dev Intended to be called by the token contract
   * @return totalSupply The total supply of the token
   */
-  function totalSupply() public view returns (uint256) {
-    return _tokens[msg.sender].totalSupply;
+  function totalSupply() public override view returns (uint256) {
+    return _tokens[_msgSender()].totalSupply;
   }
 
   /**
@@ -180,8 +179,8 @@ contract Processor is Initializable, IProcessor, Operator {
   * @param _owner The address for which the balance has to be retrieved
   * @return balance The token balance for the address given in parameter
   */
-  function balanceOf(address _owner) public view returns (uint256) {
-    return _tokens[msg.sender].balances[_owner];
+  function balanceOf(address _owner) public override view returns (uint256) {
+    return _tokens[_msgSender()].balances[_owner];
   }
 
   /**
@@ -194,14 +193,14 @@ contract Processor is Initializable, IProcessor, Operator {
   * @return ruleId The ruleId that first rejected the transfer
   * @return reason The reason code for the transfer rejection
   */
-  function canTransfer(address _from, address _to, uint256 _amount) public view returns (bool, uint256, uint256) {
+  function canTransfer(address _from, address _to, uint256 _amount) public override view returns (bool, uint256, uint256) {
     uint256[] memory rulesParams;
     uint256[] memory ruleIds;
-    (ruleIds, rulesParams) = IRulable(msg.sender).rules();
+    (ruleIds, rulesParams) = IRulable(_msgSender()).rules();
     return ruleEngine.validateTransferWithRules(
       ruleIds, 
       rulesParams, 
-      msg.sender,
+      _msgSender(),
       _from, 
       _to, 
       _amount
@@ -222,26 +221,26 @@ contract Processor is Initializable, IProcessor, Operator {
   * @return updatedValue The real amount of tokens sent
   */
   function transferFrom(address _from, address _to, uint256 _value) 
-    public returns (bool, address updatedTo, uint256 updatedValue) 
+    public override returns (bool, address updatedTo, uint256 updatedValue) 
   {
     require(_to != address(0), "ER01");
     uint256[] memory rulesParams;
     uint256[] memory ruleIds;
     uint256 i;
-    (ruleIds, rulesParams) = IRulable(msg.sender).rules();
+    (ruleIds, rulesParams) = IRulable(_msgSender()).rules();
     IRule[] memory rules = ruleEngine.rules(ruleIds);
     uint256[] memory ruleValid = new uint256[](ruleIds.length);
     /* Transfer check */
     for (i = 0; i < rules.length; i++) {
       (ruleValid[i], ) = rules[i].isTransferValid(
-        msg.sender, _from, _to, _value, rulesParams[i]);
+        _msgSender(), _from, _to, _value, rulesParams[i]);
       require(ruleValid[i] > TRANSFER_INVALID, "RU03");
     }
     /* Before transfer hook execution if needed */
     for (i = 0; i < rules.length; i++) {
       if (ruleValid[i] == TRANSFER_VALID_WITH_BEFORE_HOOK) {
         (ruleValid[i], _to, _value) = rules[i].beforeTransferHook(
-          msg.sender, _from, _to, _value, rulesParams[i]);
+          _msgSender(), _from, _to, _value, rulesParams[i]);
         require(ruleValid[i] > TRANSFER_INVALID, "RU03");
       }
     }
@@ -252,7 +251,7 @@ contract Processor is Initializable, IProcessor, Operator {
     for (i = 0; i < rules.length; i++) {
       if (ruleValid[i] == TRANSFER_VALID_WITH_AFTER_HOOK) {
         rules[i].afterTransferHook(
-          msg.sender, _from, _to, _value, rulesParams[i]);
+          _msgSender(), _from, _to, _value, rulesParams[i]);
       }
     }
     return (true, _to, _value);
@@ -266,9 +265,8 @@ contract Processor is Initializable, IProcessor, Operator {
   * @param _owner The owner of the tokens to be allowed for spending
   * @param _spender The spender address to allow
   * @param _value The maximum amount of tokens that can be allowed for spending
-  * @return True if the approval is successful, false otherwise
   */
-  function approve(address _owner, address _spender, uint256 _value) public {
+  function approve(address _owner, address _spender, uint256 _value) public override {
     require(_owner != address(0), "ER02");
     require(_spender != address(0), "ER03");
 
@@ -282,8 +280,8 @@ contract Processor is Initializable, IProcessor, Operator {
   * @param _spender The spender for which we want the allowed amount
   * @return The amount of tokens that can be spent by the spender from the owning address
   */
-  function allowance(address _owner, address _spender) public view returns (uint256) {
-    return _tokens[msg.sender].allowed[_owner][_spender];
+  function allowance(address _owner, address _spender) public override view returns (uint256) {
+    return _tokens[_msgSender()].allowed[_owner][_spender];
   }
 
   /**
@@ -294,12 +292,11 @@ contract Processor is Initializable, IProcessor, Operator {
   * @param _owner The owner of the tokens to be allowed for spending
   * @param _spender The spender address to allow
   * @param _addedValue The number of tokens for the approval increase
-  * @return True if the increase is successful, false otherwise
   */
-  function increaseApproval(address _owner, address _spender, uint _addedValue) public {
+  function increaseApproval(address _owner, address _spender, uint _addedValue) public override {
     require(_owner != address(0), "ER02");
     require(_spender != address(0), "ER03");
-    _setAllowance(_owner, _spender, _tokens[msg.sender].allowed[_owner][_spender].add(_addedValue));
+    _setAllowance(_owner, _spender, _tokens[_msgSender()].allowed[_owner][_spender].add(_addedValue));
   }
 
   /**
@@ -310,12 +307,11 @@ contract Processor is Initializable, IProcessor, Operator {
   * @param _owner The owner of the tokens to be allowed for spending
   * @param _spender The spender address to allow
   * @param _subtractedValue The number of tokens for the approval decrease
-  * @return True if the decrease is successful, false otherwise
   */
-  function decreaseApproval(address _owner, address _spender, uint _subtractedValue) public {
+  function decreaseApproval(address _owner, address _spender, uint _subtractedValue) public override {
     require(_owner != address(0), "ER02");
     require(_spender != address(0), "ER03");
-    _setAllowance(_owner, _spender, _tokens[msg.sender].allowed[_owner][_spender].sub(_subtractedValue));
+    _setAllowance(_owner, _spender, _tokens[_msgSender()].allowed[_owner][_spender].sub(_subtractedValue));
   }
 
   /* Seizable */
@@ -327,11 +323,10 @@ contract Processor is Initializable, IProcessor, Operator {
   * @param _caller The address that wants to seize the tokens
   * @param _account The address from which the tokens will be seized
   * @param _value The amount of tokens to seize
-  * @return True if the seize operation is successful, false otherwise
   */
-  function seize(address _caller, address _account, uint256 _value) public {
+  function seize(address _caller, address _account, uint256 _value) public override {
     require(_account != address(0), "SE01"); 
-    require(ISeizable(msg.sender).isSeizer(_caller), "SE02");
+    require(ISeizable(_msgSender()).isSeizer(_caller), "SE02");
     _subBalance(_account, _value);
     _addBalance(_caller, _value);
   }
@@ -344,12 +339,11 @@ contract Processor is Initializable, IProcessor, Operator {
   * @param _caller The address that wants to mint tokens
   * @param _to The address on which the tokens will be minted
   * @param _amount The amount of tokens to mint
-  * @return True if the mint operation is successful, false otherwise
   */
-  function mint(address _caller, address _to, uint256 _amount) public {
+  function mint(address _caller, address _to, uint256 _amount) public override {
     require(_to != address(0), "MT01");
-    require(ISuppliable(msg.sender).isSupplier(_caller), "SU01");
-    _tokens[msg.sender].totalSupply = _tokens[msg.sender].totalSupply.add(_amount);
+    require(ISuppliable(_msgSender()).isSupplier(_caller), "SU01");
+    _tokens[_msgSender()].totalSupply = _tokens[_msgSender()].totalSupply.add(_amount);
     _addBalance(_to, _amount);
   }
 
@@ -360,12 +354,11 @@ contract Processor is Initializable, IProcessor, Operator {
   * @param _caller The address that wants to burn tokens
   * @param _from The address from which the tokens will be burnt
   * @param _amount The amount of tokens to burn
-  * @return True if the burn operation is successful, false otherwise
   */
-  function burn(address _caller, address _from, uint256 _amount) public {
+  function burn(address _caller, address _from, uint256 _amount) public override {
     require(_from != address(0), "MT03");
-    require(ISuppliable(msg.sender).isSupplier(_caller), "SU01");
-    _tokens[msg.sender].totalSupply = _tokens[msg.sender].totalSupply.sub(_amount);
+    require(ISuppliable(_msgSender()).isSupplier(_caller), "SU01");
+    _tokens[_msgSender()].totalSupply = _tokens[_msgSender()].totalSupply.sub(_amount);
     _subBalance(_from, _amount);
   }
 
@@ -377,7 +370,7 @@ contract Processor is Initializable, IProcessor, Operator {
   * @param _value The amount fo tokens to add
   */
   function _addBalance(address _owner, uint256 _value) internal {
-    _tokens[msg.sender].balances[_owner] = _tokens[msg.sender].balances[_owner].add(_value);
+    _tokens[_msgSender()].balances[_owner] = _tokens[_msgSender()].balances[_owner].add(_value);
   }
 
   /**
@@ -387,7 +380,7 @@ contract Processor is Initializable, IProcessor, Operator {
   * @param _value The amount fo tokens to remove
   */
   function _subBalance(address _owner, uint256 _value) internal {
-    _tokens[msg.sender].balances[_owner] = _tokens[msg.sender].balances[_owner].sub(_value);
+    _tokens[_msgSender()].balances[_owner] = _tokens[_msgSender()].balances[_owner].sub(_value);
   }
 
   /**
@@ -398,6 +391,6 @@ contract Processor is Initializable, IProcessor, Operator {
   * @param _value The maximum amount of tokens that can be allowed for spending
   */
   function _setAllowance(address _owner, address _spender, uint256 _value) internal {
-    _tokens[msg.sender].allowed[_owner][_spender] = _value;
+    _tokens[_msgSender()].allowed[_owner][_spender] = _value;
   }
 }

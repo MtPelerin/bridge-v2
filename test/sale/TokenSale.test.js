@@ -66,7 +66,7 @@ contract('TokenSale', function ([_, owner, operator, administrator, supplier, et
     this.project = await TestHelper();
     this.ruleEngine = await this.project.createProxy(RuleEngine, {initArgs: [owner]});
     this.yesNo = await this.project.createProxy(YesNoRule);
-    await this.ruleEngine.methods.setRules([this.yesNo.address]).send({from: owner});
+    await this.ruleEngine.methods.setRules([this.yesNo.address]).send({from: owner, gas: 100000});
     this.priceOracle = await this.project.createProxy(PriceOracle, {initArgs: [owner]});
     this.processor = await this.project.createProxy(Processor, {initArgs: [owner, this.ruleEngine.address], gas: 100000});
     this.token = await this.project.createProxy(BrigeToken, {initArgs: [owner, this.processor.address, 'Token', 'TKN', 0, [trustedIntermediary1]], gas: 100000});

@@ -35,11 +35,10 @@
     address: hello@mtpelerin.com
 */
 
-pragma solidity 0.5.2;
+pragma solidity 0.6.2;
 
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/lifecycle/Pausable.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/utils/Pausable.sol";
 import "../token/BridgeToken.sol";
 import "../access/Operator.sol";
 
@@ -61,7 +60,7 @@ import "../access/Operator.sol";
  * TS10: Computed token amount is 0
  * TS11: Sale has already started
  */
-contract TokenSale is Initializable, Pausable, Operator {
+contract TokenSale is Initializable, PausableUpgradeSafe, Operator {
   using SafeMath for uint256;
 
   uint256 public constant VERSION = 1;
@@ -89,7 +88,7 @@ contract TokenSale is Initializable, Pausable, Operator {
     public initializer 
   {
     Operator.initialize(_owner);
-    Pausable.initialize(_owner);
+    __Pausable_init();
     token = _token;
     etherVault = _etherVault;
     tokenVault = _tokenVault;
@@ -106,6 +105,14 @@ contract TokenSale is Initializable, Pausable, Operator {
   modifier beforeOpen {
     require(startAt == 0 || _currentTime() < startAt, "TS11");
     _;
+  }
+
+  function pause() public {
+    _pause();
+  }
+
+  function unpause() public {
+    _unpause();
   }
 
   function setMaxEtherBalance(uint256 _maxEtherBalance) public onlyOperator {
@@ -128,14 +135,14 @@ contract TokenSale is Initializable, Pausable, Operator {
     require(etherVault.send(address(this).balance), "TS03");
   }
 
-  function () external isOpen whenNotPaused payable {
+  receive () external isOpen whenNotPaused payable {
     require(msg.data.length == 0, "TS08");
-    _investEther(msg.sender, msg.value);
+    _investEther(_msgSender(), msg.value);
     _rebalance();
   }
 
   function investEther() public isOpen whenNotPaused payable {
-    _investEther(msg.sender, msg.value);
+    _investEther(_msgSender(), msg.value);
     _rebalance();
   }
 

@@ -35,9 +35,8 @@
     address: hello@mtpelerin.com
 */
 
-pragma solidity 0.5.2;
+pragma solidity 0.6.2;
 
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "./BridgeToken.sol";
 import "../interfaces/IProcessor.sol";
 
@@ -60,7 +59,7 @@ contract BondBridgeToken is Initializable, BridgeToken {
     uint8 decimals,
     address[] memory trustedIntermediaries
   ) 
-    public initializer 
+    public override initializer 
   {
     BridgeToken.initialize(
       owner, 

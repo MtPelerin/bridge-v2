@@ -35,7 +35,7 @@
     address: hello@mtpelerin.com
 */
 
-pragma solidity 0.5.2;
+pragma solidity 0.6.2;
 
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "./abstract/AbstractRule.sol";
@@ -86,7 +86,7 @@ contract UserKycThresholdFromRule is Initializable, AbstractRule {
   */
   function isTransferValid(
     address _token, address _from, address /* _to */, uint256 /* _amount */, uint256 _kycThreshold)
-    public view returns (uint256, uint256)
+    public override view returns (uint256, uint256)
   {
     address[] memory trustedIntermediaries = IGovernable(_token).trustedIntermediaries();
     uint256 userId;

@@ -35,7 +35,7 @@
     address: hello@mtpelerin.com
 */
 
-pragma solidity 0.5.2;
+pragma solidity 0.6.2;
 
 /**
  * @title IAdministrable

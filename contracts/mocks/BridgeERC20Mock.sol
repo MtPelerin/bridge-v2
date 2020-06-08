@@ -35,10 +35,10 @@
     address: hello@mtpelerin.com
 */
 
-pragma solidity 0.5.2;
+pragma solidity 0.6.2;
 
 import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/access/Roles.sol";
+import "../access/Roles.sol";
 import "../interfaces/IGovernable.sol";
 import "../interfaces/IERC20Detailed.sol";
 import "../interfaces/IPriceOracle.sol";
@@ -81,76 +81,76 @@ contract BridgeERC20Mock is IGovernable, IPriceable, IMintable, IAdministrable, 
     _priceOracle = priceOracle;
   }
 
-  function realm() public view returns (address) {
+  function realm() public override view returns (address) {
     return _realm;
   }
 
-  function setRealm(address newRealm) public {
+  function setRealm(address newRealm) public override {
     _realm = newRealm;
   } 
 
-  function trustedIntermediaries() public view returns (address[] memory) {
+  function trustedIntermediaries() public override view returns (address[] memory) {
     return _trustedIntermediaries;
   }
 
-  function setTrustedIntermediaries(address[] calldata newTrustedIntermediaries) external {
+  function setTrustedIntermediaries(address[] calldata newTrustedIntermediaries) external override {
     _trustedIntermediaries = newTrustedIntermediaries;
   }  
 
-  function isRealmAdministrator(address _administrator) public view returns (bool) {
+  function isRealmAdministrator(address _administrator) public override view returns (bool) {
     return _realmAdministrators.has(_administrator);
   }
 
-  function addRealmAdministrator(address _administrator) public {
+  function addRealmAdministrator(address _administrator) public override {
     _realmAdministrators.add(_administrator);
     emit RealmAdministratorAdded(_administrator);
   }
 
-  function removeRealmAdministrator(address _administrator) public {
+  function removeRealmAdministrator(address _administrator) public override {
     _realmAdministrators.remove(_administrator);
     emit RealmAdministratorRemoved(_administrator);
   }
 
   /* Administrable */
-  function isAdministrator(address _administrator) public view returns (bool) {
+  function isAdministrator(address _administrator) public override view returns (bool) {
     return _administrators.has(_administrator);
   }
 
-  function addAdministrator(address _administrator) public {
+  function addAdministrator(address _administrator) public override {
     _administrators.add(_administrator);
     emit AdministratorAdded(_administrator);
   }
 
-  function removeAdministrator(address _administrator) public {
+  function removeAdministrator(address _administrator) public override {
     _administrators.remove(_administrator);
     emit AdministratorRemoved(_administrator);
   }
 
   /* Mintable */
-  function mint(address _to, uint256 _amount) public
+  function mint(address _to, uint256 _amount) public override
   {
     _totalSupply = _totalSupply.add(_amount);
     _balances[_to] = _balances[_to].add(_amount);
   }
 
-  function burn(address _from, uint256 _amount) public
+  function burn(address _from, uint256 _amount) public override
   {
     _totalSupply = _totalSupply.sub(_amount);
     _balances[_from] = _balances[_from].sub(_amount);
   }
 
-  function priceOracle() public view returns (IPriceOracle) {
+  function priceOracle() public override view returns (IPriceOracle) {
     return _priceOracle;
   }
 
-  function setPriceOracle(IPriceOracle newPriceOracle) public {
+  function setPriceOracle(IPriceOracle newPriceOracle) public override {
     _priceOracle = newPriceOracle;
   }
 
   function convertTo(
     uint256 _amount, string calldata _currency, uint8 maxDecimals
   ) 
-    external view returns(uint256) 
+    external override view returns(uint256) 
   {
     uint256 amountToConvert = _amount;
     uint256 xrate;
@@ -169,39 +169,39 @@ contract BridgeERC20Mock is IGovernable, IPriceable, IMintable, IAdministrable, 
     return amountToConvert.mul(xrate).mul(10**((2*maxDecimals)-xrateDecimals-tokenDecimals));
   }
 
-  function name() external view returns (string memory) {
+  function name() external override view returns (string memory) {
     return _name;
   }
 
-  function symbol() external view returns (string memory) {
+  function symbol() external override view returns (string memory) {
     return _symbol;
   }
 
-  function decimals() external view returns (uint8) {
+  function decimals() external override view returns (uint8) {
     return _decimals;
   }
 
-  function transfer(address /* to */, uint256 /* value */) external returns (bool) {
+  function transfer(address /* to */, uint256 /* value */) external override returns (bool) {
     return true;
   }
 
-  function approve(address /* spender */, uint256 /* value */) external returns (bool) {
+  function approve(address /* spender */, uint256 /* value */) external override returns (bool) {
     return true;
   }
 
-  function transferFrom(address /* from */, address /* to */, uint256 /* value */) external returns (bool) {
+  function transferFrom(address /* from */, address /* to */, uint256 /* value */) external override returns (bool) {
     return true;
   }
 
-  function totalSupply() external view returns (uint256) {
+  function totalSupply() external override view returns (uint256) {
     return _totalSupply;
   }
 
-  function balanceOf(address account) external view returns (uint256) {
+  function balanceOf(address account) external override view returns (uint256) {
     return _balances[account];
   }
 
-  function allowance(address /* owner */, address /* spender */) external view returns (uint256) {
+  function allowance(address /* owner */, address /* spender */) external override view returns (uint256) {
     return 0;
   }
 }

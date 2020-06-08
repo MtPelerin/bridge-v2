@@ -37,9 +37,8 @@
     This contract is a modified version of Maker OTC contracts: https://github.com/makerdao/maker-otc
 */
 
-pragma solidity 0.5.2;
+pragma solidity 0.6.2;
 
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
 import "../lib/ds-math/math.sol";
 import "../interfaces/IExchange.sol";
@@ -117,13 +116,13 @@ contract Exchange is IExchange, DSMath, Operator {
   modifier canCancel(uint256 id) {
     require(isActive(id), "EX01");
     require(
-      msg.sender == getOwner(id) || id == dustId,
+      _msgSender() == getOwner(id) || id == dustId,
       "EX02"
     );
     _;
   }
 
-  function initialize(address owner) public initializer {
+  function initialize(address owner) public override initializer {
     Operator.initialize(owner);
   }
 
@@ -270,7 +269,7 @@ contract Exchange is IExchange, DSMath, Operator {
 
     _hide(id);                      //remove offer from unsorted offers list
     _sort(id, pos);                 //put offer into the sorted offers list
-    emit RankInserted(msg.sender, id);
+    emit RankInserted(_msgSender(), id);
     return true;
   }
 
@@ -284,7 +283,7 @@ contract Exchange is IExchange, DSMath, Operator {
     require(!isActive(id), "EX09");
     require(_rank[id].delb != 0 && _rank[id].delb < block.number - 10, "EX10");
     delete _rank[id];
-    emit RankDeleted(msg.sender, id);
+    emit RankDeleted(_msgSender(), id);
     return true;
   }
 
@@ -519,19 +518,19 @@ contract Exchange is IExchange, DSMath, Operator {
     info.payToken = payToken;
     info.buyAmount = buyAmount;
     info.buyToken = buyToken;
-    info.owner = msg.sender;
+    info.owner = _msgSender();
     // solium-disable-next-line security/no-block-members
     info.timestamp = now;
     id = _nextId();
     offers[id] = info;
 
-    require(payToken.transferFrom(msg.sender, address(this), payAmount), "EX21");
+    require(payToken.transferFrom(_msgSender(), address(this), payAmount), "EX21");
 
     emit ItemUpdated(id);
     emit OrderMade(
       bytes32(id),
       keccak256(abi.encodePacked(payToken, buyToken)),
-      msg.sender,
+      _msgSender(),
       payToken,
       buyToken,
       payAmount,
@@ -569,8 +568,8 @@ contract Exchange is IExchange, DSMath, Operator {
     _lock();
     offers[id].payAmount = sub(currentOffer.payAmount, quantity);
     offers[id].buyAmount = sub(currentOffer.buyAmount, spend);
-    require(currentOffer.buyToken.transferFrom(msg.sender, currentOffer.owner, spend), "EX23");
-    require(currentOffer.payToken.transfer(msg.sender, quantity), "EX24");
+    require(currentOffer.buyToken.transferFrom(_msgSender(), currentOffer.owner, spend), "EX23");
+    require(currentOffer.payToken.transfer(_msgSender(), quantity), "EX24");
 
     emit ItemUpdated(id);
     emit OrderTaken(
@@ -579,7 +578,7 @@ contract Exchange is IExchange, DSMath, Operator {
       currentOffer.owner,
       currentOffer.payToken,
       currentOffer.buyToken,
-      msg.sender,
+      _msgSender(),
       quantity,
       spend,
       // solium-disable-next-line security/no-block-members
@@ -600,7 +599,7 @@ contract Exchange is IExchange, DSMath, Operator {
 
     // If offer has become dust during buy, we cancel it
     if (isActive(id) && offers[id].payAmount < _dust[address(offers[id].payToken)]) {
-      dustId = id; //enable current msg.sender to call cancel(id)
+      dustId = id; //enable current _msgSender() to call cancel(id)
       cancel(id);
     }
 

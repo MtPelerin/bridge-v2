@@ -35,9 +35,8 @@
     address: hello@mtpelerin.com
 */
 
-pragma solidity 0.5.2;
+pragma solidity 0.6.2;
 
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 import "../interfaces/IERC20Detailed.sol";
 import "../access/Operator.sol";
@@ -95,7 +94,7 @@ contract TokenDispenserQueue is Initializable, Operator {
 
   /* Validators related functions */
   modifier onlyValidator() {
-    require(isValidator(msg.sender), "DQ01");
+    require(isValidator(_msgSender()), "DQ01");
     _;
   }
 
@@ -223,7 +222,7 @@ contract TokenDispenserQueue is Initializable, Operator {
     PendingTransfer memory transfer = pendingTransfers[transferIndex];
     require(IERC20Detailed(token).transfer(transfer.to, transfer.amount), "DQ03");
     emit TransferApproved(
-      msg.sender, 
+      _msgSender(), 
       transfer.to, 
       transfer.amount
     );
@@ -237,7 +236,7 @@ contract TokenDispenserQueue is Initializable, Operator {
     /* Send the tokens back to the transfer originator */
     PendingTransfer memory transfer = pendingTransfers[transferIndex];
     emit TransferRejected(
-      msg.sender, 
+      _msgSender(), 
       transfer.to, 
       transfer.amount
     );

@@ -35,9 +35,8 @@
     address: hello@mtpelerin.com
 */
 
-pragma solidity 0.5.2;
+pragma solidity 0.6.2;
 
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "./BridgeToken.sol";
 import "../interfaces/IProcessor.sol";
 import "../interfaces/IVotable.sol";
@@ -70,7 +69,7 @@ contract ShareBridgeToken is Initializable, IVotable, BridgeToken {
   uint256 public constant VERSION = 1;
   
   uint16 public tokenizedSharePercentage;
-  address public votingSession;
+  address public override votingSession;
   string public boardResolutionDocumentUrl;
   bytes32 public boardResolutionDocumentHash;
 
@@ -130,7 +129,7 @@ contract ShareBridgeToken is Initializable, IVotable, BridgeToken {
   * @dev Set the voting session contract address (used for general meetings)
   * @param _votingSession the voting session contract address
   */
-  function setVotingSession(address _votingSession) public onlyAdministrator {
+  function setVotingSession(address _votingSession) public override onlyAdministrator {
     votingSession = _votingSession;
     emit VotingSessionSet(_votingSession);
   }

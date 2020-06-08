@@ -35,9 +35,8 @@
     address: hello@mtpelerin.com
 */
 
-pragma solidity 0.5.2;
+pragma solidity 0.6.2;
 
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 import "../interfaces/IComplianceRegistry.sol";
 import "../interfaces/IPriceable.sol";
@@ -101,7 +100,7 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
   * @dev Initializer (replaces constructor when contract is upgradable)
   * @param owner the final owner of the contract
   */
-  function initialize(address owner) public initializer {
+  function initialize(address owner) public override initializer {
     Operator.initialize(owner);
   }
 
@@ -118,7 +117,7 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
     address[] calldata _trustedIntermediaries, 
     address _address
   ) 
-    external view returns (uint256, address) 
+    external override view returns (uint256, address) 
   {
     return _getUser(_trustedIntermediaries, _address);
   }
@@ -129,7 +128,7 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
    * @param _userId the userId for which the validity date has to be returned
    * @return the date at which user validity ends (UNIX timestamp)
    */
-  function validUntil(address _trustedIntermediary, uint256 _userId) public view returns (uint256) {
+  function validUntil(address _trustedIntermediary, uint256 _userId) public override view returns (uint256) {
     return userAttributes[_trustedIntermediary][_userId][USER_VALID_UNTIL_KEY];
   }
 
@@ -141,7 +140,7 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
    * @return the attribute value for the pair (_userId, _key), defaults to 0 if _key or _userId not found
    */
   function attribute(address _trustedIntermediary, uint256 _userId, uint256 _key)
-    public view returns (uint256)
+    public override view returns (uint256)
   {
     return userAttributes[_trustedIntermediary][_userId][_key];
   }
@@ -154,7 +153,7 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
   * @return the attribute values for each pair (_userId, _key), defaults to 0 if _key or _userId not found
   **/
   function attributes(address _trustedIntermediary, uint256 _userId, uint256[] calldata _keys) 
-    external view returns (uint256[] memory)
+    external override view returns (uint256[] memory)
   {
     uint256[] memory values = new uint256[](_keys.length);
     for (uint256 i = 0; i < _keys.length; i++) {
@@ -169,7 +168,7 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
    * @param _address address to look for
    * @return true if a user corresponding to the address was found for a trusted intermediary and is not expired, false otherwise
    */
-  function isAddressValid(address[] calldata _trustedIntermediaries, address _address) external view returns (bool) {
+  function isAddressValid(address[] calldata _trustedIntermediaries, address _address) external override view returns (bool) {
     uint256 _userId;
     address _trustedIntermediary;
     (_userId, _trustedIntermediary) = _getUser(_trustedIntermediaries, _address);
@@ -182,7 +181,7 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
    * @param _userId the userId to be checked
    * @return true if a user was found for the trusted intermediary and is not expired, false otherwise
    */
-  function isValid(address _trustedIntermediary, uint256 _userId) public view returns (bool) {
+  function isValid(address _trustedIntermediary, uint256 _userId) public override view returns (bool) {
     return _isValid(_trustedIntermediary, _userId);
   }
 
@@ -197,10 +196,10 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
    * @param _attributeValues array of values of attributes to set
    */
   function registerUser(address _address, uint256[] calldata _attributeKeys, uint256[] calldata _attributeValues)
-    external
+    external override
   {
     require(_attributeKeys.length == _attributeValues.length, "UR05");
-    require(addressUsers[msg.sender][_address] == 0, "UR02");
+    require(addressUsers[_msgSender()][_address] == 0, "UR02");
     _registerUser(_address, _attributeKeys, _attributeValues);
   }
 
@@ -219,11 +218,11 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
     uint256[] calldata _attributeKeys, 
     uint256[] calldata _attributeValues
   ) 
-    external
+    external override
   {
     require(_attributeKeys.length == _attributeValues.length, "UR05");
     for (uint256 i = 0; i < _addresses.length; i++) {
-      if (addressUsers[msg.sender][_addresses[i]] == 0) {
+      if (addressUsers[_msgSender()][_addresses[i]] == 0) {
         _registerUser(_addresses[i], _attributeKeys, _attributeValues);
       }
     }
@@ -239,9 +238,9 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
    * @param _address the address to attach
    */
   function attachAddress(uint256 _userId, address _address)
-    public
+    public override
   {
-    require(_userId > 0 && _userId <= userCount[msg.sender], "UR01");
+    require(_userId > 0 && _userId <= userCount[_msgSender()], "UR01");
     _attachAddress(_userId, _address);
   }
 
@@ -256,10 +255,10 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
    * @param _addresses array of addresses to attach
    */
   function attachAddresses(uint256[] calldata _userIds, address[] calldata _addresses)
-    external
+    external override
   {
     require(_addresses.length == _userIds.length, "UR03");
-    uint256 _userCount = userCount[msg.sender];
+    uint256 _userCount = userCount[_msgSender()];
     for (uint256 i = 0; i < _addresses.length; i++) {
       require(_userIds[i] > 0 && _userIds[i] <= _userCount, "UR01");
       _attachAddress(_userIds[i], _addresses[i]);
@@ -273,7 +272,7 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
    * @dev Emits AddressDetached event
    * @param _address address to detach
    */
-  function detachAddress(address _address) public {
+  function detachAddress(address _address) public override {
     _detachAddress(_address);
   }
 
@@ -284,7 +283,7 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
    * @dev Emits multiple AddressDetached events
    * @param _addresses array of addresses to detach
    */
-  function detachAddresses(address[] calldata _addresses) external {
+  function detachAddresses(address[] calldata _addresses) external override {
     for (uint256 i = 0; i < _addresses.length; i++) {
       _detachAddress(_addresses[i]);
     }
@@ -304,10 +303,10 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
     uint256[] calldata _attributeKeys, 
     uint256[] calldata _attributeValues
   )
-    external
+    external override
   {
     require(_attributeKeys.length == _attributeValues.length, "UR05");
-    require(_userId > 0 && _userId <= userCount[msg.sender], "UR01");
+    require(_userId > 0 && _userId <= userCount[_msgSender()], "UR01");
     _updateUserAttributes(_userId, _attributeKeys, _attributeValues);
   }
 
@@ -324,10 +323,10 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
     uint256[] calldata _userIds,
     uint256[] calldata _attributeKeys, 
     uint256[] calldata _attributeValues
-  ) external
+  ) external override
   {
     require(_attributeKeys.length == _attributeValues.length, "UR05");
-    uint256 _userCount = userCount[msg.sender];
+    uint256 _userCount = userCount[_msgSender()];
     for (uint256 i = 0; i < _userIds.length; i++) {
       if (_userIds[i] > 0 && _userIds[i] <= _userCount) {
         _updateUserAttributes(_userIds[i], _attributeKeys, _attributeValues);
@@ -349,7 +348,7 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
     address _to, 
     uint256 _value
   ) 
-    public onlyOperator
+    public override onlyOperator
   {
     return _updateTransfers(_realm, _from, _to, _value);
   }
@@ -366,7 +365,7 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
     address[] calldata _trustedIntermediaries, 
     address _address
   ) 
-    external view returns (uint256) 
+    external override view returns (uint256) 
   {
     return _monthlyInTransfers(_realm, _trustedIntermediaries, _address) + 
       _monthlyOutTransfers(_realm, _trustedIntermediaries, _address);
@@ -384,7 +383,7 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
     address[] calldata _trustedIntermediaries, 
     address _address
   ) 
-    external view returns (uint256) 
+    external override view returns (uint256) 
   {
     return _yearlyInTransfers(_realm, _trustedIntermediaries, _address) + 
       _yearlyOutTransfers(_realm, _trustedIntermediaries, _address);
@@ -402,7 +401,7 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
     address[] calldata _trustedIntermediaries, 
     address _address
   ) 
-    external view returns (uint256) 
+    external override view returns (uint256) 
   {
     return _monthlyInTransfers(_realm, _trustedIntermediaries, _address);
   }
@@ -419,7 +418,7 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
     address[] calldata _trustedIntermediaries, 
     address _address
   ) 
-    external view returns (uint256) 
+    external override view returns (uint256) 
   {
     return _yearlyInTransfers(_realm, _trustedIntermediaries, _address);
   }
@@ -436,7 +435,7 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
     address[] calldata _trustedIntermediaries, 
     address _address
   ) 
-    external view returns (uint256) 
+    external override view returns (uint256) 
   {
     return _monthlyOutTransfers(_realm, _trustedIntermediaries, _address);
   }
@@ -453,7 +452,7 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
     address[] calldata _trustedIntermediaries, 
     address _address
   ) 
-    external view returns (uint256) 
+    external override view returns (uint256) 
   {
     return _yearlyOutTransfers(_realm, _trustedIntermediaries, _address);
   }
@@ -475,7 +474,7 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
     address to, 
     uint256 amount
   )
-    public onlyOperator
+    public override onlyOperator
   {
     uint256 maxBoundary = onHoldMaxBoundary[trustedIntermediary]++;
     onHoldTransfers[trustedIntermediary][maxBoundary] = OnHoldTransfer(
@@ -501,7 +500,7 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
   * @return amount the array of amounts for on hold transfers
   */
   function getOnHoldTransfers(address trustedIntermediary)
-    public view returns (
+    public override view returns (
       uint256 length,
       uint256[] memory id,
       address[] memory token, 
@@ -546,14 +545,14 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
   * @param skipMinBoundaryUpdate whether to skip the minBoundary update or not. Updating minBoundary can result in out of gas exception.
   * Skipping the update will process the transfers and the user will be able to update minBoundary by calling the updateOnHoldMinBoundary multiple times
   */
-  function processOnHoldTransfers(uint256[] calldata transfers, uint8[] calldata transferDecisions, bool skipMinBoundaryUpdate) external {
+  function processOnHoldTransfers(uint256[] calldata transfers, uint8[] calldata transferDecisions, bool skipMinBoundaryUpdate) external override {
     require(transfers.length == transferDecisions.length, "UR06");
-    uint256 minBoundary = onHoldMinBoundary[msg.sender];
-    uint256 maxBoundary = onHoldMaxBoundary[msg.sender];
+    uint256 minBoundary = onHoldMinBoundary[_msgSender()];
+    uint256 maxBoundary = onHoldMaxBoundary[_msgSender()];
     for (uint256 i = 0; i < transfers.length; i++) {
       /* Only process on-hold transfers, other statuses are ignored */
-      if (onHoldTransfers[msg.sender][transfers[i]].decision == TRANSFER_ONHOLD) {
-        onHoldTransfers[msg.sender][transfers[i]].decision = transferDecisions[i];
+      if (onHoldTransfers[_msgSender()][transfers[i]].decision == TRANSFER_ONHOLD) {
+        onHoldTransfers[_msgSender()][transfers[i]].decision = transferDecisions[i];
         if (transferDecisions[i] == TRANSFER_APPROVE) {
           _approveOnHoldTransfer(transfers[i]);
         } else {
@@ -562,7 +561,7 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
       }
     }
     if (!skipMinBoundaryUpdate) {
-      _updateOnHoldMinBoundary(msg.sender, minBoundary, maxBoundary);
+      _updateOnHoldMinBoundary(_msgSender(), minBoundary, maxBoundary);
     }
   }
 
@@ -571,13 +570,13 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
   * @dev Intended to be called from a trusted intermediary key
   * @param maxIterations number of iterations allowed for the loop
   */
-  function updateOnHoldMinBoundary(uint256 maxIterations) public {
-    uint256 minBoundary = onHoldMinBoundary[msg.sender];
-    uint256 maxBoundary = onHoldMaxBoundary[msg.sender];
+  function updateOnHoldMinBoundary(uint256 maxIterations) public override {
+    uint256 minBoundary = onHoldMinBoundary[_msgSender()];
+    uint256 maxBoundary = onHoldMaxBoundary[_msgSender()];
     if (minBoundary + maxIterations < maxBoundary) {
       maxBoundary = minBoundary + maxIterations;
     }
-    _updateOnHoldMinBoundary(msg.sender, minBoundary, maxBoundary);
+    _updateOnHoldMinBoundary(_msgSender(), minBoundary, maxBoundary);
   }
 
   /**
@@ -594,7 +593,7 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
     uint256 maxBoundary = onHoldMaxBoundary[trustedIntermediary];
     for (uint256 i = 0; i < transfers.length; i++) {
       OnHoldTransfer memory transfer = onHoldTransfers[trustedIntermediary][transfers[i]];
-      require(transfer.from == msg.sender, "UR07");
+      require(transfer.from == _msgSender(), "UR07");
       onHoldTransfers[trustedIntermediary][transfers[i]].decision = TRANSFER_CANCEL;
       require(IERC20Detailed(transfer.token).transfer(transfer.from, transfer.amount), "UR08");
       emit TransferCancelled(
@@ -617,7 +616,7 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
   */
   function _approveOnHoldTransfer(uint256 transferIndex) internal {
     /* Send the token to the transfer recipient */
-    OnHoldTransfer memory transfer = onHoldTransfers[msg.sender][transferIndex];
+    OnHoldTransfer memory transfer = onHoldTransfers[_msgSender()][transferIndex];
     _updateTransfers(
       IGovernable(transfer.token).realm(),
       transfer.from, 
@@ -626,7 +625,7 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
     );
     require(IERC20Detailed(transfer.token).transfer(transfer.to, transfer.amount), "UR08");
     emit TransferApproved(
-      msg.sender, 
+      _msgSender(), 
       address(transfer.token), 
       transfer.from, 
       transfer.to, 
@@ -641,10 +640,10 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
   */
   function _rejectOnHoldTransfer(uint256 transferIndex) internal {
     /* Send the tokens back to the transfer originator */
-    OnHoldTransfer memory transfer = onHoldTransfers[msg.sender][transferIndex];
+    OnHoldTransfer memory transfer = onHoldTransfers[_msgSender()][transferIndex];
     require(IERC20Detailed(transfer.token).transfer(transfer.from, transfer.amount), "UR08");
     emit TransferRejected(
-      msg.sender, 
+      _msgSender(), 
       address(transfer.token), 
       transfer.from, 
       transfer.to, 
@@ -658,7 +657,6 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
   * @param _from the sender of the tokens
   * @param _to the receiver of the tokens
   * @param _value transfered tokens value converted in CHF
-  * @return true if sucessful, false otherwise
   */
   function _updateTransfers(
     address _realm, 
@@ -690,13 +688,13 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
   function _registerUser(address _address, uint256[] memory _attributeKeys, uint256[] memory _attributeValues)
     internal
   {
-    uint256 _userCount = userCount[msg.sender];
+    uint256 _userCount = userCount[_msgSender()];
     _updateUserAttributes(++_userCount, _attributeKeys, _attributeValues);
-    addressUsers[msg.sender][_address] = _userCount;
-    userAddresses[msg.sender][_userCount].push(_address);
+    addressUsers[_msgSender()][_address] = _userCount;
+    userAddresses[_msgSender()][_userCount].push(_address);
 
-    emit AddressAttached(msg.sender, _userCount, _address);
-    userCount[msg.sender] = _userCount;
+    emit AddressAttached(_msgSender(), _userCount, _address);
+    userCount[_msgSender()] = _userCount;
   }
 
   /**
@@ -709,7 +707,7 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
     internal 
   {
     for (uint256 i = 0; i < _attributeKeys.length; i++) {
-      userAttributes[msg.sender][_userId][_attributeKeys[i]] = _attributeValues[i];
+      userAttributes[_msgSender()][_userId][_attributeKeys[i]] = _attributeValues[i];
     }
   }
 
@@ -719,11 +717,11 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
    * @param _address the address to attach
    */
   function _attachAddress(uint256 _userId, address _address) internal {
-    require(addressUsers[msg.sender][_address] == 0, "UR02");
-    addressUsers[msg.sender][_address] = _userId;
-    userAddresses[msg.sender][_userId].push(_address);
+    require(addressUsers[_msgSender()][_address] == 0, "UR02");
+    addressUsers[_msgSender()][_address] = _userId;
+    userAddresses[_msgSender()][_userId].push(_address);
 
-    emit AddressAttached(msg.sender, _userId, _address);
+    emit AddressAttached(_msgSender(), _userId, _address);
   }
 
   /**
@@ -731,18 +729,18 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
    * @param _address address to detach
    */
   function _detachAddress(address _address) internal {
-    uint256 addressUserId = addressUsers[msg.sender][_address];
+    uint256 addressUserId = addressUsers[_msgSender()][_address];
     require(addressUserId != 0, "UR04");
-    delete addressUsers[msg.sender][_address];
-    uint256 userAddressesLength = userAddresses[msg.sender][addressUserId].length;
+    delete addressUsers[_msgSender()][_address];
+    uint256 userAddressesLength = userAddresses[_msgSender()][addressUserId].length;
     for (uint256 i = 0; i < userAddressesLength; i++) {
-      if (userAddresses[msg.sender][addressUserId][i] == _address) {
+      if (userAddresses[_msgSender()][addressUserId][i] == _address) {
         /* For gas efficiency, we only delete the slot and accept that address 0x0 can be present */
-        delete userAddresses[msg.sender][addressUserId][i];
+        delete userAddresses[_msgSender()][addressUserId][i];
         break;
       }
     }
-    emit AddressDetached(msg.sender, addressUserId, _address);
+    emit AddressDetached(_msgSender(), addressUserId, _address);
   }
 
   /**

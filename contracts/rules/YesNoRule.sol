@@ -35,7 +35,7 @@
     address: hello@mtpelerin.com
 */
 
-pragma solidity 0.5.2;
+pragma solidity 0.6.2;
 
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "./abstract/AbstractRule.sol";
@@ -69,7 +69,7 @@ contract YesNoRule is Initializable, AbstractRule {
     address /*_to */,
     uint256 /*_amount */,
     uint256 _yesNo)
-    public view returns (uint256, uint256)
+    public override view returns (uint256, uint256)
   {
     if (_yesNo > 0) {
       return (TRANSFER_VALID_WITH_NO_HOOK, REASON_OK);

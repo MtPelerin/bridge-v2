@@ -35,10 +35,10 @@
     address: hello@mtpelerin.com
 */
 
-pragma solidity 0.5.2;
+pragma solidity 0.6.2;
 
-import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/access/Roles.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
+import "./Roles.sol";
 
 /**
  * @title Operator
@@ -49,7 +49,7 @@ import "@openzeppelin/contracts-ethereum-package/contracts/access/Roles.sol";
  */
 
 
-contract Operator is Ownable {
+contract Operator is OwnableUpgradeSafe {
   using Roles for Roles.Role;
 
   Roles.Role private operators;
@@ -61,15 +61,16 @@ contract Operator is Ownable {
   * @dev Initializer (replaces constructor when contract is upgradable)
   * @param owner the final owner of the contract
   */
-  function initialize(address owner) public initializer {
-    Ownable.initialize(owner);
+  function initialize(address owner) public virtual initializer {
+    __Ownable_init();
+    transferOwnership(owner);
   }
 
   /**
    * @dev Throws OP01 if called by any account other than the operator
    */
   modifier onlyOperator {
-    require(isOwner() || operators.has(msg.sender), "OP01");
+    require(owner() == _msgSender() || operators.has(_msgSender()), "OP01");
     _;
   }
 

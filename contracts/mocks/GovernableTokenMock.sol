@@ -35,9 +35,9 @@
     address: hello@mtpelerin.com
 */
 
-pragma solidity 0.5.2;
+pragma solidity 0.6.2;
 
-import "@openzeppelin/contracts-ethereum-package/contracts/access/Roles.sol";
+import "../access/Roles.sol";
 import "../interfaces/IGovernable.sol";
 
 
@@ -48,32 +48,32 @@ contract GovernableTokenMock is IGovernable {
   address[] internal _trustedIntermediaries;
   Roles.Role internal _realmAdministrators;
 
-  function realm() public view returns (address) {
+  function realm() public override view returns (address) {
     return _realm;
   }
 
-  function setRealm(address newRealm) public {
+  function setRealm(address newRealm) public override {
     _realm = newRealm;
   } 
 
-  function trustedIntermediaries() public view returns (address[] memory) {
+  function trustedIntermediaries() public override view returns (address[] memory) {
     return _trustedIntermediaries;
   }
 
-  function setTrustedIntermediaries(address[] calldata newTrustedIntermediaries) external {
+  function setTrustedIntermediaries(address[] calldata newTrustedIntermediaries) external override {
     _trustedIntermediaries = newTrustedIntermediaries;
   }  
 
-  function isRealmAdministrator(address _administrator) public view returns (bool) {
+  function isRealmAdministrator(address _administrator) public override view returns (bool) {
     return _realmAdministrators.has(_administrator);
   }
 
-  function addRealmAdministrator(address _administrator) public {
+  function addRealmAdministrator(address _administrator) public override {
     _realmAdministrators.add(_administrator);
     emit RealmAdministratorAdded(_administrator);
   }
 
-  function removeRealmAdministrator(address _administrator) public {
+  function removeRealmAdministrator(address _administrator) public override {
     _realmAdministrators.remove(_administrator);
     emit RealmAdministratorRemoved(_administrator);
   }

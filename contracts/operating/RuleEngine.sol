@@ -35,9 +35,8 @@
     address: hello@mtpelerin.com
 */
 
-pragma solidity 0.5.2;
+pragma solidity 0.6.2;
 
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "../interfaces/IRule.sol";
 import "../interfaces/IRuleEngine.sol";
 import "../access/Operator.sol";
@@ -62,7 +61,7 @@ contract RuleEngine is Initializable, Operator {
   * @dev Initializer (replaces constructor when contract is upgradable)
   * @param owner the final owner of the contract
   */
-  function initialize(address owner) public initializer {
+  function initialize(address owner) public override initializer {
     Operator.initialize(owner);
   }
 
@@ -97,7 +96,7 @@ contract RuleEngine is Initializable, Operator {
    * @dev Returns the rules associated to specific ids
    * @dev Throws RE01 if id is outside the rule array
    * @param _ruleIds Array of ids of the rules to retrieve
-   * @return rules Array of addresses of the rules
+   * @return result Array of addresses of the rules
    */
   function rules(uint256[] calldata _ruleIds) external view returns(IRule[] memory result) {
     result = new IRule[](_ruleIds.length);

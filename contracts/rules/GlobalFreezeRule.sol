@@ -35,9 +35,8 @@
     address: hello@mtpelerin.com
 */
 
-pragma solidity 0.5.2;
+pragma solidity 0.6.2;
 
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "../access/Operator.sol";
 import "./abstract/AbstractRule.sol";
 
@@ -78,7 +77,7 @@ contract GlobalFreezeRule is Initializable, AbstractRule, Operator {
   * @dev Initializer (replaces constructor when contract is upgradable)
   * @param owner the final owner of the contract
   */
-  function initialize(address owner) public initializer {
+  function initialize(address owner) public override initializer {
     Operator.initialize(owner);
   }
 
@@ -115,7 +114,7 @@ contract GlobalFreezeRule is Initializable, AbstractRule, Operator {
   */
   function isTransferValid(
     address /* _token */, address /* _from */, address /* _to */, uint256 /* _amount */, uint256 /*_param*/)
-    public view returns (uint256 transferStatus, uint256 statusCode)
+    public override view returns (uint256 transferStatus, uint256 statusCode)
   {
     if (_isFrozen()) {
       return (TRANSFER_INVALID, REASON_TRANSFERS_FROZEN_GLOBALLY);

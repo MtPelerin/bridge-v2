@@ -35,7 +35,7 @@
     address: hello@mtpelerin.com
 */
 
-pragma solidity 0.5.2;
+pragma solidity 0.6.2;
 
 import "../../interfaces/IRule.sol";
 
@@ -70,7 +70,7 @@ contract AbstractRule is IRule {
     address /* _to */,
     uint256 /* _amount */,
     uint256 /* _param */ )
-    public view returns (uint256, uint256)
+    public virtual override view returns (uint256, uint256)
   {
     return (TRANSFER_INVALID, REASON_ABSTRACT_RULE);
   }
@@ -82,7 +82,7 @@ contract AbstractRule is IRule {
   */
   function beforeTransferHook(
     address /* _token */, address /* _from */, address /* _to */, uint256 /* _amount */, uint256 /* _param */)
-    external returns (uint256, address, uint256)
+    external virtual override returns (uint256, address, uint256)
   {
     revert("RU02");
   }
@@ -94,7 +94,7 @@ contract AbstractRule is IRule {
   */
   function afterTransferHook(
     address /* _token */, address /* _from */, address /* _to */, uint256 /* _amount */, uint256 /* _param */)
-    external returns (bool)
+    external virtual override returns (bool)
   {
     revert("RU02");
   }

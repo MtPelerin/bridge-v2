@@ -35,10 +35,9 @@
     address: hello@mtpelerin.com
 */
 
-pragma solidity 0.5.2;
+pragma solidity 0.6.2;
 
 import "../access/Operator.sol";
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
 
 /**
 * @title OperatorMock
@@ -49,7 +48,7 @@ import "@openzeppelin/upgrades/contracts/Initializable.sol";
 contract OperatorMock is Initializable, Operator {
   uint256 public count;
 
-  function initialize(address sender) public initializer {
+  function initialize(address sender) public override initializer {
     Operator.initialize(sender);
     count = 0;
   }

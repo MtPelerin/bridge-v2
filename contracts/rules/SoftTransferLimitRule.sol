@@ -35,9 +35,8 @@
     address: hello@mtpelerin.com
 */
 
-pragma solidity 0.5.2;
+pragma solidity 0.6.2;
 
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 import "./abstract/AbstractRule.sol";
 import "../interfaces/IComplianceRegistry.sol";
@@ -124,7 +123,7 @@ contract SoftTransferLimitRule is Initializable, AbstractRule, Operator {
   */
   function isTransferValid(
     address _token, address _from, address _to, uint256 _amount, uint256 _noCheckThreshold)
-    public view returns (uint256, uint256)
+    public override view returns (uint256, uint256)
   {
     address[] memory trustedIntermediaries = IGovernable(_token).trustedIntermediaries();
     address realm = IGovernable(_token).realm();
@@ -148,7 +147,7 @@ contract SoftTransferLimitRule is Initializable, AbstractRule, Operator {
   */
   function beforeTransferHook(
     address _token, address _from, address _to, uint256 _amount, uint256 /* _param */)
-    external onlyOperator returns (uint256, address, uint256)
+    external override onlyOperator returns (uint256, address, uint256)
   {
     address[] memory trustedIntermediaries = IGovernable(_token).trustedIntermediaries();
     uint256 userId;
@@ -179,7 +178,7 @@ contract SoftTransferLimitRule is Initializable, AbstractRule, Operator {
   */
   function afterTransferHook(
     address _token, address _from, address _to, uint256 _amount, uint256 /* _param */)
-    external onlyOperator returns (bool)
+    external override onlyOperator returns (bool)
   {
     address realm = IGovernable(_token).realm();
     uint256 amountInRefCurrency = IPriceable(_token).convertTo(_amount, REF_CURRENCY, MAX_DECIMALS);

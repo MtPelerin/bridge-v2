@@ -87,7 +87,7 @@ contract('PriceOracle', function ([_, owner, operator, address1]) {
 
     it('can set price', async function () {
       (await this.contract.methods['getPrice(bytes32,bytes32)'](ETH, MPS).call())['0'].should.equal('0');
-      ({events: this.events} = await this.contract.methods.setPrice(ETH, MPS, '49024460000000000000', 18).send({from: operator}));
+      ({events: this.events} = await this.contract.methods.setPrice(ETH, MPS, '49024460000000000000', 18).send({from: operator, gas: 100000}));
       const ret = await this.contract.methods['getPrice(bytes32,bytes32)'](ETH, MPS).call();
       ret['0'].should.equal('49024460000000000000');
       ret['1'].should.equal('18');

@@ -35,9 +35,8 @@
     address: hello@mtpelerin.com
 */
 
-pragma solidity 0.5.2;
+pragma solidity 0.6.2;
 
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "../interfaces/IPriceOracle.sol";
 import "../access/Operator.sol";
 
@@ -62,7 +61,7 @@ contract PriceOracle is Initializable, IPriceOracle, Operator {
   * @dev Initializer (replaces constructor when contract is upgradable)
   * @param owner the final owner of the contract
   */
-  function initialize(address owner) public initializer {
+  function initialize(address owner) public override initializer {
     Operator.initialize(owner);
   }
 
@@ -79,7 +78,7 @@ contract PriceOracle is Initializable, IPriceOracle, Operator {
     uint256[] calldata _price, 
     uint8[] calldata _decimals
   ) 
-    external onlyOperator 
+    external override onlyOperator 
   {
     require(_currency1.length == _price.length, "PO01");
     require(_currency1.length == _decimals.length, "PO02");
@@ -99,7 +98,7 @@ contract PriceOracle is Initializable, IPriceOracle, Operator {
   * @param _price new price
   * @param _decimals decimals of the price to be set
   */
-  function setPrice(bytes32 _currency1, bytes32 _currency2, uint256 _price, uint8 _decimals) public onlyOperator {
+  function setPrice(bytes32 _currency1, bytes32 _currency2, uint256 _price, uint8 _decimals) public override onlyOperator {
     // solium-disable-next-line security/no-block-members
     _prices[_currency1][_currency2] = Price(_price, _decimals, now);
     // solium-disable-next-line security/no-block-members
@@ -113,7 +112,7 @@ contract PriceOracle is Initializable, IPriceOracle, Operator {
   * @return price price in decimals for the wanted pair
   * @return decimals number of decimals for the returns pair price
   */
-  function getPrice(bytes32 _currency1, bytes32 _currency2) public view returns (uint256, uint8) {
+  function getPrice(bytes32 _currency1, bytes32 _currency2) public override view returns (uint256, uint8) {
     return (_prices[_currency1][_currency2].price, _prices[_currency1][_currency2].decimals);
   }
 
@@ -124,7 +123,7 @@ contract PriceOracle is Initializable, IPriceOracle, Operator {
   * @return price price in decimals for the wanted pair
   * @return decimals number of decimals for the returns pair price
   */
-  function getPrice(string calldata _currency1, string calldata _currency2) external view returns (uint256, uint8) {
+  function getPrice(string calldata _currency1, string calldata _currency2) external override view returns (uint256, uint8) {
     return getPrice(_asBytes32(_currency1), _asBytes32(_currency2));
   }
 
@@ -134,7 +133,7 @@ contract PriceOracle is Initializable, IPriceOracle, Operator {
   * @param _currency2 destination token/currency to retrieve the last update date for
   * @return lastUpdateDate last update date for the required pair
   */
-  function getLastUpdated(bytes32 _currency1, bytes32 _currency2) public view returns (uint256) {
+  function getLastUpdated(bytes32 _currency1, bytes32 _currency2) public override view returns (uint256) {
     return _prices[_currency1][_currency2].lastUpdated;
   }
 
@@ -144,7 +143,7 @@ contract PriceOracle is Initializable, IPriceOracle, Operator {
   * @param _currency2 destination token/currency to retrieve the decimals for
   * @return decimals last update date for the required pair
   */
-  function getDecimals(bytes32 _currency1, bytes32 _currency2) public view returns (uint8) {
+  function getDecimals(bytes32 _currency1, bytes32 _currency2) public override view returns (uint8) {
     return _prices[_currency1][_currency2].decimals;
   }
 

@@ -35,9 +35,8 @@
     address: hello@mtpelerin.com
 */
 
-pragma solidity 0.5.2;
+pragma solidity 0.6.2;
 
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 import "../access/Operator.sol";
 
@@ -93,7 +92,7 @@ contract VotingSession is Initializable, Operator {
   * @dev Initializer (replaces constructor when contract is upgradable)
   * @param owner the final owner of the contract
   */
-  function initialize(address owner) public initializer {
+  function initialize(address owner) public override initializer {
     Operator.initialize(owner);
   }
 
@@ -117,7 +116,7 @@ contract VotingSession is Initializable, Operator {
   * @dev Throws VO14 if caller is not voter
   */
   modifier isVoter {
-    require(voters[msg.sender].weight > 0, "VO06");
+    require(voters[_msgSender()].weight > 0, "VO06");
     _;
   }
 
@@ -184,7 +183,7 @@ contract VotingSession is Initializable, Operator {
   */
   function delegateVote(address delegate) public isVoter beforeVotingSession {
     require(delegate != address(0), "VO04");
-    voters[msg.sender].delegate = delegate;
+    voters[_msgSender()].delegate = delegate;
   }
 
   /**
@@ -200,7 +199,7 @@ contract VotingSession is Initializable, Operator {
   */
   function vote(address voter, uint256 resolutionId, uint256 proposalId) public whenVotingSessionOpen {
     // Check if function caller is allowed to vote
-    require(voter == msg.sender || voters[voter].delegate == msg.sender, "VO05");
+    require(voter == _msgSender() || voters[voter].delegate == _msgSender(), "VO05");
     require(voters[voter].weight > 0, "VO06");
     require(resolutionId < resolutions.length, "VO07");
     require(proposalId < resolutions[resolutionId].proposals.length, "VO08");

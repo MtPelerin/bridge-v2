@@ -35,11 +35,10 @@
     address: hello@mtpelerin.com
 */
 
-pragma solidity 0.5.2;
+pragma solidity 0.6.2;
 
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
+import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "./abstract/AbstractRule.sol";
 import "../interfaces/IAdministrable.sol";
 import "../interfaces/IERC20Detailed.sol";
@@ -76,7 +75,7 @@ contract AddressThresholdLockRule is Initializable, AbstractRule {
   */
   function isTransferValid(
     address _token, address _from, address /* _to */, uint256 _amount , uint256 /* */)
-    public view returns (uint256, uint256)
+    public override view returns (uint256, uint256)
   {
     uint256 balance = IERC20Detailed(_token).balanceOf(_from);
     if (balance > 0) {

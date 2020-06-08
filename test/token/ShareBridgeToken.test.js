@@ -62,7 +62,7 @@ contract('ShareBridgeToken', function ([_, owner, administrator, trustedIntermed
     this.ruleEngine = await this.project.createProxy(RuleEngine, {initArgs: [owner]});
     this.yesNo = await this.project.createProxy(YesNoRule);
     this.yesNoUpdate = await this.project.createProxy(YesNoUpdateRule);
-    await this.ruleEngine.methods.setRules([this.yesNo.address, this.yesNoUpdate.address]).send({from: owner});
+    await this.ruleEngine.methods.setRules([this.yesNo.address, this.yesNoUpdate.address]).send({from: owner, gas: 100000});
     this.processor = await this.project.createProxy(Processor, {initArgs: [owner, this.ruleEngine.address], gas: 100000});
     this.contract = await this.project.createProxy(Contract, {initArgs: [owner, this.processor.address, 'Test token', 'TST', [trustedIntermediary1, trustedIntermediary2], INITIAL_TOKENIZED_SHARE_PERCENTAGE], gas: 100000});
   });

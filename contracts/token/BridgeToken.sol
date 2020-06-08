@@ -35,10 +35,9 @@
     address: hello@mtpelerin.com
 */
 
-pragma solidity 0.5.2;
+pragma solidity 0.6.2;
 
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/access/Roles.sol";
+import "../access/Roles.sol";
 import "./abstract/SeizableBridgeERC20.sol";
 import "../interfaces/IRulable.sol";
 import "../interfaces/ISuppliable.sol";
@@ -63,7 +62,7 @@ contract BridgeToken is Initializable, IContactable, IRulable, ISuppliable, IMin
   Roles.Role internal _suppliers;
   uint256[] internal _rules;
   uint256[] internal _rulesParams;
-  string public contact;
+  string internal _contact;
 
   function initialize(
     address owner,
@@ -73,7 +72,7 @@ contract BridgeToken is Initializable, IContactable, IRulable, ISuppliable, IMin
     uint8 decimals,
     address[] memory trustedIntermediaries
   ) 
-    public initializer 
+    public virtual initializer 
   {
     SeizableBridgeERC20.initialize(owner, processor);
     processor.register(name, symbol, decimals);
@@ -82,47 +81,47 @@ contract BridgeToken is Initializable, IContactable, IRulable, ISuppliable, IMin
   }
 
   modifier onlySupplier() {
-    require(isSupplier(msg.sender), "SU01");
+    require(isSupplier(_msgSender()), "SU01");
     _;
   }
 
   /* Mintable */
-  function isSupplier(address _supplier) public view returns (bool) {
+  function isSupplier(address _supplier) public override view returns (bool) {
     return _suppliers.has(_supplier);
   }
 
-  function addSupplier(address _supplier) public onlyAdministrator {
+  function addSupplier(address _supplier) public override onlyAdministrator {
     _suppliers.add(_supplier);
     emit SupplierAdded(_supplier);
   }
 
-  function removeSupplier(address _supplier) public onlyAdministrator {
+  function removeSupplier(address _supplier) public override onlyAdministrator {
     _suppliers.remove(_supplier);
     emit SupplierRemoved(_supplier);
   }  
 
   function mint(address _to, uint256 _amount)
-    public onlySupplier hasProcessor
+    public override onlySupplier hasProcessor
   {
-    _processor.mint(msg.sender, _to, _amount);
+    _processor.mint(_msgSender(), _to, _amount);
     emit Mint(_to, _amount);
     emit Transfer(address(0), _to, _amount);
   }
 
   function burn(address _from, uint256 _amount)
-    public onlySupplier hasProcessor 
+    public override onlySupplier hasProcessor 
   {
-    _processor.burn(msg.sender, _from, _amount);
+    _processor.burn(_msgSender(), _from, _amount);
     emit Burn(_from, _amount);
     emit Transfer(_from, address(0), _amount);
   }
 
   /* Rulable */
-  function rules() public view returns (uint256[] memory, uint256[] memory) {
+  function rules() public override view returns (uint256[] memory, uint256[] memory) {
     return (_rules, _rulesParams);
   }
   
-  function rule(uint256 ruleId) public view returns (uint256, uint256) {
+  function rule(uint256 ruleId) public override view returns (uint256, uint256) {
     require(ruleId < _rules.length, "RE01");
     return (_rules[ruleId], _rulesParams[ruleId]);
   }
@@ -130,7 +129,7 @@ contract BridgeToken is Initializable, IContactable, IRulable, ISuppliable, IMin
   function canTransfer(
     address _from, address _to, uint256 _amount
   ) 
-    public hasProcessor view returns (bool, uint256, uint256) 
+    public override hasProcessor view returns (bool, uint256, uint256) 
   {
     return _processor.canTransfer(_from, _to, _amount);
   }
@@ -139,7 +138,7 @@ contract BridgeToken is Initializable, IContactable, IRulable, ISuppliable, IMin
     uint256[] calldata newRules, 
     uint256[] calldata newRulesParams
   ) 
-    external onlyAdministrator
+    external override onlyAdministrator
   {
     require(newRules.length == newRulesParams.length, "RU01");
     _rules = newRules;
@@ -148,9 +147,13 @@ contract BridgeToken is Initializable, IContactable, IRulable, ISuppliable, IMin
   }
 
   /* Contactable */
-  function setContact(string calldata _contact) external onlyAdministrator {
-    contact = _contact;
-    emit ContactSet(_contact);
+  function contact() external override view returns (string memory) {
+    return _contact;
+  }
+
+  function setContact(string calldata __contact) external override onlyAdministrator {
+    _contact = __contact;
+    emit ContactSet(__contact);
   }
 
   /* Reserved slots for future use: https://docs.openzeppelin.com/sdk/2.5/writing-contracts.html#modifying-your-contracts */
