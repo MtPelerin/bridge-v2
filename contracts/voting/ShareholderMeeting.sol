@@ -38,7 +38,9 @@
 pragma solidity 0.6.2;
 
 import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
-import "@opengsn/gsn/contracts/BaseRelayRecipient.sol";
+import "../gsn_1/GsnUtils.sol";
+import "../gsn_1/IRelayHub.sol";
+import "../gsn_1/RelayRecipient.sol";
 import "../access/Operator.sol";
 
 /**
@@ -60,11 +62,14 @@ import "../access/Operator.sol";
 */
 
 
-contract ShareholderMeeting is Initializable, Operator, BaseRelayRecipient {
+contract ShareholderMeeting is Initializable, Operator, RelayRecipient {
   using SafeMath for uint256;
 
   uint256 public constant VERSION = 1;
-
+  address private constant RELAY_HUB = 0xD216153c06E857cD7f72665E0aF1d7D82172F494;
+  bytes4 private constant VOTE_METHOD_ID = 0x2a4a1b73;
+  bytes4 private constant DELEGATE_METHOD_ID = 0xb31e1d4d;
+          
   event ResolutionAdded(bytes32 indexed name, bytes32 url, uint256 proposalCount);
   event ResolutionOpen(uint256 votingEnd);
   event VoterRegistered(address indexed voter, uint256 weight);
@@ -90,11 +95,10 @@ contract ShareholderMeeting is Initializable, Operator, BaseRelayRecipient {
   /**
   * @dev Initializer (replaces constructor when contract is upgradable)
   * @param owner the final owner of the contract
-  * @param forwarder the forwarder address for the gsn network (https://docs.opengsn.org/gsn-provider/networks.html)
   */
-  function initialize(address owner, address forwarder) public initializer {
+  function initialize(address owner) public override initializer {
     Operator.initialize(owner);
-    trustedForwarder = forwarder;
+    setRelayHub(IRelayHub(RELAY_HUB));
   }
 
 
@@ -110,7 +114,7 @@ contract ShareholderMeeting is Initializable, Operator, BaseRelayRecipient {
   * @dev Throws VO14 if caller is not voter
   */
   modifier isVoter {
-    require(voters[_msgSender()].weight > 0, "VO06");
+    require(voters[getSender()].weight > 0, "VO06");
     _;
   }
 
@@ -178,7 +182,7 @@ contract ShareholderMeeting is Initializable, Operator, BaseRelayRecipient {
   */
   function delegateVote(address delegate) public isVoter beforeVotingSession {
     require(delegate != address(0), "VO04");
-    voters[_msgSender()].delegate = delegate;
+    voters[getSender()].delegate = delegate;
   }
 
   /**
@@ -197,7 +201,7 @@ contract ShareholderMeeting is Initializable, Operator, BaseRelayRecipient {
     require(proposalId < resolutions[resolutionId].proposals.length, "VO08");
     require(resolutions[resolutionId].votingEnd > 0 && resolutions[resolutionId].votingEnd > now, "VO10");
     // Check if function caller is allowed to vote
-    require(voter == _msgSender() || voters[voter].delegate == _msgSender(), "VO05");
+    require(voter == getSender() || voters[voter].delegate == getSender(), "VO05");
     require(voters[voter].weight > 0, "VO06");
     require(voters[voter].voted[resolutionId] == false, "VO09");
     voters[voter].voted[resolutionId] = true;
@@ -228,11 +232,45 @@ contract ShareholderMeeting is Initializable, Operator, BaseRelayRecipient {
     return voters[voter].voted[resolutionId];
   }
 
-  function versionRecipient() external override view returns (string memory) {
-    return "2.0.0";
+  function preRelayedCall(bytes calldata /* context */) external override returns (bytes32) {
   }
 
-  function _msgSender() internal override(BaseRelayRecipient, ContextUpgradeSafe) virtual view returns (address payable) {
-    return BaseRelayRecipient._msgSender();
+  function acceptRelayedCall(
+      address /* relay */,
+      address /* from */,
+      bytes calldata encodedFunction,
+      uint256 /* transactionFee */,
+      uint256 /* gasPrice */,
+      uint256 /* gasLimit  */,
+      uint256 /* nonce */,
+      bytes calldata /* approvalData */,
+      uint256 /* maxPossibleCharge */
+  )
+  external
+  override
+  view
+  returns (uint256, bytes memory) {
+    bytes4 methodId = _getMethodId(encodedFunction);
+    if (methodId == VOTE_METHOD_ID || methodId == DELEGATE_METHOD_ID) {
+      return (0, abi.encode(now));
+    }
+    return (1, '');
+  }
+
+  function postRelayedCall(bytes calldata /* context */, bool /* success */, uint /* actualCharge */, bytes32 /*  preRetVal */) external override {
+  }
+
+  function _getMethodId(bytes memory encodedFunction) internal pure returns (bytes4) {
+    bytes4 methodId;
+    assembly {
+      methodId := mload(add(encodedFunction, 32))
+    }
+    return methodId;
+  }
+
+  function withdraw() public onlyOperator {
+    uint256 balance = getRelayHub().balanceOf(address(this));
+    getRelayHub().withdraw(balance, payable(address(this)));
+    msg.sender.transfer(balance);
   }
 }

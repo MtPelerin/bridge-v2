@@ -49,6 +49,6 @@ pragma solidity 0.6.2;
 
 contract ProofOfAddress {
   fallback () external payable {
-    require(false, "PA01");
+    revert("PA01");
   }
 }

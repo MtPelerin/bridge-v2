@@ -56,7 +56,7 @@ const timeout = function (ms) {
 
 const Contract = Contracts.getFromLocal('ShareholderMeeting');
 
-contract('ShareholderMeeting', function ([_, owner, operator, address1, address2, address3, address4, address5, address6]) {
+contract('ShareholderMeeting', function ([_, owner, operator, address1, address2, address3, address4, address5, address6, relay, from]) {
   beforeEach(async function () {
     this.project = await TestHelper();
     this.contract = await this.project.createProxy(Contract, {initArgs: [owner]});
@@ -180,6 +180,12 @@ contract('ShareholderMeeting', function ([_, owner, operator, address1, address2
 
     it('can get the contract version', async function () {
       (await this.contract.methods.VERSION().call()).should.equal('1');
+    });
+
+    context('Security model', function () {
+      it('reverts if trying to withdraw deposited ETH', async function () {
+        await shouldFail.reverting.withMessage(this.contract.methods.withdraw().send({from: address1, gas: 500000}), "OP01");
+      });
     });
 
     context('Resolutions', function () {
@@ -353,4 +359,24 @@ contract('ShareholderMeeting', function ([_, owner, operator, address1, address2
       });
     });
   }); 
+
+  context('Meta transaction', function () {
+    it('should allow meta transaction for delegateVote', async function () {
+      const delegateVoteEncodedFunction = '0xb31e1d4d000000000000000000000000e84da28128a48dd5585d1abb1ba67276fdd70776';
+      ret = await this.contract.methods.acceptRelayedCall(relay, from, delegateVoteEncodedFunction, 10, 10, 10, 10, '0x', 100).call();
+      ret['0'].should.equal('0');
+    });
+
+    it('should allow meta transaction for vote', async function () {
+      const voteEncodedFunction = '0x2a4a1b73000000000000000000000000ce42bdb34189a93c55de250e011c68faee374dd300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000';
+      ret = await this.contract.methods.acceptRelayedCall(relay, from, voteEncodedFunction, 10, 10, 10, 10, '0x', 100).call();
+      ret['0'].should.equal('0');
+    });
+
+    it('should deny meta transaction with anything else', async function () {
+      const badEncodedFunction = '0x2a4b1b73000000000000000000000000ce42bdb34189a93c55de250e011c68faee374dd300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000';
+      ret = await this.contract.methods.acceptRelayedCall(relay, from, badEncodedFunction, 10, 10, 10, 10, '0x', 100).call();
+      ret['0'].should.equal('1');
+    });
+  });
 });
