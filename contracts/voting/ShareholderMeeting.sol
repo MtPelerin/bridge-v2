@@ -37,11 +37,11 @@
 
 pragma solidity 0.6.2;
 
-import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "../gsn_1/GsnUtils.sol";
 import "../gsn_1/IRelayHub.sol";
 import "../gsn_1/RelayRecipient.sol";
-import "../access/Operator.sol";
 
 /**
 * @title ShareholderMeeting
@@ -62,7 +62,7 @@ import "../access/Operator.sol";
 */
 
 
-contract ShareholderMeeting is Initializable, Operator, RelayRecipient {
+contract ShareholderMeeting is Ownable, RelayRecipient {
   using SafeMath for uint256;
 
   uint256 public constant VERSION = 1;
@@ -92,12 +92,7 @@ contract ShareholderMeeting is Initializable, Operator, RelayRecipient {
   mapping(address => Voter) public voters;
   Resolution[] public resolutions;
 
-  /**
-  * @dev Initializer (replaces constructor when contract is upgradable)
-  * @param owner the final owner of the contract
-  */
-  function initialize(address owner) public override initializer {
-    Operator.initialize(owner);
+  constructor() public {
     setRelayHub(IRelayHub(RELAY_HUB));
   }
 
@@ -127,7 +122,7 @@ contract ShareholderMeeting is Initializable, Operator, RelayRecipient {
   * @param _urls Array of bytes where each vote details can be found
   * @param _proposalCounts Array containing the count of proposals for each vote (proposals should be detailed in the vote url)
   */
-  function addResolutions(bytes32[] calldata _names, bytes32[] calldata _urls, uint256[] calldata _proposalCounts) external onlyOperator beforeVotingSession {
+  function addResolutions(bytes32[] calldata _names, bytes32[] calldata _urls, uint256[] calldata _proposalCounts) external onlyOwner beforeVotingSession {
     require(_names.length == _urls.length, "VO01");
     require(_names.length == _proposalCounts.length, "VO02");
     for (uint256 i = 0; i < _names.length; i++) {
@@ -142,7 +137,7 @@ contract ShareholderMeeting is Initializable, Operator, RelayRecipient {
   * @param resolutionId the id of the resolution to open
   * @param voteDuration the duration in seconds during which the vote is possible
   */
-  function openResolutionVote(uint256 resolutionId, uint256 voteDuration) external onlyOperator {
+  function openResolutionVote(uint256 resolutionId, uint256 voteDuration) external onlyOwner {
     require(resolutionId < resolutions.length, "VO07");
     if (!votingStarted) {
       votingStarted = true;
@@ -166,7 +161,7 @@ contract ShareholderMeeting is Initializable, Operator, RelayRecipient {
   * @param _voters array of addresses allowed to vote
   * @param _weights array of weigths, each weight corresponding to a voter
   */
-  function registerVoters(address[] calldata _voters, uint256[] calldata _weights) external onlyOperator beforeVotingSession {
+  function registerVoters(address[] calldata _voters, uint256[] calldata _weights) external onlyOwner beforeVotingSession {
     require(_voters.length == _weights.length, "VO03");
     for (uint256 i = 0; i < _voters.length; i++) {
       voters[_voters[i]].weight = _weights[i];
@@ -268,9 +263,12 @@ contract ShareholderMeeting is Initializable, Operator, RelayRecipient {
     return methodId;
   }
 
-  function withdraw() public onlyOperator {
+  receive() external payable {
+  }
+
+  function withdraw() public onlyOwner {
     uint256 balance = getRelayHub().balanceOf(address(this));
     getRelayHub().withdraw(balance, payable(address(this)));
-    msg.sender.transfer(balance);
+    msg.sender.transfer(address(this).balance);
   }
 }
