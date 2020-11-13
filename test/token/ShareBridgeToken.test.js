@@ -141,4 +141,17 @@ contract('ShareBridgeToken', function ([_, owner, administrator, trustedIntermed
       });
     });
   });
+
+  context("Storage slots positions", function () {
+    it('retains original slot for boardResolutionDocumentHash', async function () {
+      await this.contract.methods.addAdministrator(administrator).send({from: owner});
+      (await this.contract.methods.boardResolutionDocumentUrl().call()).should.equal("");
+      (await this.contract.methods.boardResolutionDocumentHash().call()).should.equal(ZERO_HASH);
+      await this.contract.methods.setBoardResolutionDocument(BOARD_DOCUMENT_URL, BOARD_DOCUMENT_HASH).send({from: administrator, gas: 200000});
+      (await this.contract.methods.boardResolutionDocumentUrl().call()).should.equal(BOARD_DOCUMENT_URL);
+      (await this.contract.methods.boardResolutionDocumentHash().call()).should.equal(BOARD_DOCUMENT_HASH);
+      const data = await web3.eth.getStorageAt(this.contract.address, 313);
+      data.should.equal(BOARD_DOCUMENT_HASH);
+    });
+  });
 });

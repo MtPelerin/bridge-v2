@@ -36,9 +36,11 @@
 */
 
 require('chai/register-should');
+const crypto = require('crypto');
 const { TestHelper } = require('@openzeppelin/cli');
 const { Contracts, ZWeb3 } = require('@openzeppelin/upgrades');
 const { expectEvent, shouldFail } = require('openzeppelin-test-helpers');
+const { hexStringFromBuffer, signEIP712, PRIVATE_KEYS } = require('../helpers/EIP712');
 
 ZWeb3.initialize(web3.currentProvider);
 
@@ -51,7 +53,16 @@ const YesNoUpdateRule = Contracts.getFromLocal('YesNoUpdateRule');
 
 const zero = '0x0000000000000000000000000000000000000000';
 
-contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1, trustedIntermediary2, seizer, supplier, kingOwner, realmAdministrator, realm, address1, address2, address3]) {
+const PERMIT_TYPEHASH = web3.utils.keccak256('Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)');
+const TRANSFER_WITH_AUTHORIZATION_TYPEHASH = web3.utils.keccak256("TransferWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)");
+const APPROVE_WITH_AUTHORIZATION_TYPEHASH = web3.utils.keccak256("ApproveWithAuthorization(address owner,address spender,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)");
+const INCREASE_APPROVAL_WITH_AUTHORIZATION_TYPEHASH = web3.utils.keccak256("IncreaseApprovalWithAuthorization(address owner,address spender,uint256 increment,uint256 validAfter,uint256 validBefore,bytes32 nonce)");
+const DECREASE_APPROVAL_WITH_AUTHORIZATION_TYPEHASH = web3.utils.keccak256("DecreaseApprovalWithAuthorization(address owner,address spender,uint256 decrement,uint256 validAfter,uint256 validBefore,bytes32 nonce)");
+const CANCEL_AUTHORIZATION_TYPEHASH = web3.utils.keccak256("CancelAuthorization(address authorizer,bytes32 nonce)");
+
+const [_Key, ownerKey, administratorKey, trustedIntermediary1Key, trustedIntermediary2Key, seizerKey, supplierKey, kingOwnerKey, realmAdministratorKey, realmKey, address1Key, address2Key, address3Key, address4Key] = PRIVATE_KEYS;
+
+contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1, trustedIntermediary2, seizer, supplier, kingOwner, realmAdministrator, realm, address1, address2, address3, address4]) {
   beforeEach(async function () {
     this.project = await TestHelper();
     this.ruleEngine = await this.project.createProxy(RuleEngine, {initArgs: [owner]});
@@ -60,6 +71,23 @@ contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1
     await this.ruleEngine.methods.setRules([this.yesNo.address, this.yesNoUpdate.address]).send({from: owner, gas: 100000});
     this.processor = await this.project.createProxy(Processor, {initArgs: [owner, this.ruleEngine.address], gas: 100000});
     this.contract = await this.project.createProxy(Contract, {initArgs: [owner, this.processor.address, 'Test token', 'TST', 3, [trustedIntermediary1, trustedIntermediary2]], gas: 100000});
+    this.computeDomainSeparator = () => {
+      const chainId = 1; // Ganache chainId
+      return web3.utils.keccak256(
+        web3.eth.abi.encodeParameters(
+          ["bytes32", "bytes32", "bytes32", "uint256", "address"],
+          [
+            web3.utils.keccak256(
+              "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+            ),
+            web3.utils.keccak256("Test token"),
+            web3.utils.keccak256("2"),
+            chainId,
+            this.contract.address,
+          ]
+        )
+      );
+    };
   });
 
   context('When owner', function () {
@@ -522,6 +550,10 @@ contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1
       it('has proper realm', async function () {
         (await this.contract.methods.realm().call()).should.equal(this.contract.address);
       });
+      it('has an EIP712 Domain Separator', async function () {
+        const DOMAIN_SEPARATOR = this.computeDomainSeparator();
+        (await this.contract.methods.DOMAIN_SEPARATOR().call()).should.equal(DOMAIN_SEPARATOR);
+      });
     });
 
     context('Allowance', function () {
@@ -581,6 +613,785 @@ contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1
         this.events.Approval.returnValues.should.have.property('owner', address1);
         this.events.Approval.returnValues.should.have.property('spender', address3);
         this.events.Approval.returnValues.should.have.property('value', '50000');
+      });
+    });
+
+    context('EIP2612 - Permit function', function () {
+      it('has the expected PERMIT_TYPEHASH', async function () {
+        (await this.contract.methods.PERMIT_TYPEHASH().call()).should.equal(PERMIT_TYPEHASH);
+      });
+
+      it('allows address1 to permit spending allowance for address3 sent by address4', async function () {
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('0');
+        (await this.contract.methods.nonces(address1).call()).should.equal('0');
+        const deadline = Math.floor(Date.now() / 1000) + 10;
+        const params = {
+          owner: address1,
+          spender: address3,
+          value: 20000,
+          nonce: 0,
+          deadline,
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const { r, s, v } = signEIP712(domainSeparator, PERMIT_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256"], [params.owner, params.spender, params.value, params.nonce, params.deadline], address1Key);
+        ({events: this.events} = await this.contract.methods.permit(params.owner, params.spender, params.value, params.deadline, v, r, s).send({from: address4}));
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('20000');
+        (await this.contract.methods.nonces(address1).call()).should.equal('1');     
+      });
+  
+      it('emits an Approval event', function () {
+        this.events.should.have.property('Approval');
+        this.events.Approval.returnValues.should.have.property('owner', address1);
+        this.events.Approval.returnValues.should.have.property('spender', address3);
+        this.events.Approval.returnValues.should.have.property('value', '20000');
+      });
+
+      it('should revert if trying to permit spending allowance for address3 sent by address4 with invalid nonce', async function () {
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('0');
+        (await this.contract.methods.nonces(address1).call()).should.equal('0');
+        const deadline = Math.floor(Date.now() / 1000) + 10;
+        const params = {
+          owner: address1,
+          spender: address3,
+          value: 20000,
+          nonce: 1,
+          deadline,
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const { r, s, v } = signEIP712(domainSeparator, PERMIT_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256"], [params.owner, params.spender, params.value, params.nonce, params.deadline], address1Key);
+        await shouldFail.reverting.withMessage(this.contract.methods.permit(params.owner, params.spender, params.value, params.deadline, v, r, s).send({from: address4}), 'SI01');
+      });
+
+      it('should revert if trying to permit spending allowance for address3 sent by address4 with invalid signature', async function () {
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('0');
+        (await this.contract.methods.nonces(address1).call()).should.equal('0');
+        const deadline = Math.floor(Date.now() / 1000) + 10;
+        const params = {
+          owner: address1,
+          spender: address3,
+          value: 20000,
+          nonce: 0,
+          deadline,
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const { r, s, v } = signEIP712(domainSeparator, PERMIT_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256"], [params.owner, params.spender, params.value, params.nonce, params.deadline], address2Key);
+        await shouldFail.reverting.withMessage(this.contract.methods.permit(params.owner, params.spender, params.value, params.deadline, v, r, s).send({from: address4}), 'SI01');
+      });
+
+      it('should revert if trying to permit spending allowance for address3 sent by address4 with expired deadline', async function () {
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('0');
+        (await this.contract.methods.nonces(address1).call()).should.equal('0');
+        const deadline = Math.floor(Date.now() / 1000) - 1;
+        const params = {
+          owner: address1,
+          spender: address3,
+          value: 20000,
+          nonce: 0,
+          deadline,
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const { r, s, v } = signEIP712(domainSeparator, PERMIT_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256"], [params.owner, params.spender, params.value, params.nonce, params.deadline], address1Key);
+        await shouldFail.reverting.withMessage(this.contract.methods.permit(params.owner, params.spender, params.value, params.deadline, v, r, s).send({from: address4}), 'EX01');
+      });
+    });
+
+    context('EIP3009 - transferWithAuthorization function', function () {
+      it('has the expected TRANSFER_WITH_AUTHORIZATION_TYPEHASH', async function () {
+        (await this.contract.methods.TRANSFER_WITH_AUTHORIZATION_TYPEHASH().call()).should.equal(TRANSFER_WITH_AUTHORIZATION_TYPEHASH);
+      });
+
+      it('has the expected CANCEL_AUTHORIZATION_TYPEHASH', async function () {
+        (await this.contract.methods.CANCEL_AUTHORIZATION_TYPEHASH().call()).should.equal(CANCEL_AUTHORIZATION_TYPEHASH);
+      });
+
+      it('allows address1 to transfer tokens from address1 to address2 sent by address4', async function () {
+        (await this.yesNoUpdate.methods.updateCount().call()).should.equals('0');    
+        (await this.contract.methods.balanceOf(owner).call()).should.equal('4000');
+        (await this.contract.methods.balanceOf(address1).call()).should.equal('31000');
+        (await this.contract.methods.balanceOf(address2).call()).should.equal('32000');
+        (await this.contract.methods.balanceOf(address3).call()).should.equal('33000');
+        const validAfter = Math.floor(Date.now() / 1000) - 10;
+        const validBefore = Math.floor(Date.now() / 1000) + 10;
+        const params = {
+          from: address1,
+          to: address2,
+          value: 11000,
+          validAfter,
+          validBefore,
+          nonce: hexStringFromBuffer(crypto.randomBytes(32)),
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const { r, s, v } = signEIP712(domainSeparator, TRANSFER_WITH_AUTHORIZATION_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256", "bytes32"], [params.from, params.to, params.value, params.validAfter, params.validBefore, params.nonce], address1Key);
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+        ({events: this.events} = await this.contract.methods.transferWithAuthorization(params.from, params.to, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000})); 
+        (await this.contract.methods.balanceOf(owner).call()).should.equal('4000');
+        (await this.contract.methods.balanceOf(address1).call()).should.equal('20000');
+        (await this.contract.methods.balanceOf(address2).call()).should.equal('43000');
+        (await this.contract.methods.balanceOf(address3).call()).should.equal('33000');
+        (await this.contract.methods.totalSupply().call()).should.equal('100000');   
+        (await this.yesNoUpdate.methods.updateCount().call()).should.equals('1');   
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('1');    
+      });
+
+      it('emits a Transfer event', function () {
+        this.events.should.have.property('Transfer');
+        this.events.Transfer.returnValues.should.have.property('from', address1);
+        this.events.Transfer.returnValues.should.have.property('to', address2);
+        this.events.Transfer.returnValues.should.have.property('value', '11000');
+      });
+
+      it('should revert if trying to transfer tokens from address1 to address2 sent by address4 with invalid signature', async function () {
+        (await this.yesNoUpdate.methods.updateCount().call()).should.equals('0');    
+        (await this.contract.methods.balanceOf(owner).call()).should.equal('4000');
+        (await this.contract.methods.balanceOf(address1).call()).should.equal('31000');
+        (await this.contract.methods.balanceOf(address2).call()).should.equal('32000');
+        (await this.contract.methods.balanceOf(address3).call()).should.equal('33000');
+        const validAfter = Math.floor(Date.now() / 1000) - 10;
+        const validBefore = Math.floor(Date.now() / 1000) + 10;
+        const params = {
+          from: address1,
+          to: address2,
+          value: 11000,
+          validAfter,
+          validBefore,
+          nonce: hexStringFromBuffer(crypto.randomBytes(32)),
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const { r, s, v } = signEIP712(domainSeparator, TRANSFER_WITH_AUTHORIZATION_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256", "bytes32"], [params.from, params.to, params.value, params.validAfter, params.validBefore, params.nonce], address2Key);
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+        await shouldFail.reverting.withMessage(this.contract.methods.transferWithAuthorization(params.from, params.to, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000}), 'SI01'); 
+        (await this.contract.methods.balanceOf(owner).call()).should.equal('4000');
+        (await this.contract.methods.balanceOf(address1).call()).should.equal('31000');
+        (await this.contract.methods.balanceOf(address2).call()).should.equal('32000');
+        (await this.contract.methods.balanceOf(address3).call()).should.equal('33000');
+        (await this.contract.methods.totalSupply().call()).should.equal('100000');   
+        (await this.yesNoUpdate.methods.updateCount().call()).should.equals('0'); 
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+      });
+
+      it('should revert if trying to transfer tokens from address1 to address2 sent by address4 before validAfter', async function () {
+        (await this.yesNoUpdate.methods.updateCount().call()).should.equals('0');    
+        (await this.contract.methods.balanceOf(owner).call()).should.equal('4000');
+        (await this.contract.methods.balanceOf(address1).call()).should.equal('31000');
+        (await this.contract.methods.balanceOf(address2).call()).should.equal('32000');
+        (await this.contract.methods.balanceOf(address3).call()).should.equal('33000');
+        const validAfter = Math.floor(Date.now() / 1000) + 10;
+        const validBefore = Math.floor(Date.now() / 1000) + 20;
+        const params = {
+          from: address1,
+          to: address2,
+          value: 11000,
+          validAfter,
+          validBefore,
+          nonce: hexStringFromBuffer(crypto.randomBytes(32)),
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const { r, s, v } = signEIP712(domainSeparator, TRANSFER_WITH_AUTHORIZATION_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256", "bytes32"], [params.from, params.to, params.value, params.validAfter, params.validBefore, params.nonce], address1Key);
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+        await shouldFail.reverting.withMessage(this.contract.methods.transferWithAuthorization(params.from, params.to, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000}), 'EX02'); 
+        (await this.contract.methods.balanceOf(owner).call()).should.equal('4000');
+        (await this.contract.methods.balanceOf(address1).call()).should.equal('31000');
+        (await this.contract.methods.balanceOf(address2).call()).should.equal('32000');
+        (await this.contract.methods.balanceOf(address3).call()).should.equal('33000');
+        (await this.contract.methods.totalSupply().call()).should.equal('100000');   
+        (await this.yesNoUpdate.methods.updateCount().call()).should.equals('0'); 
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+      });
+
+      it('should revert if trying to transfer tokens from address1 to address2 sent by address4 after validBefore', async function () {
+        (await this.yesNoUpdate.methods.updateCount().call()).should.equals('0');    
+        (await this.contract.methods.balanceOf(owner).call()).should.equal('4000');
+        (await this.contract.methods.balanceOf(address1).call()).should.equal('31000');
+        (await this.contract.methods.balanceOf(address2).call()).should.equal('32000');
+        (await this.contract.methods.balanceOf(address3).call()).should.equal('33000');
+        const validAfter = Math.floor(Date.now() / 1000) - 20;
+        const validBefore = Math.floor(Date.now() / 1000) - 10;
+        const params = {
+          from: address1,
+          to: address2,
+          value: 11000,
+          validAfter,
+          validBefore,
+          nonce: hexStringFromBuffer(crypto.randomBytes(32)),
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const { r, s, v } = signEIP712(domainSeparator, TRANSFER_WITH_AUTHORIZATION_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256", "bytes32"], [params.from, params.to, params.value, params.validAfter, params.validBefore, params.nonce], address1Key);
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+        await shouldFail.reverting.withMessage(this.contract.methods.transferWithAuthorization(params.from, params.to, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000}), 'EX01'); 
+        (await this.contract.methods.balanceOf(owner).call()).should.equal('4000');
+        (await this.contract.methods.balanceOf(address1).call()).should.equal('31000');
+        (await this.contract.methods.balanceOf(address2).call()).should.equal('32000');
+        (await this.contract.methods.balanceOf(address3).call()).should.equal('33000');
+        (await this.contract.methods.totalSupply().call()).should.equal('100000');   
+        (await this.yesNoUpdate.methods.updateCount().call()).should.equals('0'); 
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+      });
+
+      it('should revert if trying to transfer tokens from address1 to address2 sent by address4 and authorization has already been used', async function () {
+        (await this.yesNoUpdate.methods.updateCount().call()).should.equals('0');    
+        (await this.contract.methods.balanceOf(owner).call()).should.equal('4000');
+        (await this.contract.methods.balanceOf(address1).call()).should.equal('31000');
+        (await this.contract.methods.balanceOf(address2).call()).should.equal('32000');
+        (await this.contract.methods.balanceOf(address3).call()).should.equal('33000');
+        const validAfter = Math.floor(Date.now() / 1000) - 10;
+        const validBefore = Math.floor(Date.now() / 1000) + 10;
+        const params = {
+          from: address1,
+          to: address2,
+          value: 11000,
+          validAfter,
+          validBefore,
+          nonce: hexStringFromBuffer(crypto.randomBytes(32)),
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const { r, s, v } = signEIP712(domainSeparator, TRANSFER_WITH_AUTHORIZATION_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256", "bytes32"], [params.from, params.to, params.value, params.validAfter, params.validBefore, params.nonce], address1Key);
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+        ({events: this.events} = await this.contract.methods.transferWithAuthorization(params.from, params.to, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000})); 
+        (await this.contract.methods.balanceOf(owner).call()).should.equal('4000');
+        (await this.contract.methods.balanceOf(address1).call()).should.equal('20000');
+        (await this.contract.methods.balanceOf(address2).call()).should.equal('43000');
+        (await this.contract.methods.balanceOf(address3).call()).should.equal('33000');
+        (await this.contract.methods.totalSupply().call()).should.equal('100000');   
+        (await this.yesNoUpdate.methods.updateCount().call()).should.equals('1'); 
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('1'); 
+        await shouldFail.reverting.withMessage(this.contract.methods.transferWithAuthorization(params.from, params.to, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000}), 'EX03'); 
+        (await this.contract.methods.balanceOf(owner).call()).should.equal('4000');
+        (await this.contract.methods.balanceOf(address1).call()).should.equal('20000');
+        (await this.contract.methods.balanceOf(address2).call()).should.equal('43000');
+        (await this.contract.methods.balanceOf(address3).call()).should.equal('33000');
+        (await this.contract.methods.totalSupply().call()).should.equal('100000');   
+        (await this.yesNoUpdate.methods.updateCount().call()).should.equals('1'); 
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('1'); 
+      });
+
+      it('should revert if trying to transfer tokens from address1 to address2 sent by address4 and authorization has been cancelled', async function () {
+        (await this.yesNoUpdate.methods.updateCount().call()).should.equals('0');    
+        (await this.contract.methods.balanceOf(owner).call()).should.equal('4000');
+        (await this.contract.methods.balanceOf(address1).call()).should.equal('31000');
+        (await this.contract.methods.balanceOf(address2).call()).should.equal('32000');
+        (await this.contract.methods.balanceOf(address3).call()).should.equal('33000');
+        const validAfter = Math.floor(Date.now() / 1000) - 10;
+        const validBefore = Math.floor(Date.now() / 1000) + 10;
+        const params = {
+          from: address1,
+          to: address2,
+          value: 11000,
+          validAfter,
+          validBefore,
+          nonce: hexStringFromBuffer(crypto.randomBytes(32)),
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const cancellation = signEIP712(domainSeparator, CANCEL_AUTHORIZATION_TYPEHASH, ["address", "bytes32"], [params.from, params.nonce], address1Key);
+        const { r, s, v } = signEIP712(domainSeparator, TRANSFER_WITH_AUTHORIZATION_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256", "bytes32"], [params.from, params.to, params.value, params.validAfter, params.validBefore, params.nonce], address1Key);
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+        ({events: this.events} = await this.contract.methods.cancelAuthorization(params.from, params.nonce, cancellation.v, cancellation.r, cancellation.s).send({from: address2, gas: 200000})); 
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('2'); 
+        await shouldFail.reverting.withMessage(this.contract.methods.transferWithAuthorization(params.from, params.to, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000}), 'EX03'); 
+        (await this.contract.methods.balanceOf(owner).call()).should.equal('4000');
+        (await this.contract.methods.balanceOf(address1).call()).should.equal('31000');
+        (await this.contract.methods.balanceOf(address2).call()).should.equal('32000');
+        (await this.contract.methods.balanceOf(address3).call()).should.equal('33000');
+        (await this.contract.methods.totalSupply().call()).should.equal('100000');   
+        (await this.yesNoUpdate.methods.updateCount().call()).should.equals('0'); 
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('2'); 
+      });
+    }); 
+
+    context('approveWithAuthorization function', function () {
+      it('has the expected APPROVE_WITH_AUTHORIZATION_TYPEHASH', async function () {
+        (await this.contract.methods.APPROVE_WITH_AUTHORIZATION_TYPEHASH().call()).should.equal(APPROVE_WITH_AUTHORIZATION_TYPEHASH);
+      });
+
+      it('allows address1 to approve spending allowance for address3 sent by address4', async function () {
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('0');
+        const validAfter = Math.floor(Date.now() / 1000) - 10;
+        const validBefore = Math.floor(Date.now() / 1000) + 10;
+        const params = {
+          owner: address1,
+          spender: address3,
+          value: 20000,
+          validAfter,
+          validBefore,
+          nonce: hexStringFromBuffer(crypto.randomBytes(32)),
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const { r, s, v } = signEIP712(domainSeparator, APPROVE_WITH_AUTHORIZATION_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256", "bytes32"], [params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce], address1Key);
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+        ({events: this.events} = await this.contract.methods.approveWithAuthorization(params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000}));      
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('1');
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('20000');
+      });
+  
+      it('emits an Approval event', function () {
+        this.events.should.have.property('Approval');
+        this.events.Approval.returnValues.should.have.property('owner', address1);
+        this.events.Approval.returnValues.should.have.property('spender', address3);
+        this.events.Approval.returnValues.should.have.property('value', '20000');
+      });
+
+      it('should revert if trying to allow address1 to approve spending allowance for address3 sent by address4 with invalid signature', async function () {
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('0');
+        const validAfter = Math.floor(Date.now() / 1000) - 10;
+        const validBefore = Math.floor(Date.now() / 1000) + 10;
+        const params = {
+          owner: address1,
+          spender: address3,
+          value: 20000,
+          validAfter,
+          validBefore,
+          nonce: hexStringFromBuffer(crypto.randomBytes(32)),
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const { r, s, v } = signEIP712(domainSeparator, APPROVE_WITH_AUTHORIZATION_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256", "bytes32"], [params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce], address2Key);
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+        await shouldFail.reverting.withMessage(this.contract.methods.approveWithAuthorization(params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000}), 'SI01'); 
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('0');
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+      });
+
+      it('should revert if trying to allow address1 to approve spending allowance for address3 sent by address4 before validAfter', async function () {
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('0');
+        const validAfter = Math.floor(Date.now() / 1000) + 10;
+        const validBefore = Math.floor(Date.now() / 1000) + 20;
+        const params = {
+          owner: address1,
+          spender: address3,
+          value: 20000,
+          validAfter,
+          validBefore,
+          nonce: hexStringFromBuffer(crypto.randomBytes(32)),
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const { r, s, v } = signEIP712(domainSeparator, APPROVE_WITH_AUTHORIZATION_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256", "bytes32"], [params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce], address1Key);
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+        await shouldFail.reverting.withMessage(this.contract.methods.approveWithAuthorization(params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000}), 'EX02'); 
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('0');
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+      });
+
+      it('should revert if trying to allow address1 to approve spending allowance for address3 sent by address4 after validBefore', async function () {
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('0');
+        const validAfter = Math.floor(Date.now() / 1000) - 20;
+        const validBefore = Math.floor(Date.now() / 1000) - 10;
+        const params = {
+          owner: address1,
+          spender: address3,
+          value: 20000,
+          validAfter,
+          validBefore,
+          nonce: hexStringFromBuffer(crypto.randomBytes(32)),
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const { r, s, v } = signEIP712(domainSeparator, APPROVE_WITH_AUTHORIZATION_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256", "bytes32"], [params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce], address1Key);
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+        await shouldFail.reverting.withMessage(this.contract.methods.approveWithAuthorization(params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000}), 'EX01'); 
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('0');
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+      });
+
+      it('should revert if trying to allow address1 to approve spending allowance for address3 sent by address4 and authorization has already been used', async function () {
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('0');
+        const validAfter = Math.floor(Date.now() / 1000) - 10;
+        const validBefore = Math.floor(Date.now() / 1000) + 10;
+        const params = {
+          owner: address1,
+          spender: address3,
+          value: 20000,
+          validAfter,
+          validBefore,
+          nonce: hexStringFromBuffer(crypto.randomBytes(32)),
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const { r, s, v } = signEIP712(domainSeparator, APPROVE_WITH_AUTHORIZATION_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256", "bytes32"], [params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce], address1Key);
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+        ({events: this.events} = await this.contract.methods.approveWithAuthorization(params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000})); 
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('20000');
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('1'); 
+        await shouldFail.reverting.withMessage(this.contract.methods.approveWithAuthorization(params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000}), 'EX03'); 
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('20000');
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('1'); 
+      });
+
+      it('should revert if trying to allow address1 to approve spending allowance for address3 sent by address4 and authorization has been cancelled', async function () {
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('0');
+        const validAfter = Math.floor(Date.now() / 1000) - 10;
+        const validBefore = Math.floor(Date.now() / 1000) + 10;
+        const params = {
+          owner: address1,
+          spender: address3,
+          value: 20000,
+          validAfter,
+          validBefore,
+          nonce: hexStringFromBuffer(crypto.randomBytes(32)),
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const cancellation = signEIP712(domainSeparator, CANCEL_AUTHORIZATION_TYPEHASH, ["address", "bytes32"], [params.owner, params.nonce], address1Key);
+        const { r, s, v } = signEIP712(domainSeparator, APPROVE_WITH_AUTHORIZATION_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256", "bytes32"], [params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce], address1Key);
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+        ({events: this.events} = await this.contract.methods.cancelAuthorization(params.owner, params.nonce, cancellation.v, cancellation.r, cancellation.s).send({from: address2, gas: 200000})); 
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('2'); 
+        await shouldFail.reverting.withMessage(this.contract.methods.approveWithAuthorization(params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000}), 'EX03'); 
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('0');
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('2'); 
+      });
+    });
+
+    context('increaseApprovalWithAuthorization function', function () {
+      beforeEach(async function () {
+        await this.contract.methods.approve(address3, 20000).send({from: address1});
+      });
+
+      it('has the expected INCREASE_APPROVAL_WITH_AUTHORIZATION_TYPEHASH', async function () {
+        (await this.contract.methods.INCREASE_APPROVAL_WITH_AUTHORIZATION_TYPEHASH().call()).should.equal(INCREASE_APPROVAL_WITH_AUTHORIZATION_TYPEHASH);
+      });
+
+      it('allows address1 to increase spending allowance for address3 sent by address4', async function () {
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('20000');
+        const validAfter = Math.floor(Date.now() / 1000) - 10;
+        const validBefore = Math.floor(Date.now() / 1000) + 10;
+        const params = {
+          owner: address1,
+          spender: address3,
+          value: 10000,
+          validAfter,
+          validBefore,
+          nonce: hexStringFromBuffer(crypto.randomBytes(32)),
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const { r, s, v } = signEIP712(domainSeparator, INCREASE_APPROVAL_WITH_AUTHORIZATION_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256", "bytes32"], [params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce], address1Key);
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+        ({events: this.events} = await this.contract.methods.increaseApprovalWithAuthorization(params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000}));      
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('1');
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('30000');
+      });
+  
+      it('emits an Approval event', function () {
+        this.events.should.have.property('Approval');
+        this.events.Approval.returnValues.should.have.property('owner', address1);
+        this.events.Approval.returnValues.should.have.property('spender', address3);
+        this.events.Approval.returnValues.should.have.property('value', '30000');
+      });
+
+      it('should revert if trying to allow address1 to increase spending allowance for address3 sent by address4 with invalid signature', async function () {
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('20000');
+        const validAfter = Math.floor(Date.now() / 1000) - 10;
+        const validBefore = Math.floor(Date.now() / 1000) + 10;
+        const params = {
+          owner: address1,
+          spender: address3,
+          value: 10000,
+          validAfter,
+          validBefore,
+          nonce: hexStringFromBuffer(crypto.randomBytes(32)),
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const { r, s, v } = signEIP712(domainSeparator, INCREASE_APPROVAL_WITH_AUTHORIZATION_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256", "bytes32"], [params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce], address2Key);
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+        await shouldFail.reverting.withMessage(this.contract.methods.increaseApprovalWithAuthorization(params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000}), 'SI01'); 
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('20000');
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+      });
+
+      it('should revert if trying to allow address1 to increase spending allowance for address3 sent by address4 before validAfter', async function () {
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('20000');
+        const validAfter = Math.floor(Date.now() / 1000) + 10;
+        const validBefore = Math.floor(Date.now() / 1000) + 20;
+        const params = {
+          owner: address1,
+          spender: address3,
+          value: 10000,
+          validAfter,
+          validBefore,
+          nonce: hexStringFromBuffer(crypto.randomBytes(32)),
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const { r, s, v } = signEIP712(domainSeparator, INCREASE_APPROVAL_WITH_AUTHORIZATION_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256", "bytes32"], [params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce], address1Key);
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+        await shouldFail.reverting.withMessage(this.contract.methods.increaseApprovalWithAuthorization(params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000}), 'EX02'); 
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('20000');
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+      });
+
+      it('should revert if trying to allow address1 to increase spending allowance for address3 sent by address4 after validBefore', async function () {
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('20000');
+        const validAfter = Math.floor(Date.now() / 1000) - 20;
+        const validBefore = Math.floor(Date.now() / 1000) - 10;
+        const params = {
+          owner: address1,
+          spender: address3,
+          value: 10000,
+          validAfter,
+          validBefore,
+          nonce: hexStringFromBuffer(crypto.randomBytes(32)),
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const { r, s, v } = signEIP712(domainSeparator, INCREASE_APPROVAL_WITH_AUTHORIZATION_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256", "bytes32"], [params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce], address1Key);
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+        await shouldFail.reverting.withMessage(this.contract.methods.increaseApprovalWithAuthorization(params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000}), 'EX01'); 
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('20000');
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+      });
+
+      it('should revert if trying to allow address1 to increase spending allowance for address3 sent by address4 and authorization has already been used', async function () {
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('20000');
+        const validAfter = Math.floor(Date.now() / 1000) - 10;
+        const validBefore = Math.floor(Date.now() / 1000) + 10;
+        const params = {
+          owner: address1,
+          spender: address3,
+          value: 10000,
+          validAfter,
+          validBefore,
+          nonce: hexStringFromBuffer(crypto.randomBytes(32)),
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const { r, s, v } = signEIP712(domainSeparator, INCREASE_APPROVAL_WITH_AUTHORIZATION_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256", "bytes32"], [params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce], address1Key);
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+        ({events: this.events} = await this.contract.methods.increaseApprovalWithAuthorization(params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000})); 
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('30000');
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('1'); 
+        await shouldFail.reverting.withMessage(this.contract.methods.increaseApprovalWithAuthorization(params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000}), 'EX03'); 
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('30000');
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('1'); 
+      });
+
+      it('should revert if trying to allow address1 to increase spending allowance for address3 sent by address4 and authorization has been cancelled', async function () {
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('20000');
+        const validAfter = Math.floor(Date.now() / 1000) - 10;
+        const validBefore = Math.floor(Date.now() / 1000) + 10;
+        const params = {
+          owner: address1,
+          spender: address3,
+          value: 10000,
+          validAfter,
+          validBefore,
+          nonce: hexStringFromBuffer(crypto.randomBytes(32)),
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const cancellation = signEIP712(domainSeparator, CANCEL_AUTHORIZATION_TYPEHASH, ["address", "bytes32"], [params.owner, params.nonce], address1Key);
+        const { r, s, v } = signEIP712(domainSeparator, INCREASE_APPROVAL_WITH_AUTHORIZATION_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256", "bytes32"], [params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce], address1Key);
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+        ({events: this.events} = await this.contract.methods.cancelAuthorization(params.owner, params.nonce, cancellation.v, cancellation.r, cancellation.s).send({from: address2, gas: 200000})); 
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('2'); 
+        await shouldFail.reverting.withMessage(this.contract.methods.increaseApprovalWithAuthorization(params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000}), 'EX03'); 
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('20000');
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('2'); 
+      });
+    });
+
+    context('decreaseApprovalWithAuthorization function', function () {
+      beforeEach(async function () {
+        await this.contract.methods.approve(address3, 20000).send({from: address1});
+      });
+
+      it('has the expected DECREASE_APPROVAL_WITH_AUTHORIZATION_TYPEHASH', async function () {
+        (await this.contract.methods.DECREASE_APPROVAL_WITH_AUTHORIZATION_TYPEHASH().call()).should.equal(DECREASE_APPROVAL_WITH_AUTHORIZATION_TYPEHASH);
+      });
+
+      it('allows address1 to decrease spending allowance for address3 sent by address4', async function () {
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('20000');
+        const validAfter = Math.floor(Date.now() / 1000) - 10;
+        const validBefore = Math.floor(Date.now() / 1000) + 10;
+        const params = {
+          owner: address1,
+          spender: address3,
+          value: 10000,
+          validAfter,
+          validBefore,
+          nonce: hexStringFromBuffer(crypto.randomBytes(32)),
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const { r, s, v } = signEIP712(domainSeparator, DECREASE_APPROVAL_WITH_AUTHORIZATION_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256", "bytes32"], [params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce], address1Key);
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+        ({events: this.events} = await this.contract.methods.decreaseApprovalWithAuthorization(params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000}));      
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('1');
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('10000');
+      });
+  
+      it('emits an Approval event', function () {
+        this.events.should.have.property('Approval');
+        this.events.Approval.returnValues.should.have.property('owner', address1);
+        this.events.Approval.returnValues.should.have.property('spender', address3);
+        this.events.Approval.returnValues.should.have.property('value', '10000');
+      });
+
+      it('should revert if trying to allow address1 to decrease spending allowance for address3 sent by address4 with invalid signature', async function () {
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('20000');
+        const validAfter = Math.floor(Date.now() / 1000) - 10;
+        const validBefore = Math.floor(Date.now() / 1000) + 10;
+        const params = {
+          owner: address1,
+          spender: address3,
+          value: 10000,
+          validAfter,
+          validBefore,
+          nonce: hexStringFromBuffer(crypto.randomBytes(32)),
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const { r, s, v } = signEIP712(domainSeparator, DECREASE_APPROVAL_WITH_AUTHORIZATION_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256", "bytes32"], [params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce], address2Key);
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+        await shouldFail.reverting.withMessage(this.contract.methods.decreaseApprovalWithAuthorization(params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000}), 'SI01'); 
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('20000');
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+      });
+
+      it('should revert if trying to allow address1 to decrease spending allowance for address3 sent by address4 before validAfter', async function () {
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('20000');
+        const validAfter = Math.floor(Date.now() / 1000) + 10;
+        const validBefore = Math.floor(Date.now() / 1000) + 20;
+        const params = {
+          owner: address1,
+          spender: address3,
+          value: 10000,
+          validAfter,
+          validBefore,
+          nonce: hexStringFromBuffer(crypto.randomBytes(32)),
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const { r, s, v } = signEIP712(domainSeparator, DECREASE_APPROVAL_WITH_AUTHORIZATION_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256", "bytes32"], [params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce], address1Key);
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+        await shouldFail.reverting.withMessage(this.contract.methods.decreaseApprovalWithAuthorization(params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000}), 'EX02'); 
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('20000');
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+      });
+
+      it('should revert if trying to allow address1 to decrease spending allowance for address3 sent by address4 after validBefore', async function () {
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('20000');
+        const validAfter = Math.floor(Date.now() / 1000) - 20;
+        const validBefore = Math.floor(Date.now() / 1000) - 10;
+        const params = {
+          owner: address1,
+          spender: address3,
+          value: 10000,
+          validAfter,
+          validBefore,
+          nonce: hexStringFromBuffer(crypto.randomBytes(32)),
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const { r, s, v } = signEIP712(domainSeparator, DECREASE_APPROVAL_WITH_AUTHORIZATION_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256", "bytes32"], [params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce], address1Key);
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+        await shouldFail.reverting.withMessage(this.contract.methods.decreaseApprovalWithAuthorization(params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000}), 'EX01'); 
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('20000');
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+      });
+
+      it('should revert if trying to allow address1 to decrease spending allowance for address3 sent by address4 and authorization has already been used', async function () {
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('20000');
+        const validAfter = Math.floor(Date.now() / 1000) - 10;
+        const validBefore = Math.floor(Date.now() / 1000) + 10;
+        const params = {
+          owner: address1,
+          spender: address3,
+          value: 10000,
+          validAfter,
+          validBefore,
+          nonce: hexStringFromBuffer(crypto.randomBytes(32)),
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const { r, s, v } = signEIP712(domainSeparator, DECREASE_APPROVAL_WITH_AUTHORIZATION_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256", "bytes32"], [params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce], address1Key);
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+        ({events: this.events} = await this.contract.methods.decreaseApprovalWithAuthorization(params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000})); 
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('10000');
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('1'); 
+        await shouldFail.reverting.withMessage(this.contract.methods.decreaseApprovalWithAuthorization(params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000}), 'EX03'); 
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('10000');
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('1'); 
+      });
+
+      it('should revert if trying to allow address1 to decrease spending allowance for address3 sent by address4 and authorization has been cancelled', async function () {
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('20000');
+        const validAfter = Math.floor(Date.now() / 1000) - 10;
+        const validBefore = Math.floor(Date.now() / 1000) + 10;
+        const params = {
+          owner: address1,
+          spender: address3,
+          value: 10000,
+          validAfter,
+          validBefore,
+          nonce: hexStringFromBuffer(crypto.randomBytes(32)),
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const cancellation = signEIP712(domainSeparator, CANCEL_AUTHORIZATION_TYPEHASH, ["address", "bytes32"], [params.owner, params.nonce], address1Key);
+        const { r, s, v } = signEIP712(domainSeparator, DECREASE_APPROVAL_WITH_AUTHORIZATION_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256", "bytes32"], [params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce], address1Key);
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+        ({events: this.events} = await this.contract.methods.cancelAuthorization(params.owner, params.nonce, cancellation.v, cancellation.r, cancellation.s).send({from: address2, gas: 200000})); 
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('2'); 
+        await shouldFail.reverting.withMessage(this.contract.methods.decreaseApprovalWithAuthorization(params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000}), 'EX03'); 
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('20000');
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('2'); 
+      });
+    });
+
+    context('cancelAuthorization function', function () {
+      it('has the expected CANCEL_AUTHORIZATION_TYPEHASH', async function () {
+        (await this.contract.methods.CANCEL_AUTHORIZATION_TYPEHASH().call()).should.equal(CANCEL_AUTHORIZATION_TYPEHASH);
+      });
+
+      it('allows address1 to cancel authorization sent by address2', async function () {
+        const validAfter = Math.floor(Date.now() / 1000) - 10;
+        const validBefore = Math.floor(Date.now() / 1000) + 10;
+        this.nonce = hexStringFromBuffer(crypto.randomBytes(32));
+        const params = {
+          owner: address1,
+          spender: address3,
+          value: 10000,
+          validAfter,
+          validBefore,
+          nonce: this.nonce,
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const cancellation = signEIP712(domainSeparator, CANCEL_AUTHORIZATION_TYPEHASH, ["address", "bytes32"], [params.owner, params.nonce], address1Key);
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+        ({events: this.events} = await this.contract.methods.cancelAuthorization(params.owner, params.nonce, cancellation.v, cancellation.r, cancellation.s).send({from: address2, gas: 200000})); 
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('2'); 
+      });
+  
+      it('emits an AuthorizationCanceled event', function () {
+        this.events.should.have.property('AuthorizationCanceled');
+        this.events.AuthorizationCanceled.returnValues.should.have.property('authorizer', address1);
+        this.events.AuthorizationCanceled.returnValues.should.have.property('nonce', this.nonce);
+      });
+
+      it('should revert if trying to cancel already used authorization', async function () {
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('0');
+        const validAfter = Math.floor(Date.now() / 1000) - 10;
+        const validBefore = Math.floor(Date.now() / 1000) + 10;
+        const params = {
+          owner: address1,
+          spender: address3,
+          value: 20000,
+          validAfter,
+          validBefore,
+          nonce: hexStringFromBuffer(crypto.randomBytes(32)),
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const cancellation = signEIP712(domainSeparator, CANCEL_AUTHORIZATION_TYPEHASH, ["address", "bytes32"], [params.owner, params.nonce], address1Key);
+        const { r, s, v } = signEIP712(domainSeparator, APPROVE_WITH_AUTHORIZATION_TYPEHASH, ["address", "address", "uint256", "uint256", "uint256", "bytes32"], [params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce], address1Key);
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+        await this.contract.methods.approveWithAuthorization(params.owner, params.spender, params.value, params.validAfter, params.validBefore, params.nonce, v, r, s).send({from: address4, gas: 200000});      
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('1');
+        (await this.contract.methods.allowance(address1, address3).call()).should.equal('20000');
+        await shouldFail.reverting.withMessage(this.contract.methods.cancelAuthorization(params.owner, params.nonce, cancellation.v, cancellation.r, cancellation.s).send({from: address2, gas: 200000}), 'EX03'); 
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('1'); 
+      });
+
+      it('should revert if trying to cancel authorization with wrong signature', async function () {
+        const validAfter = Math.floor(Date.now() / 1000) - 10;
+        const validBefore = Math.floor(Date.now() / 1000) + 10;
+        this.nonce = hexStringFromBuffer(crypto.randomBytes(32));
+        const params = {
+          owner: address1,
+          spender: address3,
+          value: 10000,
+          validAfter,
+          validBefore,
+          nonce: this.nonce,
+        };
+        const domainSeparator = this.computeDomainSeparator();
+        const cancellation = signEIP712(domainSeparator, CANCEL_AUTHORIZATION_TYPEHASH, ["address", "bytes32"], [params.owner, params.nonce], address2Key);
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
+        await shouldFail.reverting.withMessage(this.contract.methods.cancelAuthorization(params.owner, params.nonce, cancellation.v, cancellation.r, cancellation.s).send({from: address2, gas: 200000}), 'SI01'); 
+        (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
       });
     });
 
@@ -764,6 +1575,14 @@ contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1
       it('reverts if trying to seize tokens', async function () {
         await shouldFail.reverting.withMessage(this.contract.methods.seize(address1, 10000).send({from: address2}), "SE02");
       });
+    });
+  }); 
+
+  context("Storage slots positions", function () {
+    it('retains original slot for DOMAIN_SEPARATOR', async function () {
+      const data = await web3.eth.getStorageAt(this.contract.address, 261);
+      const DOMAIN_SEPARATOR = this.computeDomainSeparator();
+      data.should.equal(DOMAIN_SEPARATOR);
     });
   });
 });

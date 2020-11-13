@@ -44,6 +44,9 @@ import "../interfaces/ISuppliable.sol";
 import "../interfaces/IMintable.sol";
 import "../interfaces/IContactable.sol";
 import "../interfaces/IProcessor.sol";
+import "../interfaces/IERC2612.sol";
+import "../interfaces/IERC3009.sol";
+import "./utils/EIP712.sol";
 
 /**
  * @title BridgeToken
@@ -53,16 +56,33 @@ import "../interfaces/IProcessor.sol";
  * SU01: Caller is not supplier
  * RU01: Rules and rules params don't have the same length
  * RE01: Rule id overflow
+ * EX01: Authorization is expired
+ * EX02: Authorization is not valid yet
+ * EX03: Authorization is already used or cancelled
+ * SI01: Invalid signature 
 **/
 
 
-contract BridgeToken is Initializable, IContactable, IRulable, ISuppliable, IMintable, SeizableBridgeERC20 {
+contract BridgeToken is Initializable, IContactable, IRulable, ISuppliable, IMintable, IERC2612, IERC3009, SeizableBridgeERC20 {
   using Roles for Roles.Role;
   
+  bytes32 public constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9; // = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)")
+  bytes32 public constant TRANSFER_WITH_AUTHORIZATION_TYPEHASH = 0x7c7c6cdb67a18743f49ec6fa9b35f50d52ed05cbed4cc592e13b44501c1a2267; // = keccak256("TransferWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)")
+  bytes32 public constant APPROVE_WITH_AUTHORIZATION_TYPEHASH = 0x808c10407a796f3ef2c7ea38c0638ea9d2b8a1c63e3ca9e1f56ce84ae59df73c; // = keccak256("ApproveWithAuthorization(address owner,address spender,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)")
+  bytes32 public constant INCREASE_APPROVAL_WITH_AUTHORIZATION_TYPEHASH = 0x9a42d39fe98978ff30e5bb6104a6ce6f70ac074c10013f1bce9743e2dccce41b; // = keccak256("IncreaseApprovalWithAuthorization(address owner,address spender,uint256 increment,uint256 validAfter,uint256 validBefore,bytes32 nonce)")
+  bytes32 public constant DECREASE_APPROVAL_WITH_AUTHORIZATION_TYPEHASH = 0x604bdf0208a879f7d9fa63ff2f539804aaf6f7876eaa13d531bdc957f1c0284f; // = keccak256("DecreaseApprovalWithAuthorization(address owner,address spender,uint256 decrement,uint256 validAfter,uint256 validBefore,bytes32 nonce)")
+  bytes32 public constant CANCEL_AUTHORIZATION_TYPEHASH = 0x158b0a9edf7a828aad02f63cd515c68ef2f50ba807396f6d12842833a1597429; // = keccak256("CancelAuthorization(address authorizer,bytes32 nonce)")
+
   Roles.Role internal _suppliers;
   uint256[] internal _rules;
   uint256[] internal _rulesParams;
   string internal _contact;
+  /* EIP712 Domain Separator */
+  bytes32 public DOMAIN_SEPARATOR;
+  /* EIP2612 Permit nonces */
+  mapping(address => uint256) public nonces;
+  /* EIP3009 Authorization States */
+  mapping(address => mapping(bytes32 => AuthorizationState)) public authorizationStates;
 
   function initialize(
     address owner,
@@ -78,11 +98,17 @@ contract BridgeToken is Initializable, IContactable, IRulable, ISuppliable, IMin
     processor.register(name, symbol, decimals);
     _trustedIntermediaries = trustedIntermediaries;
     emit TrustedIntermediariesChanged(trustedIntermediaries);
+    _upgradeToV2();
   }
 
   modifier onlySupplier() {
     require(isSupplier(_msgSender()), "SU01");
     _;
+  }
+
+  /* Upgrade helpers */
+  function upgradeToV2() public onlyOwner {
+    _upgradeToV2();
   }
 
   /* Mintable */
@@ -156,6 +182,288 @@ contract BridgeToken is Initializable, IContactable, IRulable, ISuppliable, IMin
     emit ContactSet(__contact);
   }
 
+  /* EIP2612 - Initial code from https://github.com/centrehq/centre-tokens/blob/master/contracts/v2/Permit.sol */
+  function permit(
+        address owner,
+        address spender,
+        uint256 value,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external override hasProcessor {
+      require(deadline >= block.timestamp, "EX01");
+
+      bytes memory data = abi.encode(
+        PERMIT_TYPEHASH,
+        owner,
+        spender,
+        value,
+        nonces[owner]++,
+        deadline
+      );
+      require(
+        EIP712.recover(DOMAIN_SEPARATOR, v, r, s, data) == owner,
+        "SI01"
+      );
+
+      _approve(owner, spender, value);
+  }
+
+  /* EIP3009 - Initial code from https://github.com/centrehq/centre-tokens/blob/master/contracts/v2/GasAbstraction.sol */
+  /**
+   * @notice Execute a transfer with a signed authorization
+   * @param from          Payer's address (Authorizer)
+   * @param to            Payee's address
+   * @param value         Amount to be transferred
+   * @param validAfter    The time after which this is valid (unix time)
+   * @param validBefore   The time before which this is valid (unix time)
+   * @param nonce         Unique nonce
+   * @param v             v of the signature
+   * @param r             r of the signature
+   * @param s             s of the signature
+  */
+  function transferWithAuthorization(
+    address from,
+    address to,
+    uint256 value,
+    uint256 validAfter,
+    uint256 validBefore,
+    bytes32 nonce,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) external override hasProcessor {
+    _requireValidAuthorization(from, nonce, validAfter, validBefore);
+
+    bytes memory data = abi.encode(
+      TRANSFER_WITH_AUTHORIZATION_TYPEHASH,
+      from,
+      to,
+      value,
+      validAfter,
+      validBefore,
+      nonce
+    );
+    require(
+      EIP712.recover(DOMAIN_SEPARATOR, v, r, s, data) == from,
+      "SI01"
+    );
+
+    _markAuthorizationAsUsed(from, nonce);
+    _transferFrom(from, to, value);
+  }
+
+  /**
+  * @notice Update allowance with a signed authorization
+  * @param owner         Token owner's address (Authorizer)
+  * @param spender       Spender's address
+  * @param value         Amount of allowance
+  * @param validAfter    The time after which this is valid (unix time)
+  * @param validBefore   The time before which this is valid (unix time)
+  * @param nonce         Unique nonce
+  * @param v             v of the signature
+  * @param r             r of the signature
+  * @param s             s of the signature
+  */
+  function approveWithAuthorization(
+    address owner,
+    address spender,
+    uint256 value,
+    uint256 validAfter,
+    uint256 validBefore,
+    bytes32 nonce,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) external hasProcessor {
+    _requireValidAuthorization(owner, nonce, validAfter, validBefore);
+
+    bytes memory data = abi.encode(
+      APPROVE_WITH_AUTHORIZATION_TYPEHASH,
+      owner,
+      spender,
+      value,
+      validAfter,
+      validBefore,
+      nonce
+    );
+    require(
+      EIP712.recover(DOMAIN_SEPARATOR, v, r, s, data) == owner,
+      "SI01"
+    );
+
+    _markAuthorizationAsUsed(owner, nonce);
+    _approve(owner, spender, value);
+  }
+
+  /**
+  * @notice Increase approval with a signed authorization
+  * @param owner         Token owner's address (Authorizer)
+  * @param spender       Spender's address
+  * @param increment     Amount of increase in allowance
+  * @param validAfter    The time after which this is valid (unix time)
+  * @param validBefore   The time before which this is valid (unix time)
+  * @param nonce         Unique nonce
+  * @param v             v of the signature
+  * @param r             r of the signature
+  * @param s             s of the signature
+  */
+  function increaseApprovalWithAuthorization(
+    address owner,
+    address spender,
+    uint256 increment,
+    uint256 validAfter,
+    uint256 validBefore,
+    bytes32 nonce,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) external hasProcessor {
+    _requireValidAuthorization(owner, nonce, validAfter, validBefore);
+
+    bytes memory data = abi.encode(
+      INCREASE_APPROVAL_WITH_AUTHORIZATION_TYPEHASH,
+      owner,
+      spender,
+      increment,
+      validAfter,
+      validBefore,
+      nonce
+    );
+    require(
+      EIP712.recover(DOMAIN_SEPARATOR, v, r, s, data) == owner,
+      "SI01"
+    );
+
+    _markAuthorizationAsUsed(owner, nonce);
+    _increaseApproval(owner, spender, increment);
+  }
+
+  /**
+  * @notice Decrease approval with a signed authorization
+  * @param owner         Token owner's address (Authorizer)
+  * @param spender       Spender's address
+  * @param decrement     Amount of decrease in allowance
+  * @param validAfter    The time after which this is valid (unix time)
+  * @param validBefore   The time before which this is valid (unix time)
+  * @param nonce         Unique nonce
+  * @param v             v of the signature
+  * @param r             r of the signature
+  * @param s             s of the signature
+  */
+  function decreaseApprovalWithAuthorization(
+    address owner,
+    address spender,
+    uint256 decrement,
+    uint256 validAfter,
+    uint256 validBefore,
+    bytes32 nonce,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) external hasProcessor {
+    _requireValidAuthorization(owner, nonce, validAfter, validBefore);
+
+    bytes memory data = abi.encode(
+      DECREASE_APPROVAL_WITH_AUTHORIZATION_TYPEHASH,
+      owner,
+      spender,
+      decrement,
+      validAfter,
+      validBefore,
+      nonce
+    );
+    require(
+      EIP712.recover(DOMAIN_SEPARATOR, v, r, s, data) == owner,
+      "SI01"
+    );
+
+    _markAuthorizationAsUsed(owner, nonce);
+    _decreaseApproval(owner, spender, decrement);
+  }
+
+  /**
+  * @notice Attempt to cancel an authorization
+  * @dev Works only if the authorization is not yet used.
+  * @param authorizer    Authorizer's address
+  * @param nonce         Nonce of the authorization
+  * @param v             v of the signature
+  * @param r             r of the signature
+  * @param s             s of the signature
+  */
+  function cancelAuthorization(
+    address authorizer,
+    bytes32 nonce,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) external {
+    _requireUnusedAuthorization(authorizer, nonce);
+
+    bytes memory data = abi.encode(
+      CANCEL_AUTHORIZATION_TYPEHASH,
+      authorizer,
+      nonce
+    );
+    require(
+      EIP712.recover(DOMAIN_SEPARATOR, v, r, s, data) == authorizer,
+      "SI01"
+    );
+
+    authorizationStates[authorizer][nonce] = AuthorizationState.Canceled;
+    emit AuthorizationCanceled(authorizer, nonce);
+  }
+
+  /* Private EIP3009 functions */
+  /**
+  * @notice Check that an authorization is unused
+  * @param authorizer    Authorizer's address
+  * @param nonce         Nonce of the authorization
+  */
+  function _requireUnusedAuthorization(address authorizer, bytes32 nonce) internal view {
+    require(
+      authorizationStates[authorizer][nonce] == AuthorizationState.Unused,
+      "EX03"
+    );
+  }
+
+  /**
+  * @notice Check that authorization is valid
+  * @param authorizer    Authorizer's address
+  * @param nonce         Nonce of the authorization
+  * @param validAfter    The time after which this is valid (unix time)
+  * @param validBefore   The time before which this is valid (unix time)
+  */
+  function _requireValidAuthorization(
+    address authorizer,
+    bytes32 nonce,
+    uint256 validAfter,
+    uint256 validBefore
+  ) internal view {
+    require(
+      block.timestamp > validAfter,
+      "EX02"
+    );
+    require(block.timestamp < validBefore, "EX01");
+    _requireUnusedAuthorization(authorizer, nonce);
+  }
+
+  /**
+  * @notice Mark an authorization as used
+  * @param authorizer    Authorizer's address
+  * @param nonce         Nonce of the authorization
+  */
+  function _markAuthorizationAsUsed(address authorizer, bytes32 nonce) internal { 
+    authorizationStates[authorizer][nonce] = AuthorizationState.Used;
+    emit AuthorizationUsed(authorizer, nonce);
+  }
+
+  /* Private upgrader logic */
+  function _upgradeToV2() internal {
+    DOMAIN_SEPARATOR = EIP712.makeDomainSeparator(_processor.name(), "2");
+  }
+
   /* Reserved slots for future use: https://docs.openzeppelin.com/sdk/2.5/writing-contracts.html#modifying-your-contracts */
-  uint256[50] private ______gap;
+  uint256[47] private ______gap;
 }

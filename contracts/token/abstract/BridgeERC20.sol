@@ -76,12 +76,12 @@ contract BridgeERC20 is Initializable, OwnableUpgradeSafe, IAdministrable, IGove
   /** 
   * @dev Initialization function that replaces constructor in the case of upgradable contracts
   **/
-  function initialize(address owner, IProcessor processor) public virtual initializer {
+  function initialize(address owner, IProcessor newProcessor) public virtual initializer {
     __Ownable_init();
     transferOwnership(owner);
-    _processor = processor;
+    _processor = newProcessor;
     _realm = address(this);
-    emit ProcessorChanged(address(processor));
+    emit ProcessorChanged(address(newProcessor));
     emit RealmChanged(address(this));
   }
 
@@ -181,9 +181,9 @@ contract BridgeERC20 is Initializable, OwnableUpgradeSafe, IAdministrable, IGove
   /**
   * @dev Set the token processor
   **/
-  function setProcessor(IProcessor processor) public onlyAdministrator {
-    _processor = processor;
-    emit ProcessorChanged(address(processor));
+  function setProcessor(IProcessor newProcessor) public onlyAdministrator {
+    _processor = newProcessor;
+    emit ProcessorChanged(address(newProcessor));
   }
 
   /**
@@ -233,12 +233,11 @@ contract BridgeERC20 is Initializable, OwnableUpgradeSafe, IAdministrable, IGove
     bool success;
     address updatedTo;
     uint256 updatedAmount;
-    (success, updatedTo, updatedAmount) = _processor.transferFrom(
+    (success, updatedTo, updatedAmount) = _transferFrom(
       _msgSender(), 
       _to, 
       _value
     );
-    emit Transfer(_msgSender(), updatedTo, updatedAmount);
     return true;
   }
 
@@ -274,13 +273,12 @@ contract BridgeERC20 is Initializable, OwnableUpgradeSafe, IAdministrable, IGove
     bool success;
     address updatedTo;
     uint256 updatedAmount;
-    (success, updatedTo, updatedAmount) = _processor.transferFrom(
+    (success, updatedTo, updatedAmount) = _transferFrom(
       _from, 
       _to, 
       _value
     );
     _processor.decreaseApproval(_from, _msgSender(), updatedAmount);
-    emit Transfer(_from, updatedTo, updatedAmount);
     return true;
   }
 
@@ -297,8 +295,7 @@ contract BridgeERC20 is Initializable, OwnableUpgradeSafe, IAdministrable, IGove
    */
   function approve(address _spender, uint256 _value) public override hasProcessor returns (bool)
   {
-    _processor.approve(_msgSender(), _spender, _value);
-    emit Approval(_msgSender(), _spender, _value);
+    _approve(_msgSender(), _spender, _value);
     return true;
   }
 
@@ -338,9 +335,7 @@ contract BridgeERC20 is Initializable, OwnableUpgradeSafe, IAdministrable, IGove
     public
     hasProcessor
   {
-    _processor.increaseApproval(_msgSender(), _spender, _addedValue);
-    uint256 allowed = _processor.allowance(_msgSender(), _spender);
-    emit Approval(_msgSender(), _spender, allowed);
+    _increaseApproval(_msgSender(), _spender, _addedValue);
   }
 
   /**
@@ -352,7 +347,6 @@ contract BridgeERC20 is Initializable, OwnableUpgradeSafe, IAdministrable, IGove
    * From MonolithDAO Token.sol
    * @param _spender The address which will spend the funds.
    * @param _subtractedValue The amount of tokens to decrease the allowance by.
-   * @return true if decrease is successful, false otherwise
    */
   function decreaseApproval(
     address _spender,
@@ -360,11 +354,69 @@ contract BridgeERC20 is Initializable, OwnableUpgradeSafe, IAdministrable, IGove
   )
     public
     hasProcessor
-    returns (bool)
   {
-    _processor.decreaseApproval(_msgSender(), _spender, _subtractedValue);
-    uint256 allowed = _processor.allowance(_msgSender(), _spender);
-    emit Approval(_msgSender(), _spender, allowed);
+    _decreaseApproval(_msgSender(), _spender, _subtractedValue);
+  }
+
+  /**
+   * @dev Transfer tokens from one address to another
+   * @param _from address The address which you want to send tokens from
+   * @param _to address The address which you want to transfer to
+   * @param _value uint256 the amount of tokens to be transferred
+   * @return _success True if the transfer is successful, false otherwise
+   * @return _updatedTo The real address the tokens were sent to
+   * @return _updatedAmount The real amount of tokens sent
+   */
+  function _transferFrom(address _from, address _to, uint256 _value) internal returns (bool _success, address _updatedTo, uint256 _updatedAmount) {
+    (_success, _updatedTo, _updatedAmount) = _processor.transferFrom(
+      _from, 
+      _to, 
+      _value
+    );
+    emit Transfer(_from, _updatedTo, _updatedAmount);
+    return (_success, _updatedTo, _updatedAmount);
+  }
+
+  /**
+   * @dev Approve the passed address to spend the specified amount of tokens on behalf of _msgSender().
+   *
+   * Beware that changing an allowance with this method brings the risk that someone may use both the old
+   * and the new allowance by unfortunate transaction ordering. One possible solution to mitigate this
+   * race condition is to first reduce the spender's allowance to 0 and set the desired value afterwards:
+   * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
+   * @param _owner The owner address of the funds to spend
+   * @param _spender The address which will spend the funds.
+   * @param _value The amount of tokens to be spent.
+   */
+  function _approve(address _owner, address _spender, uint256 _value) internal {
+    _processor.approve(_owner, _spender, _value);
+    emit Approval(_owner, _spender, _value);
+  }
+
+  /**
+   * @dev Increase the amount of tokens that an owner allowed to a spender.
+   *
+   * @param _owner The address which has the funds
+   * @param _spender The address which will spend the funds.
+   * @param _addedValue The amount of tokens to increase the allowance by.
+   */
+  function _increaseApproval(address _owner, address _spender, uint _addedValue) internal {
+    _processor.increaseApproval(_owner, _spender, _addedValue);
+    uint256 allowed = _processor.allowance(_owner, _spender);
+    emit Approval(_owner, _spender, allowed);
+  }
+
+  /**
+   * @dev Decrease the amount of tokens that an owner allowed to a spender.
+   *
+   * @param _owner The address which has the funds
+   * @param _spender The address which will spend the funds.
+   * @param _subtractedValue The amount of tokens to decrease the allowance by.
+   */
+  function _decreaseApproval(address _owner, address _spender, uint _subtractedValue) internal {
+    _processor.decreaseApproval(_owner, _spender, _subtractedValue);
+    uint256 allowed = _processor.allowance(_owner, _spender);
+    emit Approval(_owner, _spender, allowed);
   }
 
   /* Reserved slots for future use: https://docs.openzeppelin.com/sdk/2.5/writing-contracts.html#modifying-your-contracts */

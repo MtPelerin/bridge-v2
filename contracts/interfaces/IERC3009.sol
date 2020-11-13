@@ -37,64 +37,30 @@
 
 pragma solidity 0.6.2;
 
-import "../../access/Roles.sol";
-import "./BridgeERC20.sol";
-import "../../interfaces/ISeizable.sol";
-import "../../interfaces/IProcessor.sol";
-
 /**
- * @title SeizableBridgeERC20
- * @dev SeizableBridgeERC20 contract
- *
- * Error messages
- * SE02: Caller is not seizer
-**/
+ * @title IERC3009
+ * @dev IERC3009 interface
+ */
 
+ 
+interface IERC3009 {
+  function transferWithAuthorization(
+    address from,
+    address to,
+    uint256 value,
+    uint256 validAfter,
+    uint256 validBefore,
+    bytes32 nonce,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) external;
+ 
+  event AuthorizationUsed(address indexed authorizer, bytes32 indexed nonce);
+  event AuthorizationCanceled(
+      address indexed authorizer,
+      bytes32 indexed nonce
+  );
 
-contract SeizableBridgeERC20 is Initializable, ISeizable, BridgeERC20 {
-  using Roles for Roles.Role;
-  
-  Roles.Role internal _seizers;
-
-  function initialize(
-    address owner, 
-    IProcessor processor
-  ) 
-    public override initializer 
-  {
-    BridgeERC20.initialize(owner, processor);
-  }
-
-  modifier onlySeizer() {
-    require(isSeizer(_msgSender()), "SE02");
-    _;
-  }
-
-  function isSeizer(address _seizer) public override view returns (bool) {
-    return _seizers.has(_seizer);
-  }
-
-  function addSeizer(address _seizer) public override onlyAdministrator {
-    _seizers.add(_seizer);
-    emit SeizerAdded(_seizer);
-  }
-
-  function removeSeizer(address _seizer) public override onlyAdministrator {
-    _seizers.remove(_seizer);
-    emit SeizerRemoved(_seizer);
-  }
-
-  /**
-   * @dev called by the owner to seize value from the account
-   */
-  function seize(address _account, uint256 _value)
-    public override onlySeizer hasProcessor
-  {
-    _processor.seize(_msgSender(), _account, _value);
-    emit Seize(_account, _value);
-    emit Transfer(_account, _msgSender(), _value); 
-  }
-
-  /* Reserved slots for future use: https://docs.openzeppelin.com/sdk/2.5/writing-contracts.html#modifying-your-contracts */
-  uint256[49] private ______gap;
+  enum AuthorizationState { Unused, Used, Canceled }
 }
