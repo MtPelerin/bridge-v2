@@ -26,6 +26,12 @@ As we want Bridge to be as open as possible, the token issuer will have the oppo
 
 The token is registered with a Processor that will process all the operations centrally. Having a single Processor for all tokens will ease the maintenance of the token lifecycle, as it will not be necessary to upgrade all the tokens to be able to add new features or new restrictions to each token.
 
+Every token issued with Bridge Token is compliant with the following standard proposals:
+
+- [ERC20](https://eips.ethereum.org/EIPS/eip-20)
+- [ERC2612](https://eips.ethereum.org/EIPS/eip-2612)
+- [ERC3009](https://eips.ethereum.org/EIPS/eip-3009)
+
 [Bridge Token API Overview](docs/api.md#bridgetoken)
 
 ## Processor
