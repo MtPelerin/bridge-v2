@@ -60,6 +60,7 @@ import "./utils/EIP712.sol";
  * EX02: Authorization is not valid yet
  * EX03: Authorization is already used or cancelled
  * SI01: Invalid signature 
+ * BK01: To array is not the same size as values array
 **/
 
 
@@ -457,6 +458,19 @@ contract BridgeToken is Initializable, IContactable, IRulable, ISuppliable, IMin
   function _markAuthorizationAsUsed(address authorizer, bytes32 nonce) internal { 
     authorizationStates[authorizer][nonce] = AuthorizationState.Used;
     emit AuthorizationUsed(authorizer, nonce);
+  }
+
+  /**
+  * @dev bulk transfer tokens to specified addresses
+  * @param _to The array of addresses to transfer to.
+  * @param _values The array of amounts to be transferred.
+  */
+  function bulkTransfer(address[] calldata _to, uint256[] calldata _values) external hasProcessor  
+  {
+    require(_to.length == _values.length, "BK01");
+    for (uint256 i = 0; i < _to.length; i++) {
+      _transferFrom(_msgSender(), _to[i], _values[i]);
+    }
   }
 
   /* Private upgrader logic */

@@ -1415,8 +1415,42 @@ contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1
           this.events.Transfer.returnValues.should.have.property('value', '11000');
         });
     
-        it('reverts if address1 transfers more tokens than he owns to address2', async function () {
+        it('reverts if address1 transfers more tokens than owned to address2', async function () {
           await shouldFail.reverting(this.contract.methods.transfer(address2, 50000).send({from: address1}));        
+        });
+
+        it('allows address1 to bulk transfer tokens to address2, address3 and address4', async function () {
+          (await this.yesNoUpdate.methods.updateCount().call()).should.equals('0');    
+          ({events: this.events} = await this.contract.methods.bulkTransfer([address2, address3, address4], [1000, 2000, 3000]).send({from: address1, gas: 500000})); 
+          (await this.contract.methods.balanceOf(owner).call()).should.equal('4000');
+          (await this.contract.methods.balanceOf(address1).call()).should.equal('25000');
+          (await this.contract.methods.balanceOf(address2).call()).should.equal('33000');
+          (await this.contract.methods.balanceOf(address3).call()).should.equal('35000');
+          (await this.contract.methods.balanceOf(address4).call()).should.equal('3000');
+          (await this.contract.methods.totalSupply().call()).should.equal('100000');   
+          (await this.yesNoUpdate.methods.updateCount().call()).should.equals('3');        
+        });
+
+        it('emits Transfer events', function () {
+          this.events.should.have.property('Transfer');
+          this.events.Transfer.should.have.length(3);
+          this.events.Transfer[0].returnValues.should.have.property('from', address1);
+          this.events.Transfer[0].returnValues.should.have.property('to', address2);
+          this.events.Transfer[0].returnValues.should.have.property('value', '1000');
+          this.events.Transfer[1].returnValues.should.have.property('from', address1);
+          this.events.Transfer[1].returnValues.should.have.property('to', address3);
+          this.events.Transfer[1].returnValues.should.have.property('value', '2000');
+          this.events.Transfer[2].returnValues.should.have.property('from', address1);
+          this.events.Transfer[2].returnValues.should.have.property('to', address4);
+          this.events.Transfer[2].returnValues.should.have.property('value', '3000');
+        });
+
+        it('reverts if trying to bulk transfer from address1 but to and values arrays are not the same size', async function () {
+          await shouldFail.reverting.withMessage(this.contract.methods.bulkTransfer([address2, address3, address4], [1000, 2000]).send({from: address1, gas: 500000}), "BK01");        
+        });
+
+        it('reverts if address1 transfers more tokens than owned', async function () {
+          await shouldFail.reverting(this.contract.methods.bulkTransfer([address2, address3, address4], [10000, 20000, 30000]).send({from: address1, gas: 500000}));        
         });
     
         it('allows address3 to transfer tokens from address1 to address2 with the right allowance', async function () {
@@ -1466,6 +1500,10 @@ contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1
 
         it('reverts when address1 tries to transfer tokens to address2', async function () {
           await shouldFail.reverting.withMessage(this.contract.methods.transfer(address2, 11000).send({from: address1}), "RU03");           
+        });
+
+        it('reverts if trying to bulk transfer from address1 but rule disallow it', async function () {
+          await shouldFail.reverting.withMessage(this.contract.methods.bulkTransfer([address2, address3, address4], [1000, 2000, 3000]).send({from: address1, gas: 500000}), "RU03");        
         });
 
         it('reverts when address3 tries to transfer tokens from address1 to address2 with the right allowance', async function () {
