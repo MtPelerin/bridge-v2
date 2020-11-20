@@ -44,6 +44,7 @@ import "../interfaces/ISuppliable.sol";
 import "../interfaces/IMintable.sol";
 import "../interfaces/IContactable.sol";
 import "../interfaces/IProcessor.sol";
+import "../interfaces/IBulkTransferable.sol";
 import "../interfaces/IERC2612.sol";
 import "../interfaces/IERC3009.sol";
 import "./utils/EIP712.sol";
@@ -64,7 +65,7 @@ import "./utils/EIP712.sol";
 **/
 
 
-contract BridgeToken is Initializable, IContactable, IRulable, ISuppliable, IMintable, IERC2612, IERC3009, SeizableBridgeERC20 {
+contract BridgeToken is Initializable, IContactable, IRulable, ISuppliable, IMintable, IERC2612, IERC3009, IBulkTransferable, SeizableBridgeERC20 {
   using Roles for Roles.Role;
   
   bytes32 public constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9; // = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)")
@@ -465,7 +466,7 @@ contract BridgeToken is Initializable, IContactable, IRulable, ISuppliable, IMin
   * @param _to The array of addresses to transfer to.
   * @param _values The array of amounts to be transferred.
   */
-  function bulkTransfer(address[] calldata _to, uint256[] calldata _values) external hasProcessor  
+  function bulkTransfer(address[] calldata _to, uint256[] calldata _values) external override hasProcessor  
   {
     require(_to.length == _values.length, "BK01");
     for (uint256 i = 0; i < _to.length; i++) {

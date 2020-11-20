@@ -124,7 +124,7 @@ contract('ShareBridgeToken', function ([_, owner, administrator, trustedIntermed
 
   context('When standard user', function () {
     it('can get the contract version', async function () {
-      (await this.contract.methods.VERSION().call()).should.equal('1');
+      (await this.contract.methods.VERSION().call()).should.equal('2');
     });
 
     context('Security model', function () {

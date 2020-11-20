@@ -49,7 +49,7 @@ import "../interfaces/IProcessor.sol";
 
 
 contract CoinBridgeToken is Initializable, BridgeToken {
-  uint256 public constant VERSION = 1;
+  uint256 public constant VERSION = 2;
 
   function initialize(
     address owner,
