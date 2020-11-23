@@ -37,6 +37,7 @@
 
 pragma solidity 0.6.2;
 
+import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 import "../access/Roles.sol";
 import "./abstract/SeizableBridgeERC20.sol";
 import "../interfaces/IRulable.sol";
@@ -67,6 +68,7 @@ import "./utils/EIP712.sol";
 
 contract BridgeToken is Initializable, IContactable, IRulable, ISuppliable, IMintable, IERC2612, IERC3009, IBulkTransferable, SeizableBridgeERC20 {
   using Roles for Roles.Role;
+  using SafeMath for uint256;
   
   bytes32 public constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9; // = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)")
   bytes32 public constant TRANSFER_WITH_AUTHORIZATION_TYPEHASH = 0x7c7c6cdb67a18743f49ec6fa9b35f50d52ed05cbed4cc592e13b44501c1a2267; // = keccak256("TransferWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)")
@@ -472,6 +474,31 @@ contract BridgeToken is Initializable, IContactable, IRulable, ISuppliable, IMin
     for (uint256 i = 0; i < _to.length; i++) {
       _transferFrom(_msgSender(), _to[i], _values[i]);
     }
+  }
+
+  /**
+  * @dev bulk transfer tokens from one address to multiple specified addresses
+  * @param _from address The address which you want to send tokens from
+  * @param _to The array of addresses to transfer to.
+  * @param _values The array of amounts to be transferred.
+  */
+  function bulkTransferFrom(address _from, address[] calldata _to, uint256[] calldata _values) external override hasProcessor  
+  {
+    require(_to.length == _values.length, "BK01");
+    uint256 _totalValue = 0;
+    uint256 _totalTransfered = 0;
+    for (uint256 i = 0; i < _to.length; i++) {
+      _totalValue = _totalValue.add(_values[i]);
+    }
+    require(_totalValue <= _processor.allowance(_from, _msgSender()), "AL01"); 
+    for (uint256 i = 0; i < _to.length; i++) {
+      bool success;
+      address updatedTo;
+      uint256 updatedAmount;
+      (success, updatedTo, updatedAmount) = _transferFrom(_from, _to[i], _values[i]);
+      _totalTransfered = _totalTransfered.add(updatedAmount);
+    }
+    _processor.decreaseApproval(_from, _msgSender(), _totalTransfered);
   }
 
   /* Private upgrader logic */

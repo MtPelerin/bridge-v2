@@ -90,7 +90,7 @@ contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1
     };
   });
 
-  context('When owner', function () {
+  /* context('When owner', function () {
     it('has proper owner', async function () {
       (await this.contract.methods.owner().call()).should.equal(owner);
     });
@@ -523,7 +523,7 @@ contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1
     it('reverts if trying to burn tokens', async function () {
       await shouldFail.reverting.withMessage(this.contract.methods.burn(address1, 10000).send({from: seizer}), "SU01");
     });
-  });
+  });*/
 
   context('When standard user', function () {
     beforeEach(async function () {
@@ -537,7 +537,7 @@ contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1
       await this.contract.methods.mint(owner, 4000).send({from: supplier});
     });
 
-    context('Token structure', function () {
+    /* context('Token structure', function () {
       it('has the defined name', async function () {
         (await this.contract.methods.name().call()).should.equal('Test token');
       });
@@ -1393,7 +1393,7 @@ contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1
         await shouldFail.reverting.withMessage(this.contract.methods.cancelAuthorization(params.owner, params.nonce, cancellation.v, cancellation.r, cancellation.s).send({from: address2, gas: 200000}), 'SI01'); 
         (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
       });
-    });
+    });*/
 
     context('Transfer', function () {
       context('Valid transfer', function () {
@@ -1491,6 +1491,50 @@ contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1
           await this.contract.methods.approve(address3, 1000000).send({from: address1});
           await shouldFail.reverting(this.contract.methods.transferFrom(address1, address2, 50000).send({from: address3}));        
         });
+
+        it('allows address3 to bulk transfer tokens from address1 to address2 and address4 with the right allowance', async function () {
+          // Define allowance
+          await this.contract.methods.approve(address3, 20000).send({from: address1});
+    
+          // Transfer
+          (await this.yesNoUpdate.methods.updateCount().call()).should.equal('0');  
+          (await this.contract.methods.allowance(address1, address3).call()).should.equal('20000');
+          ({events: this.events} = await this.contract.methods.bulkTransferFrom(address1, [address2, address4], [2000, 4000]).send({from: address3, gas: 300000})); 
+          (await this.contract.methods.allowance(address1, address3).call()).should.equal('14000');
+          (await this.contract.methods.balanceOf(owner).call()).should.equal('4000');
+          (await this.contract.methods.balanceOf(address1).call()).should.equal('25000');
+          (await this.contract.methods.balanceOf(address2).call()).should.equal('34000');
+          (await this.contract.methods.balanceOf(address3).call()).should.equal('33000');
+          (await this.contract.methods.balanceOf(address4).call()).should.equal('4000');
+          (await this.contract.methods.totalSupply().call()).should.equal('100000'); 
+          (await this.yesNoUpdate.methods.updateCount().call()).should.equals('2');              
+        });
+
+        it('emits a Transfer event', function () {
+          this.events.should.have.property('Transfer');
+          this.events.Transfer.should.have.length(2);
+          this.events.Transfer[0].returnValues.should.have.property('from', address1);
+          this.events.Transfer[0].returnValues.should.have.property('to', address2);
+          this.events.Transfer[0].returnValues.should.have.property('value', '2000');
+          this.events.Transfer[1].returnValues.should.have.property('from', address1);
+          this.events.Transfer[1].returnValues.should.have.property('to', address4);
+          this.events.Transfer[1].returnValues.should.have.property('value', '4000');
+        });
+    
+        it('reverts if address3 tries to bulk transfer more tokens than the allowance from address1 to address2 and address4', async function () {
+          // Define allowance
+          (await this.contract.methods.allowance(address1, address3).call()).should.equal('0');
+          await this.contract.methods.approve(address3, 20000).send({from: address1});
+          (await this.contract.methods.allowance(address1, address3).call()).should.equal('20000');
+    
+          // Transfer
+          await shouldFail.reverting.withMessage(this.contract.methods.bulkTransferFrom(address1, [address2, address4], [11000, 10000]).send({from: address3, gas: 300000}), "AL01");        
+        });
+    
+        it('reverts if address3 tries to bulk transfer more tokens than address1 owns from address1 to address2 and address4', async function () {
+          await this.contract.methods.approve(address3, 1000000).send({from: address1});
+          await shouldFail.reverting(this.contract.methods.bulkTransferFrom(address1, [address2, address4], [20000, 30000]).send({from: address3}));        
+        });
       });
 
       context('Invalid transfer', function () {
@@ -1511,6 +1555,13 @@ contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1
           await this.contract.methods.approve(address3, 20000).send({from: address1});
           // Transfer
           await shouldFail.reverting.withMessage(this.contract.methods.transferFrom(address1, address2, 11000).send({from: address3}), "RU03");           
+        });
+
+        it('reverts when address3 tries to transfer tokens from address1 to address2 and address4 with the right allowance', async function () {
+          // Define allowance
+          await this.contract.methods.approve(address3, 20000).send({from: address1});
+          // Transfer
+          await shouldFail.reverting.withMessage(this.contract.methods.bulkTransferFrom(address1, [address2, address4], [2000, 4000]).send({from: address3, gas: 300000}), "RU03");           
         });
       });
     });
