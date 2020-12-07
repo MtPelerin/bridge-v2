@@ -90,7 +90,7 @@ contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1
     };
   });
 
-  /* context('When owner', function () {
+  context('When owner', function () {
     it('has proper owner', async function () {
       (await this.contract.methods.owner().call()).should.equal(owner);
     });
@@ -523,7 +523,7 @@ contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1
     it('reverts if trying to burn tokens', async function () {
       await shouldFail.reverting.withMessage(this.contract.methods.burn(address1, 10000).send({from: seizer}), "SU01");
     });
-  });*/
+  });
 
   context('When standard user', function () {
     beforeEach(async function () {
@@ -537,7 +537,7 @@ contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1
       await this.contract.methods.mint(owner, 4000).send({from: supplier});
     });
 
-    /* context('Token structure', function () {
+    context('Token structure', function () {
       it('has the defined name', async function () {
         (await this.contract.methods.name().call()).should.equal('Test token');
       });
@@ -1393,7 +1393,7 @@ contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1
         await shouldFail.reverting.withMessage(this.contract.methods.cancelAuthorization(params.owner, params.nonce, cancellation.v, cancellation.r, cancellation.s).send({from: address2, gas: 200000}), 'SI01'); 
         (await this.contract.methods.authorizationStates(address1, params.nonce).call()).should.equals('0'); 
       });
-    });*/
+    });
 
     context('Transfer', function () {
       context('Valid transfer', function () {

@@ -59,10 +59,11 @@ import "../interfaces/IGovernable.sol";
  
 contract UserAttributeValidToRule is Initializable, AbstractRule {
 
-  uint256 public constant VERSION = 1;
+  uint256 public constant VERSION = 2;
   IComplianceRegistry public complianceRegistry;
 
   uint256 constant internal USER_ATTRIBUTE_THRESHOLD = 1;
+  uint256 constant internal WHITELISTED_KEY = 130;
 
   uint256 internal constant REASON_ADDRESS_NOT_REGISTERED = 1;
   uint256 internal constant REASON_ATTRIBUTE_LESS_THAN_THRESHOLD = 2;
@@ -94,7 +95,7 @@ contract UserAttributeValidToRule is Initializable, AbstractRule {
     if (userId == 0) {
       return (TRANSFER_INVALID, REASON_ADDRESS_NOT_REGISTERED);
     }
-    if (complianceRegistry.attribute(trustedIntermediary, userId, _attributeKey) < USER_ATTRIBUTE_THRESHOLD) {
+    if (complianceRegistry.attribute(trustedIntermediary, userId, WHITELISTED_KEY) < USER_ATTRIBUTE_THRESHOLD && complianceRegistry.attribute(trustedIntermediary, userId, _attributeKey) < USER_ATTRIBUTE_THRESHOLD) {
       return (TRANSFER_INVALID, REASON_ATTRIBUTE_LESS_THAN_THRESHOLD);
     }
     return (TRANSFER_VALID_WITH_NO_HOOK, 0);

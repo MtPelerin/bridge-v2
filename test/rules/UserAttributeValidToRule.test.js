@@ -51,8 +51,10 @@ contract('UserAttributeValidToRule', function ([_, tokenOwner, owner, trustedInt
   beforeEach(async function () {
     this.project = await TestHelper();
     this.complianceRegistry = await this.project.createProxy(ComplianceRegistry, {initArgs: [owner]});
-    await this.complianceRegistry.methods.registerUsers([address1, address2], [0, 100, 100001, 100002], [1874872800, 1, 0, 1]).send({from: trustedIntermediary1, gas: 900000});
-    await this.complianceRegistry.methods.registerUsers([address3, address4], [0, 100, 100001, 100002], [1874872800, 3, 1, 0]).send({from: trustedIntermediary1, gas: 900000});
+    await this.complianceRegistry.methods.registerUser(address1, [0, 100, 130, 100001, 100002], [1874872800, 1, 0, 0, 1]).send({from: trustedIntermediary1, gas: 900000});
+    await this.complianceRegistry.methods.registerUser(address2, [0, 100, 130, 100001, 100002], [1874872800, 1, 1, 0, 1]).send({from: trustedIntermediary1, gas: 900000});
+    await this.complianceRegistry.methods.registerUser(address3, [0, 100, 130, 100001, 100002], [1874872800, 1, 0, 1, 0]).send({from: trustedIntermediary1, gas: 900000});
+    await this.complianceRegistry.methods.registerUser(address4, [0, 100, 130, 100001, 100002], [1874872800, 3, 1, 1, 0]).send({from: trustedIntermediary1, gas: 900000});
     this.contract = await this.project.createProxy(Contract, {initArgs: [this.complianceRegistry.address]});
     this.governableTokenMock = await GovernableTokenMock.new({ from: tokenOwner });
     token = this.governableTokenMock.address;
@@ -60,16 +62,29 @@ contract('UserAttributeValidToRule', function ([_, tokenOwner, owner, trustedInt
   });
 
   it('can get the contract version', async function () {
-    (await this.contract.methods.VERSION().call()).should.equal('1');
+    (await this.contract.methods.VERSION().call()).should.equal('2');
   });
 
   context('Check transfer validity', function () {
-    it('returns that transfer is valid if attribute value is more than 0', async function () {
+    it('returns that transfer is valid if attribute value is more than 0 and global value is 0', async function () {
       const ret = await this.contract.methods.isTransferValid(token, address1, address3, 20000, 100001).call();
       ret['0'].should.equal('1');
       ret['1'].should.equal('0');
     });
-    it('returns that transfer is invalid if attribute value is less than 1', async function () {
+
+    it('returns that transfer is valid if attribute value is more than 0 and global value is more than 0', async function () {
+      const ret = await this.contract.methods.isTransferValid(token, address1, address4, 20000, 100001).call();
+      ret['0'].should.equal('1');
+      ret['1'].should.equal('0');
+    });
+
+    it('returns that transfer is valid if attribute value is 0 and global value is more than 0', async function () {
+      const ret = await this.contract.methods.isTransferValid(token, address1, address2, 20000, 100001).call();
+      ret['0'].should.equal('1');
+      ret['1'].should.equal('0');
+    });
+
+    it('returns that transfer is invalid if attribute value is 0 and global value is 0', async function () {
       const ret = await this.contract.methods.isTransferValid(token, address3, address1, 10000, 100001).call();
       ret['0'].should.equal('0');
       ret['1'].should.equal('2');
