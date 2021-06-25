@@ -39,6 +39,7 @@ pragma solidity 0.6.2;
 
 import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "../../utils/CompactAddressArray.sol";
 import "../../access/Roles.sol";
 import "../../interfaces/IERC20Detailed.sol";
 import "../../interfaces/IAdministrable.sol";
@@ -63,13 +64,14 @@ import "../../interfaces/IPriceOracle.sol";
 contract BridgeERC20 is Initializable, OwnableUpgradeSafe, IAdministrable, IGovernable, IPriceable, IERC20Detailed {
   using Roles for Roles.Role;
   using SafeMath for uint256;
+  using CompactAddressArray for CompactAddressArray.Data;
 
   event ProcessorChanged(address indexed newProcessor);
 
   IProcessor internal _processor;
   Roles.Role internal _administrators;
   Roles.Role internal _realmAdministrators;
-  address[] internal _trustedIntermediaries;
+  CompactAddressArray.Data internal _trustedIntermediaries;
   address internal _realm;
   IPriceOracle internal _priceOracle;
 
@@ -123,11 +125,11 @@ contract BridgeERC20 is Initializable, OwnableUpgradeSafe, IAdministrable, IGove
   }
 
   function trustedIntermediaries() public override view returns (address[] memory) {
-    return _trustedIntermediaries;
+    return _trustedIntermediaries.get();
   }
 
   function setTrustedIntermediaries(address[] calldata newTrustedIntermediaries) external override onlyAdministrator {
-    _trustedIntermediaries = newTrustedIntermediaries;
+    _trustedIntermediaries.set(newTrustedIntermediaries);
     emit TrustedIntermediariesChanged(newTrustedIntermediaries);
   }
 

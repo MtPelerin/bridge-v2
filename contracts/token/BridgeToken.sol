@@ -100,7 +100,7 @@ contract BridgeToken is Initializable, IContactable, IRulable, ISuppliable, IMin
   {
     SeizableBridgeERC20.initialize(owner, processor);
     processor.register(name, symbol, decimals);
-    _trustedIntermediaries = trustedIntermediaries;
+    _trustedIntermediaries.set(trustedIntermediaries);
     emit TrustedIntermediariesChanged(trustedIntermediaries);
     _upgradeToV2();
   }
