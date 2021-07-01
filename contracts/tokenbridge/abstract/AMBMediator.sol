@@ -39,7 +39,7 @@ pragma solidity 0.6.2;
 
 import "../../interfaces/IAMB.sol";
 import "../../access/Operator.sol";
-import "../@openzeppelin/contracts-ethereum-package/contracts/utils/Address.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/utils/Address.sol";
 
 contract AMBMediator is Initializable, Operator {
     address internal _bridgeContract;
