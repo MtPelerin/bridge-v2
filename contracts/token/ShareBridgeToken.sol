@@ -50,13 +50,6 @@ import "../interfaces/IVotable.sol";
 
 
 contract ShareBridgeToken is Initializable, IVotable, BridgeToken {
-  /**
-  * Purpose:
-  * This event is emitted when the percentage of shares that are tokenized is changed
-  *
-  * @param tokenizedSharePercentage - new percentage of shares that are tokenized
-  */
-  event TokenizedSharePercentageSet(uint16 tokenizedSharePercentage);
 
   /**
   * Purpose:
@@ -68,7 +61,7 @@ contract ShareBridgeToken is Initializable, IVotable, BridgeToken {
 
   uint256 public constant VERSION = 2;
   
-  uint16 public tokenizedSharePercentage;
+  uint256 public totalShares = 0; // total number of shares, maybe not all tokenized
   address public override votingSession;
   string public boardResolutionDocumentUrl;
   bytes32 public boardResolutionDocumentHash;
@@ -105,12 +98,14 @@ contract ShareBridgeToken is Initializable, IVotable, BridgeToken {
   }
 
   /**
-  * @dev Set the percentage of shares that are tokenized
-  * @param _tokenizedSharePercentage the percentage of shares that are tokenized
-  */
-  function setTokenizedSharePercentage(uint16 _tokenizedSharePercentage) public onlyAdministrator {
-    tokenizedSharePercentage = _tokenizedSharePercentage;
-    emit TokenizedSharePercentageSet(_tokenizedSharePercentage);
+   * Declares the number of total shares, including those that have not been tokenized and those
+   * that are held by the company itself. This number can be substiantially higher than totalSupply()
+   * in case not all shares have been tokenized. Also, it can be lower than totalSupply() in case some
+   * tokens have become invalid.
+   */
+  function setTotalShares(uint256 _newTotalShares) public onlyAdministrator {
+    require(_newTotalShares >= totalSupply(), "below supply");
+    totalShares = _newTotalShares;
   }
 
   /**
