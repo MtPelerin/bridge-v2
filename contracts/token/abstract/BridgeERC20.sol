@@ -241,6 +241,15 @@ contract BridgeERC20 is Initializable, OwnableUpgradeSafe, IAdministrable, IGove
     return true;
   }
 
+  // ERC-677 functionality, can be useful for swapping and wrapping tokens
+  function transferAndCall(address recipient, uint amount, bytes calldata data) public returns (bool) {
+    bool success = transfer(recipient, amount);
+    if (success){
+      success = IERC677Receiver(recipient).onTokenTransfer(msg.sender, amount, data);
+    }
+    return success;
+  }
+
   /**
   * @dev Gets the balance of the specified address.
   * @param _owner The address to query the the balance of.
@@ -421,4 +430,10 @@ contract BridgeERC20 is Initializable, OwnableUpgradeSafe, IAdministrable, IGove
 
   /* Reserved slots for future use: https://docs.openzeppelin.com/sdk/2.5/writing-contracts.html#modifying-your-contracts */
   uint256[50] private ______gap;
+}
+
+interface IERC677Receiver {
+    
+    function onTokenTransfer(address from, uint256 amount, bytes calldata data) external returns (bool);
+
 }
