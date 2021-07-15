@@ -61,6 +61,8 @@ contract ShareBridgeToken is Initializable, IVotable, BridgeToken {
 
   uint256 public constant VERSION = 2;
   
+  string public terms;
+
   uint256 public totalShares = 0; // total number of shares, maybe not all tokenized
   address public override votingSession;
   string public boardResolutionDocumentUrl;
@@ -95,6 +97,10 @@ contract ShareBridgeToken is Initializable, IVotable, BridgeToken {
     );
     tokenizedSharePercentage = _tokenizedSharePercentage;
     emit TokenizedSharePercentageSet(_tokenizedSharePercentage);
+  }
+
+  function setTerms(string memory _terms) public onlyAdministrator {
+    terms = _terms;
   }
 
   /**
