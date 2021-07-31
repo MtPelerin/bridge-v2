@@ -37,6 +37,7 @@
 
 require('chai/register-should');
 const { expectEvent, shouldFail } = require('openzeppelin-test-helpers');
+const { delay } = require('../helpers/utils');
 
 const bytes32 = function (val) {
   return web3.utils.fromAscii(val);
@@ -45,10 +46,6 @@ const bytes32 = function (val) {
 const bytes32Pad = function (val) {
   return web3.utils.fromAscii(val).padEnd(66, '0');
 };
-
-const timeout = function (ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 const Contract = artifacts.require('ShareholderMeeting');
 
@@ -239,7 +236,7 @@ contract('ShareholderMeeting', function ([_, owner, operator, address1, address2
           let ret;
           ret = await this.contract.getResolutionResults(0);
           ret['0'].should.be.bignumber.equal('0');
-          await timeout(2000);
+          await delay(2000);
           ({ logs: this.logs } = await this.contract.vote(0, 0, {from : address1, gas: 500000}));
           ret = await this.contract.getResolutionResults(0);
           ret['0'].should.be.bignumber.equal('100');
@@ -292,7 +289,7 @@ contract('ShareholderMeeting', function ([_, owner, operator, address1, address2
       context('When voting ended', function () {
         beforeEach(async function () {
           await this.contract.openResolutionVote(0, 1,{from: owner});
-          await timeout(2000);
+          await delay(2000);
         });
 
         it('reverts if trying to delegate vote to a delegate', async function () {
