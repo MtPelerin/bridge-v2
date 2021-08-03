@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start-tezos-sandbox": "scripts/start-tezos-sandbox.sh",
-    "tztest": "mocha --recursive -j 1 test/tezos",
+    "tztest": "scripts/tztest.sh",
     "tztest-file": "mocha",
     "test": "scripts/test.sh",
     "security": "scripts/security.sh",

@@ -260,7 +260,7 @@ contract('RuleEngine', function ([owner, operator, address1, address2, canTransf
 
     context('beforeTransferHook', function () {
       it('can call before transfer hook with 0 rules', async function () {
-        await runOperation(tezos, address1, () => this.contract.methods.beforeTransferHook(10000, 10000, address1.pkh, new MichelsonMap(), BURN_ADDRESS, [], address2.pkh, this.isTransferValidCallback.address, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
+        await runOperation(tezos, address1, () => this.contract.methods.beforeTransferHook(10000, 10000, address1.pkh, BURN_ADDRESS, new MichelsonMap(), [], address2.pkh, this.isTransferValidCallback.address, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
         let storage = (await this.isTransferValidCallback.storage());
         storage.amount_.should.be.bignumber.equal('10000');
         storage.from_.should.equal(address1.pkh);
@@ -271,7 +271,7 @@ contract('RuleEngine', function ([owner, operator, address1, address2, canTransf
       it('can call before transfer hook with non matching rules', async function () {
         await runOperation(tezos, address1, () => this.contract.methods.isTransferValid(10000, 10000, canTransferCallbackAddress.pkh, address1.pkh, BURN_ADDRESS, [{ruleId: 0, ruleParam: 1}], address2.pkh, this.isTransferValidCallback.address, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
         let storage = (await this.isTransferValidCallback.storage());
-        await runOperation(tezos, address1, () => this.contract.methods.beforeTransferHook(10000, 10000, address1.pkh, storage.ruleResponses_, BURN_ADDRESS, [{ruleId: 0, ruleParam: 1}], address2.pkh, this.isTransferValidCallback.address, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
+        await runOperation(tezos, address1, () => this.contract.methods.beforeTransferHook(10000, 10000, address1.pkh, BURN_ADDRESS, storage.ruleResponses_, [{ruleId: 0, ruleParam: 1}], address2.pkh, this.isTransferValidCallback.address, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
         storage = (await this.isTransferValidCallback.storage());
         storage.amount_.should.be.bignumber.equal('10000');
         storage.from_.should.equal(address1.pkh);
@@ -285,7 +285,7 @@ contract('RuleEngine', function ([owner, operator, address1, address2, canTransf
       it('can call before transfer hook with matching rules', async function () {
         await runOperation(tezos, address1, () => this.contract.methods.isTransferValid(10000, 10000, canTransferCallbackAddress.pkh, address1.pkh, BURN_ADDRESS, [{ruleId: 0, ruleParam: 1}, {ruleId: 1, ruleParam: 1}], address2.pkh, this.isTransferValidCallback.address, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
         let storage = (await this.isTransferValidCallback.storage());
-        await runOperation(tezos, address1, () => this.contract.methods.beforeTransferHook(10000, 10000, address1.pkh, storage.ruleResponses_, BURN_ADDRESS, [{ruleId: 0, ruleParam: 1}, {ruleId: 1, ruleParam: 1}], address2.pkh, this.isTransferValidCallback.address, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
+        await runOperation(tezos, address1, () => this.contract.methods.beforeTransferHook(10000, 10000, address1.pkh, BURN_ADDRESS, storage.ruleResponses_, [{ruleId: 0, ruleParam: 1}, {ruleId: 1, ruleParam: 1}], address2.pkh, this.isTransferValidCallback.address, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
         storage = (await this.isTransferValidCallback.storage());
         storage.amount_.should.be.bignumber.equal('10001');
         storage.from_.should.equal(address1.pkh);
@@ -302,24 +302,24 @@ contract('RuleEngine', function ([owner, operator, address1, address2, canTransf
 
     context('afterTransferHook', function () {
       it('can call after transfer hook with 0 rules', async function () {
-        await runOperation(tezos, address1, () => this.contract.methods.afterTransferHook(10000, 10000, address1.pkh, new MichelsonMap(), BURN_ADDRESS, [], address2.pkh, this.isTransferValidCallback.address, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
+        await runOperation(tezos, address1, () => this.contract.methods.afterTransferHook(10000, 10000, address1.pkh, BURN_ADDRESS, new MichelsonMap(), [], address2.pkh, this.isTransferValidCallback.address, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
       });
   
       it('can call after transfer hook with non matching rules', async function () {
         await runOperation(tezos, address1, () => this.contract.methods.isTransferValid(10000, 10000, canTransferCallbackAddress.pkh, address1.pkh, BURN_ADDRESS, [{ruleId: 0, ruleParam: 1}], address2.pkh, this.isTransferValidCallback.address, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
         let storage = (await this.isTransferValidCallback.storage());
-        await runOperation(tezos, address1, () => this.contract.methods.beforeTransferHook(10000, 10000, address1.pkh, storage.ruleResponses_, BURN_ADDRESS, [{ruleId: 0, ruleParam: 1}], address2.pkh, this.isTransferValidCallback.address, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
+        await runOperation(tezos, address1, () => this.contract.methods.beforeTransferHook(10000, 10000, address1.pkh, BURN_ADDRESS, storage.ruleResponses_, [{ruleId: 0, ruleParam: 1}], address2.pkh, this.isTransferValidCallback.address, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
         storage = (await this.isTransferValidCallback.storage());
-        await runOperation(tezos, address1, () => this.contract.methods.afterTransferHook(10000, 10000, address1.pkh, storage.ruleResponses_, BURN_ADDRESS, [{ruleId: 0, ruleParam: 1}], address2.pkh, this.isTransferValidCallback.address, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
+        await runOperation(tezos, address1, () => this.contract.methods.afterTransferHook(10000, 10000, address1.pkh, BURN_ADDRESS, storage.ruleResponses_, [{ruleId: 0, ruleParam: 1}], address2.pkh, this.isTransferValidCallback.address, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
         (await this.yesNoUpdate.storage()).should.be.bignumber.equal('0');
       });
   
       it('can call after transfer hook with matching rules', async function () {
         await runOperation(tezos, address1, () => this.contract.methods.isTransferValid(10000, 10000, canTransferCallbackAddress.pkh, address1.pkh, BURN_ADDRESS, [{ruleId: 0, ruleParam: 1}, {ruleId: 1, ruleParam: 1}], address2.pkh, this.isTransferValidCallback.address, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
         let storage = (await this.isTransferValidCallback.storage());
-        await runOperation(tezos, address1, () => this.contract.methods.beforeTransferHook(10000, 10000, address1.pkh, storage.ruleResponses_, BURN_ADDRESS, [{ruleId: 0, ruleParam: 1}, {ruleId: 1, ruleParam: 1}], address2.pkh, this.isTransferValidCallback.address, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
+        await runOperation(tezos, address1, () => this.contract.methods.beforeTransferHook(10000, 10000, address1.pkh, BURN_ADDRESS, storage.ruleResponses_, [{ruleId: 0, ruleParam: 1}, {ruleId: 1, ruleParam: 1}], address2.pkh, this.isTransferValidCallback.address, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
         storage = (await this.isTransferValidCallback.storage());
-        await runOperation(tezos, address1, () => this.contract.methods.afterTransferHook(10000, 10000, address1.pkh, storage.ruleResponses_, BURN_ADDRESS, [{ruleId: 0, ruleParam: 1}, {ruleId: 1, ruleParam: 1}], address2.pkh, this.isTransferValidCallback.address, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
+        await runOperation(tezos, address1, () => this.contract.methods.afterTransferHook(10000, 10000, address1.pkh, BURN_ADDRESS, storage.ruleResponses_, [{ruleId: 0, ruleParam: 1}, {ruleId: 1, ruleParam: 1}], address2.pkh, this.isTransferValidCallback.address, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
         (await this.yesNoUpdate.storage()).should.be.bignumber.equal('1');
       });
     });

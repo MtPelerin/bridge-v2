@@ -206,7 +206,7 @@ contract('GlobalFreezeRule', function ([_, owner, operator, token, address1, add
 
   context('Update after transfer', function () {
     it('should revert if trying to update', async function () {
-      await shouldFail(runOperation(tezos, owner, () => this.contract.methods.afterTransferHook(10000, this.callback.address, address1.pkh, BURN_ADDRESS, 0, address2.pkh, token.pkh, [],).send()), "RU02");
+      await shouldFail(runOperation(tezos, owner, () => this.contract.methods.afterTransferHook(10000, 10000, this.callback.address, address1.pkh, BURN_ADDRESS, 0, address2.pkh, this.token.address, []).send()), "RU02");
     });
   });
 });

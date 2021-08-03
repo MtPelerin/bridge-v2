@@ -1,4 +1,5 @@
 {
-    "timeout": "10m"
+    "timeout": "10m",
+    "slow": 2000
 }
   

@@ -183,7 +183,7 @@ contract('SoftTransferLimitRule', function ([owner, operator, administrator, tok
         await shouldFail(runOperation(tezos, owner, () => this.contract.methods.beforeTransferHook(10000, 10000, this.beforeTransferHookCallback.address, address1.pkh, realm.pkh, 0, address2.pkh, token.pkh, []).send()), "OP01");
       });
       it('afterTransferHook should revert', async function () {
-        await shouldFail(runOperation(tezos, owner, () => this.contract.methods.afterTransferHook(10000, 10000, this.callback.address, address1.pkh, realm.pkh, 0, address2.pkh, token.pkh, []).send()), "OP01");
+        await shouldFail(runOperation(tezos, owner, () => this.contract.methods.afterTransferHook(10000, 10000, address1.pkh, realm.pkh, 0, address2.pkh, token.pkh, []).send()), "OP01");
       });
     });
 
@@ -215,7 +215,7 @@ contract('SoftTransferLimitRule', function ([owner, operator, administrator, tok
         (await this.natCallback.storage()).should.be.bignumber.equal(0);
         await runOperation(tezos, owner, () => this.complianceRegistry.methods.yearlyTransfers(address2.pkh, this.natCallback.address, realm.pkh, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
         (await this.natCallback.storage()).should.be.bignumber.equal(0);
-        await runOperation(tezos, owner, () => this.contract.methods.afterTransferHook(890133, 10000, this.callback.address, address1.pkh, realm.pkh, 0, address2.pkh, token.pkh, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
+        await runOperation(tezos, owner, () => this.contract.methods.afterTransferHook(890133, 10000, address1.pkh, realm.pkh, 0, address2.pkh, token.pkh, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
         await runOperation(tezos, owner, () => this.complianceRegistry.methods.yearlyTransfers(address1.pkh, this.natCallback.address, realm.pkh, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
         (await this.natCallback.storage()).should.be.bignumber.equal(890133);
         await runOperation(tezos, owner, () => this.complianceRegistry.methods.yearlyTransfers(address2.pkh, this.natCallback.address, realm.pkh, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
@@ -403,8 +403,8 @@ contract('SoftTransferLimitRule', function ([owner, operator, administrator, tok
         await runOperation(tezos, owner, () => this.contract.methods.addOperator(operator.pkh).send());
         await runOperation(tezos, owner, () => this.complianceRegistry.methods.addOperator(this.contract.address).send());
         // Mark 183.45 as already transfered
-        await runOperation(tezos, owner, () => this.contract.methods.afterTransferHook(toDecimals(183.45), toDecimals(183.45), this.callback.address, address3.pkh, realm.pkh, 0, address2.pkh, token.pkh, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
-        await runOperation(tezos, owner, () => this.contract.methods.afterTransferHook(toDecimals(183.45), toDecimals(183.45), this.callback.address, address1.pkh, realm.pkh, 0, address3.pkh, token.pkh, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
+        await runOperation(tezos, owner, () => this.contract.methods.afterTransferHook(toDecimals(183.45), toDecimals(183.45), address3.pkh, realm.pkh, 0, address2.pkh, token.pkh, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
+        await runOperation(tezos, owner, () => this.contract.methods.afterTransferHook(toDecimals(183.45), toDecimals(183.45), address1.pkh, realm.pkh, 0, address3.pkh, token.pkh, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
       });
       it('returns that transfer is valid when from address is not found and cumulated amount is below no check threshold', async function () {
         await runOperation(tezos, owner, () => this.contract.methods.isTransferValid(toDecimals(30), toDecimals(30), this.callback.address, address3.pkh, realm.pkh, 250, address2.pkh, token.pkh, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
@@ -437,7 +437,7 @@ contract('SoftTransferLimitRule', function ([owner, operator, administrator, tok
         await runOperation(tezos, owner, () => this.contract.methods.addOperator(operator.pkh).send());
         await runOperation(tezos, owner, () => this.complianceRegistry.methods.addOperator(this.contract.address).send());
         // Mark 8901.33 as already transfered
-        await runOperation(tezos, owner, () => this.contract.methods.afterTransferHook(toDecimals(8901.33), toDecimals(8901.33), this.callback.address, address1.pkh, realm.pkh, 0, address2.pkh, token.pkh, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
+        await runOperation(tezos, owner, () => this.contract.methods.afterTransferHook(toDecimals(8901.33), toDecimals(8901.33), address1.pkh, realm.pkh, 0, address2.pkh, token.pkh, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
       });
       it('returns that transfer is valid when from address is found and transfer/monthly/yearly amounts are below thresholds with same token', async function () {
         await runOperation(tezos, owner, () => this.contract.methods.isTransferValid(toDecimals(1000), toDecimals(1000), this.callback.address, address1.pkh, realm.pkh, 0, address2.pkh, token.pkh, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
@@ -461,7 +461,7 @@ contract('SoftTransferLimitRule', function ([owner, operator, administrator, tok
         await runOperation(tezos, trustedIntermediary1, () => this.complianceRegistry.methods.updateUserAttributes([0, 100, 110, 111, 112, 113], [1874872900, 0, 11000, 320000, 300000, 567], 1).send());
         await runOperation(tezos, trustedIntermediary1, () => this.complianceRegistry.methods.updateUserAttributes([0, 100, 110, 111, 112, 113], [1874872900, 0, 11000, 320000, 300000, 567], 2).send());
         // Mark 299001.33 as already transfered
-        await runOperation(tezos, owner, () => this.contract.methods.afterTransferHook(toDecimals(299001.33), toDecimals(299001.33), this.callback.address, address1.pkh, realm.pkh, 0, address2.pkh, token.pkh, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
+        await runOperation(tezos, owner, () => this.contract.methods.afterTransferHook(toDecimals(299001.33), toDecimals(299001.33), address1.pkh, realm.pkh, 0, address2.pkh, token.pkh, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
       });
       it('returns that transfer is valid when from address is found and transfer/monthly/yearly amounts are below thresholds with same token', async function () {
         await runOperation(tezos, owner, () => this.contract.methods.isTransferValid(toDecimals(100), toDecimals(100), this.callback.address, address1.pkh, realm.pkh, 0, address2.pkh, token.pkh, [trustedIntermediary1.pkh, trustedIntermediary2.pkh]).send());
@@ -531,7 +531,6 @@ contract('SoftTransferLimitRule', function ([owner, operator, administrator, tok
       await runOperation(tezos, owner, () => this.complianceRegistry.methods.getOnHoldTransfers(this.onHoldTransferListCallback.address, trustedIntermediary1.pkh).send());
       (await this.onHoldTransferListCallback.storage()).length.should.equal(4);
       (await (await this.complianceRegistry.storage()).trustedIntermediaries.get(trustedIntermediary1.pkh)).onHoldMinBoundary.should.be.bignumber.equal('0');
-      console.log(JSON.stringify(await (await this.complianceRegistry.storage()).trustedIntermediaries.get(trustedIntermediary1.pkh)));
       await runOperation(tezos, address1, () => this.complianceRegistry.methods.cancelOnHoldTransfer(false, 0, trustedIntermediary1.pkh).send());
       await runOperation(tezos, address1, () => this.complianceRegistry.methods.cancelOnHoldTransfer(false, 2, trustedIntermediary1.pkh).send());
       (await (await this.complianceRegistry.storage()).trustedIntermediaries.get(trustedIntermediary1.pkh)).onHoldMinBoundary.should.be.bignumber.equal('1');

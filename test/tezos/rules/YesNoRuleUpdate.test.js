@@ -63,7 +63,7 @@ contract('YesNoRule', function ([_, owner, token, address1, address2]) {
       await runOperation(tezos, owner, () => this.contract.methods.isTransferValid(20000, 20000, this.callback.address, address1.pkh, BURN_ADDRESS, 1, address2.pkh, token.pkh, []).send());
       const result = await this.callback.storage();
       result.reason_.should.be.bignumber.equal('0');
-      result.valid_.should.be.bignumber.equal('1');
+      result.valid_.should.be.bignumber.equal('2');
     });
     it('returns that transfer is invalid if yes/no flag is equal to 0', async function () {
       await runOperation(tezos, owner, () => this.contract.methods.isTransferValid(10000, 10000, this.callback.address, address1.pkh, BURN_ADDRESS, 0, address2.pkh, token.pkh, []).send());
@@ -76,7 +76,7 @@ contract('YesNoRule', function ([_, owner, token, address1, address2]) {
   context('Update after transfer', function () {
     it('should update the rule state', async function () {
       (await this.contract.storage()).should.be.bignumber.equal('0');
-      await runOperation(tezos, owner, () => this.contract.methods.afterTransferHook(10000, 10000, this.callback.address, address1.pkh, BURN_ADDRESS, 0, address2.pkh, token.pkh, []).send());
+      await runOperation(tezos, owner, () => this.contract.methods.afterTransferHook(10000, 10000, address1.pkh, BURN_ADDRESS, 0, address2.pkh, token.pkh, []).send());
       (await this.contract.storage()).should.be.bignumber.equal('1');
     });
   });

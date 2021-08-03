@@ -35,7 +35,7 @@ type entry_action is
  | ComplianceRegistryCallback of list(userIdAttributesTransfersResult)
  | IsTransferValid of transferParam
  | BeforeTransferHook of beforeHookParam
- | AfterTransferHook of transferParam
+ | AfterTransferHook of afterHookParam
 
 type state is record 
   owner: address;
