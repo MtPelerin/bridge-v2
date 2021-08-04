@@ -57,7 +57,7 @@ contract.ContractBuilder = {
     new: async function(tezos, path, config, storage) {
         config = config || {};
         storage = storage || {};
-        let originationOp = await runOperation(
+        let {op: originationOp} = await runOperation(
             tezos,
             null, 
             async () => {

@@ -75,26 +75,32 @@ module.exports = {
             tezos.setSignerProvider(new InMemorySigner(signer.sk || signer));
         }
         let op = await what();
+        let fetchedBlock = null;
         await bakeBlock();
     
         async function seenOperationInBlock(block) {
             let fetchedBlock = await tezos.rpc.getBlock(block ? { block } : undefined);
-            return fetchedBlock.operations.some(blockOps => blockOps.some(blockOp => blockOp.hash === op.hash));
+            if (fetchedBlock.operations.some(blockOps => blockOps.some(blockOp => blockOp.hash === op.hash))) {
+                return fetchedBlock;
+            }
+            return null;
         }
     
         // confirmation() has a known issue with missed confirmations.
         // see https://github.com/ecadlabs/taquito/issues/276
     
         // check previous block first
-        if (await seenOperationInBlock('head~1')) {
-            return op;
+        fetchedBlock = await seenOperationInBlock('head~1');
+        if (fetchedBlock !== null) {
+            return {op, block: fetchedBlock};
         }
     
         // keep looking
         const maxTries = 120;
         for (let i = 0; i < maxTries; i++) {
-            if (await seenOperationInBlock()) {
-                return op;
+            fetchedBlock = await seenOperationInBlock()
+            if (fetchedBlock !== null) {
+                return {op, block: fetchedBlock};
             }
             await delay(500);
         }

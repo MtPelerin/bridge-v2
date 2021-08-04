@@ -37,30 +37,39 @@
 
 pragma solidity 0.6.2;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "../interfaces/IERC677Receiver.sol";
+import "../access/Operator.sol";
+import "../interfaces/IERC20Detailed.sol";
 
-/**
-* @title ERC20Mock
-* @dev Mocks ERC20 token, used for testing
-*/
+contract TokenLocker is Operator {
+  uint256 public constant VERSION = 1;
 
-
-contract ERC20Mock is ERC20 {
-  constructor (string memory name, string memory symbol) public ERC20(name, symbol) {
+  /**
+  * @dev Initializer (replaces constructor when contract is upgradable)
+  * @param owner the final owner of the contract
+  */
+  function initialize(address owner) public override initializer {
+    Operator.initialize(owner);
   }
 
-  function mint(address _to, uint256 _amount) public
-  {
-    _mint(_to, _amount);
-  }
-
-  function transferAndCall(address _to, uint256 _amount, bytes calldata _data) external returns (bool)
-  {
-    bool success = transfer(_to, _amount);
-    if (success) {
-      success = IERC677Receiver(_to).onTokenTransfer(msg.sender, _amount, _data);
+  function lock(address _tokenAddress, bytes calldata _recipient, uint256 _value) external {
+    address from = _msgSender();
+    if (IERC20Detailed(_tokenAddress).transferFrom(from, address(this), _value)) {
+      emit TokenLocked(from, _tokenAddress, _recipient, _value);
     }
-    return success;
   }
+
+  function onTokenTransfer(address from, uint256 amount, bytes calldata recipient) external returns (bool) {
+    emit TokenLocked(from, _msgSender(), recipient, amount);
+    return true;
+  }
+
+  function unlock(address _tokenAddress, address _to, uint256 _value) public onlyOperator {
+    IERC20Detailed(_tokenAddress).transfer(_to, _value);
+  }
+
+  fallback() external payable {
+    revert("Not accepting ETH");
+  }
+  
+  event TokenLocked(address indexed from, address indexed token, bytes to, uint256 value);
 }
