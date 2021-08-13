@@ -15,12 +15,12 @@ function unixPath(path) {
     return path;
 }
 
-function execLigo(args) {
+function execLigo(args, cwd) {
     return new Promise((resolve, reject) => {
         const ligoImage = 'ligolang/ligo:0.19.0';
 
         // Use spawn() instead of exec() here so that the OS can take care of escaping args.
-        let docker = spawn('docker', ['run', '-v', `${process.cwd()}:/project`, '-w', '/project', '--rm', '-i', ligoImage].concat(args));
+        let docker = spawn('docker', ['run', '-v', `${cwd || process.cwd()}:/project`, '-w', '/project', '--rm', '-i', ligoImage].concat(args));
 
         let stdout = '';
         let stderr = '';
@@ -46,9 +46,9 @@ function execLigo(args) {
     });
 }
 
-async function compileContract(sourcePath) {
+async function compileContract(sourcePath, cwd) {
     if (CONTRACT_CACHE[sourcePath]) return CONTRACT_CACHE[sourcePath];
-    const contract = JSON.parse(await execLigo(['compile-contract', '--michelson-format=json', '--disable-michelson-typechecking', unixPath(sourcePath), 'main']));
+    const contract = JSON.parse(await execLigo(['compile-contract', '--michelson-format=json', unixPath(sourcePath), 'main'], cwd));
     CONTRACT_CACHE[sourcePath] = contract;
     return contract;
 }
@@ -63,7 +63,7 @@ contract.ContractBuilder = {
             async () => {
                 try {
                     return await tezos.contract.originate({
-                        code: await compileContract(path),
+                        code: await compileContract(path, config.cwd),
                         storage,
                         balance: config.balance,
                     })

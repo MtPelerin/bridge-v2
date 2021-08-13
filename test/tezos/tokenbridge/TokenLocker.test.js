@@ -108,8 +108,7 @@ contract('TokenLocker', function ([_, owner, operator, administrator, address1, 
         symbol: 'TST',
         decimals: 3,
         totalSupply: 0,
-        balances: new MichelsonMap(),
-        allowances: new MichelsonMap(),
+        ledger: new MichelsonMap(),
         rules: [],
         trustedIntermediaries: [trustedIntermediary1.pkh, trustedIntermediary2.pkh],
         realm: realm.pkh,
@@ -191,9 +190,9 @@ contract('TokenLocker', function ([_, owner, operator, administrator, address1, 
     it('can unlock tokens', async function () {
       await runOperation(tezos, administrator, () => this.token.methods.mint(100000, this.contract.address).send());
       await runOperation(tezos, operator, () => this.contract.methods.unlock(address1.pkh, this.token.address, 10000).send());
-      await runOperation(tezos, address1, () => this.token.methods.getBalance(this.natCallback.address, this.contract.address).send());
+      await runOperation(tezos, address1, () => this.token.methods.getBalance(this.contract.address, this.natCallback.address).send());
       (await this.natCallback.storage()).should.be.bignumber.equal('90000');
-      await runOperation(tezos, address1, () => this.token.methods.getBalance(this.natCallback.address, address1.pkh).send());
+      await runOperation(tezos, address1, () => this.token.methods.getBalance(address1.pkh, this.natCallback.address).send());
       (await this.natCallback.storage()).should.be.bignumber.equal('10000');
     });
   });
@@ -209,11 +208,11 @@ contract('TokenLocker', function ([_, owner, operator, administrator, address1, 
       await runOperation(tezos, administrator, () => this.token.methods.mint(100000, address1.pkh).send());
       await runOperation(tezos, address1, () => this.token.methods.approve(10000, this.contract.address).send());
       const {block} = await runOperation(tezos, address1, () => this.contract.methods.lock(ethAddress, this.token.address, 10000).send());
-      await runOperation(tezos, address1, () => this.token.methods.getBalance(this.natCallback.address, address1.pkh).send());
+      await runOperation(tezos, address1, () => this.token.methods.getBalance(address1.pkh, this.natCallback.address).send());
       (await this.natCallback.storage()).should.be.bignumber.equal('90000');
-      await runOperation(tezos, address1, () => this.token.methods.getBalance(this.natCallback.address, this.contract.address).send());
+      await runOperation(tezos, address1, () => this.token.methods.getBalance(this.contract.address, this.natCallback.address).send());
       (await this.natCallback.storage()).should.be.bignumber.equal('10000');
-      const level = block.header.level;
+      const level = "" + block.header.level;
       const events = await (await this.contract.storage()).events.get(level);
       events[0].from_.should.equal(address1.pkh);
       events[0].token_.should.equal(this.token.address);

@@ -45,7 +45,6 @@ import "../interfaces/IOwnable.sol";
 import "../interfaces/ISeizable.sol";
 import "../interfaces/ISuppliable.sol";
 import "../interfaces/IRulable.sol";
-import "../token/abstract/BridgeERC20.sol";
 
 import "../access/Operator.sol";
 

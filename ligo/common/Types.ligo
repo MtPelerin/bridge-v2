@@ -1,12 +1,12 @@
-type transfer is record 
-  from_: address;
-  to_: address;
-  amount_: nat
+type transfer is [@layout:comb] record 
+  [@annot:from] from_: address;
+  [@annot:to] to_: address;
+  [@annot:value] amount_: nat
 end;
 
-type getBalanceParam is record
-  callback_: contract(nat);
-  owner_: address;
+type getBalanceParam is [@layout:comb] record
+  [@annot:owner] owner_: address;
+  [@annot:callback] callback_: contract(nat);
 end;
 
 type rule is record

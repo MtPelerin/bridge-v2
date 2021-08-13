@@ -35,43 +35,13 @@
     address: hello@mtpelerin.com
 */
 
-require('chai/register-should');
-const { TestHelper } = require('@openzeppelin/cli');
-const { Contracts, ZWeb3 } = require('@openzeppelin/upgrades');
-const { expectEvent, shouldFail } = require('openzeppelin-test-helpers');
+pragma solidity 0.6.2;
 
-ZWeb3.initialize(web3.currentProvider);
+/**
+ * @title IERC677Receiver
+ * @dev IERC677Receiver interface
+ */
 
-const Contract = Contracts.getFromLocal('YesNoRule');
-
-contract('YesNoRule', function (accounts) {
-  const [_, token, address1, address2] = accounts;
-  console.log(accounts);
-  beforeEach(async function () {
-    this.project = await TestHelper();
-    this.contract = await this.project.createProxy(Contract, {initArgs: []});
-  });
-
-  it('can get the contract version', async function () {
-    (await this.contract.methods.VERSION().call()).should.equal('1');
-  });
-
-  context('Check transfer validity', function () {
-    it('returns that transfer is valid if yes/no flag is more than 0', async function () {
-      const ret = await this.contract.methods.isTransferValid(token, address1, address2, 20000, 1).call();
-      ret['0'].should.equal('1');
-      ret['1'].should.equal('0');
-    });
-    it('returns that transfer is invalid if amount is equal to 0', async function () {
-      const ret = await this.contract.methods.isTransferValid(token, address1, address2, 10000, 0).call();
-      ret['0'].should.equal('0');
-      ret['1'].should.equal('1');
-    });
-  });
-
-  context('Update after transfer', function () {
-    it('should revert if trying to update', async function () {
-      await shouldFail.reverting.withMessage(this.contract.methods.afterTransferHook(token, address1, address2, 10000, 15000).send({from: address1}), "RU02");
-    });
-  });
-});
+interface IERC677Receiver {
+  function onTokenTransfer(address from, uint256 amount, bytes calldata data) external returns (bool);
+}

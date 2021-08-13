@@ -41,6 +41,7 @@ import "../../../node_modules/@openzeppelin/contracts-ethereum-package/contracts
 import "../../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 import "../../access/Roles.sol";
 import "../../interfaces/IERC20Detailed.sol";
+import "../../interfaces/IERC677Receiver.sol";
 import "../../interfaces/IAdministrable.sol";
 import "../../interfaces/IGovernable.sol";
 import "../../interfaces/IPriceable.sol";
@@ -241,6 +242,22 @@ contract BridgeERC20 is Initializable, OwnableUpgradeSafe, IAdministrable, IGove
     return true;
   }
 
+  function transferAndCall(address _to, uint256 _value, bytes calldata data) external hasProcessor returns (bool)
+  {
+    bool success;
+    address updatedTo;
+    uint256 updatedAmount;
+    (success, updatedTo, updatedAmount) = _transferFrom(
+      _msgSender(), 
+      _to, 
+      _value
+    );
+    if (success && _to == updatedTo) {
+      success = IERC677Receiver(updatedTo).onTokenTransfer(_msgSender(), updatedAmount, data);
+    }
+    return true;
+  }
+
   /**
   * @dev Gets the balance of the specified address.
   * @param _owner The address to query the the balance of.
@@ -251,6 +268,7 @@ contract BridgeERC20 is Initializable, OwnableUpgradeSafe, IAdministrable, IGove
   {
     return _processor.balanceOf(_owner);
   }
+
 
   /**
    * @dev Transfer tokens from one address to another

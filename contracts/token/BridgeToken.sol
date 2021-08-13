@@ -37,13 +37,11 @@
 
 pragma solidity 0.6.2;
 
-import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 import "../access/Roles.sol";
 import "./abstract/SeizableBridgeERC20.sol";
 import "../interfaces/IRulable.sol";
 import "../interfaces/ISuppliable.sol";
 import "../interfaces/IMintable.sol";
-import "../interfaces/IContactable.sol";
 import "../interfaces/IProcessor.sol";
 import "../interfaces/IBulkTransferable.sol";
 import "../interfaces/IERC2612.sol";
@@ -66,7 +64,7 @@ import "./utils/EIP712.sol";
 **/
 
 
-contract BridgeToken is Initializable, IContactable, IRulable, ISuppliable, IMintable, IERC2612, IERC3009, IBulkTransferable, SeizableBridgeERC20 {
+contract BridgeToken is Initializable, IRulable, ISuppliable, IMintable, IERC2612, IERC3009, IBulkTransferable, SeizableBridgeERC20 {
   using Roles for Roles.Role;
   using SafeMath for uint256;
   
@@ -80,7 +78,7 @@ contract BridgeToken is Initializable, IContactable, IRulable, ISuppliable, IMin
   Roles.Role internal _suppliers;
   uint256[] internal _rules;
   uint256[] internal _rulesParams;
-  string internal _contact;
+  string internal _contact; // DEPRECATED - Not removed for proxy compatibility: https://docs.openzeppelin.com/sdk/2.5/writing-contracts.html#modifying-your-contracts
   /* EIP712 Domain Separator */
   bytes32 public DOMAIN_SEPARATOR;
   /* EIP2612 Permit nonces */
@@ -174,16 +172,6 @@ contract BridgeToken is Initializable, IContactable, IRulable, ISuppliable, IMin
     _rules = newRules;
     _rulesParams = newRulesParams;
     emit RulesChanged(_rules, _rulesParams);
-  }
-
-  /* Contactable */
-  function contact() external override view returns (string memory) {
-    return _contact;
-  }
-
-  function setContact(string calldata __contact) external override onlyAdministrator {
-    _contact = __contact;
-    emit ContactSet(__contact);
   }
 
   /* EIP2612 - Initial code from https://github.com/centrehq/centre-tokens/blob/master/contracts/v2/Permit.sol */

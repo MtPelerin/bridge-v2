@@ -104,8 +104,7 @@ contract('ShareBridgeToken', function ([owner, kingOwner, administrator, supplie
       symbol: 'TST',
       decimals: 3,
       totalSupply: 0,
-      balances: new MichelsonMap(),
-      allowances: new MichelsonMap(),
+      ledger: new MichelsonMap(),
       rules: [],
       trustedIntermediaries: [this.trustedIntermediary1.pkh, this.trustedIntermediary2.pkh],
       realm: BURN_ADDRESS,
@@ -211,8 +210,7 @@ contract('ShareBridgeToken', function ([owner, kingOwner, administrator, supplie
           symbol: 'KNG',
           decimals: 0,
           totalSupply: 0,
-          balances: new MichelsonMap(),
-          allowances: new MichelsonMap(),
+          ledger: new MichelsonMap(),
           rules: [],
           trustedIntermediaries: [this.trustedIntermediary1.pkh, this.trustedIntermediary2.pkh],
           realm: BURN_ADDRESS,
@@ -360,26 +358,26 @@ contract('ShareBridgeToken', function ([owner, kingOwner, administrator, supplie
 
     it('can mint tokens', async function () {
       (await this.contract.storage()).totalSupply.should.be.bignumber.equal('0');
-      should.equal(await (await this.contract.storage()).balances.get(address1.pkh), undefined);
-      should.equal(await (await this.contract.storage()).balances.get(address2.pkh), undefined);
+      should.equal(await (await this.contract.storage()).ledger.get(address1.pkh), undefined);
+      should.equal(await (await this.contract.storage()).ledger.get(address2.pkh), undefined);
       await runOperation(tezos, supplier, () => this.contract.methods.mint(10000, address1.pkh).send());
       (await this.contract.storage()).totalSupply.should.be.bignumber.equal('10000');
-      (await (await this.contract.storage()).balances.get(address1.pkh)).should.be.bignumber.equal('10000');
-      should.equal(await (await this.contract.storage()).balances.get(address2.pkh), undefined);
+      (await (await this.contract.storage()).ledger.get(address1.pkh)).balance.should.be.bignumber.equal('10000');
+      should.equal(await (await this.contract.storage()).ledger.get(address2.pkh), undefined);
     });
 
     it('can burn tokens', async function () {
       (await this.contract.storage()).totalSupply.should.be.bignumber.equal('0');
-      should.equal(await (await this.contract.storage()).balances.get(address1.pkh), undefined);
-      should.equal(await (await this.contract.storage()).balances.get(address2.pkh), undefined);
+      should.equal(await (await this.contract.storage()).ledger.get(address1.pkh), undefined);
+      should.equal(await (await this.contract.storage()).ledger.get(address2.pkh), undefined);
       await runOperation(tezos, supplier, () => this.contract.methods.mint(10000, address1.pkh).send());
       (await this.contract.storage()).totalSupply.should.be.bignumber.equal('10000');
-      (await (await this.contract.storage()).balances.get(address1.pkh)).should.be.bignumber.equal('10000');
-      should.equal(await (await this.contract.storage()).balances.get(address2.pkh), undefined);
+      (await (await this.contract.storage()).ledger.get(address1.pkh)).balance.should.be.bignumber.equal('10000');
+      should.equal(await (await this.contract.storage()).ledger.get(address2.pkh), undefined);
       await runOperation(tezos, supplier, () => this.contract.methods.burn(10000, address1.pkh).send());
       (await this.contract.storage()).totalSupply.should.be.bignumber.equal('0');
-      (await (await this.contract.storage()).balances.get(address1.pkh)).should.be.bignumber.equal('0');
-      should.equal(await (await this.contract.storage()).balances.get(address2.pkh), undefined);
+      (await (await this.contract.storage()).ledger.get(address1.pkh)).balance.should.be.bignumber.equal('0');
+      should.equal(await (await this.contract.storage()).ledger.get(address2.pkh), undefined);
     });
 
     it('cannot burn more tokens than total supply', async function () {
@@ -469,14 +467,14 @@ contract('ShareBridgeToken', function ([owner, kingOwner, administrator, supplie
 
     it('can seize tokens', async function () {
       (await this.contract.storage()).totalSupply.should.be.bignumber.equal('25000');
-      (await (await this.contract.storage()).balances.get(address1.pkh)).should.be.bignumber.equal('10000');
-      (await (await this.contract.storage()).balances.get(address2.pkh)).should.be.bignumber.equal('15000');
-      should.equal(await (await this.contract.storage()).balances.get(seizer.pkh), undefined);
+      (await (await this.contract.storage()).ledger.get(address1.pkh)).balance.should.be.bignumber.equal('10000');
+      (await (await this.contract.storage()).ledger.get(address2.pkh)).balance.should.be.bignumber.equal('15000');
+      should.equal(await (await this.contract.storage()).ledger.get(seizer.pkh), undefined);
       await runOperation(tezos, seizer, () => this.contract.methods.seize(8000, address1.pkh).send());
       (await this.contract.storage()).totalSupply.should.be.bignumber.equal('25000');
-      (await (await this.contract.storage()).balances.get(address1.pkh)).should.be.bignumber.equal('2000');
-      (await (await this.contract.storage()).balances.get(address2.pkh)).should.be.bignumber.equal('15000');
-      (await (await this.contract.storage()).balances.get(seizer.pkh)).should.be.bignumber.equal('8000');
+      (await (await this.contract.storage()).ledger.get(address1.pkh)).balance.should.be.bignumber.equal('2000');
+      (await (await this.contract.storage()).ledger.get(address2.pkh)).balance.should.be.bignumber.equal('15000');
+      (await (await this.contract.storage()).ledger.get(seizer.pkh)).balance.should.be.bignumber.equal('8000');
     });
 
     it('cannot seize more tokens than available on address', async function () {
@@ -587,13 +585,13 @@ contract('ShareBridgeToken', function ([owner, kingOwner, administrator, supplie
 
       it('can get the total supply', async function () {
         (await this.contract.storage()).totalSupply.should.be.bignumber.equal('100000');
-        await runOperation(tezos, address1, () => this.contract.methods.getTotalSupply(this.natCallback.address).send());
+        await runOperation(tezos, address1, () => this.contract.methods.getTotalSupply("", this.natCallback.address).send());
         (await this.natCallback.storage()).should.be.bignumber.equal('100000');
       });
 
       it('can get the balance of an address', async function () {
-        (await (await this.contract.storage()).balances.get(address1.pkh)).should.be.bignumber.equal('31000');
-        await runOperation(tezos, address1, () => this.contract.methods.getBalance(this.natCallback.address, address1.pkh).send());
+        (await (await this.contract.storage()).ledger.get(address1.pkh)).balance.should.be.bignumber.equal('31000');
+        await runOperation(tezos, address1, () => this.contract.methods.getBalance(address1.pkh, this.natCallback.address).send());
         (await this.natCallback.storage()).should.be.bignumber.equal('31000');
       });
     });
@@ -604,43 +602,43 @@ contract('ShareBridgeToken', function ([owner, kingOwner, administrator, supplie
       });
 
       it('allows address1 to define a spending allowance for address3', async function () {
-        await runOperation(tezos, address1, () => this.contract.methods.getAllowance(this.natCallback.address, address1.pkh, address3.pkh).send());
+        await runOperation(tezos, address1, () => this.contract.methods.getAllowance(address1.pkh, address3.pkh, this.natCallback.address).send());
         (await this.natCallback.storage()).should.be.bignumber.equal('0');
         await runOperation(tezos, address1, () => this.contract.methods.approve(20000, address3.pkh).send());
-        await runOperation(tezos, address1, () => this.contract.methods.getAllowance(this.natCallback.address, address1.pkh, address3.pkh).send());
+        await runOperation(tezos, address1, () => this.contract.methods.getAllowance(address1.pkh, address3.pkh, this.natCallback.address).send());
         (await this.natCallback.storage()).should.be.bignumber.equal('20000');   
       });
   
       it('allows address1 to increase the allowance for address3', async function () {
-        await runOperation(tezos, address1, () => this.contract.methods.getAllowance(this.natCallback.address, address1.pkh, address3.pkh).send());
+        await runOperation(tezos, address1, () => this.contract.methods.getAllowance(address1.pkh, address3.pkh, this.natCallback.address).send());
         (await this.natCallback.storage()).should.be.bignumber.equal('0');
         await runOperation(tezos, address1, () => this.contract.methods.approve(20000, address3.pkh).send());
-        await runOperation(tezos, address1, () => this.contract.methods.getAllowance(this.natCallback.address, address1.pkh, address3.pkh).send());
+        await runOperation(tezos, address1, () => this.contract.methods.getAllowance(address1.pkh, address3.pkh, this.natCallback.address).send());
         (await this.natCallback.storage()).should.be.bignumber.equal('20000');   
         await runOperation(tezos, address1, () => this.contract.methods.increaseApproval(10000, address3.pkh).send());
-        await runOperation(tezos, address1, () => this.contract.methods.getAllowance(this.natCallback.address, address1.pkh, address3.pkh).send());
+        await runOperation(tezos, address1, () => this.contract.methods.getAllowance(address1.pkh, address3.pkh, this.natCallback.address).send());
         (await this.natCallback.storage()).should.be.bignumber.equal('30000');          
       });
   
       it('allows address1 to decrease the allowance for address3', async function () {
-        await runOperation(tezos, address1, () => this.contract.methods.getAllowance(this.natCallback.address, address1.pkh, address3.pkh).send());
+        await runOperation(tezos, address1, () => this.contract.methods.getAllowance(address1.pkh, address3.pkh, this.natCallback.address).send());
         (await this.natCallback.storage()).should.be.bignumber.equal('0');
         await runOperation(tezos, address1, () => this.contract.methods.approve(20000, address3.pkh).send());
-        await runOperation(tezos, address1, () => this.contract.methods.getAllowance(this.natCallback.address, address1.pkh, address3.pkh).send());
+        await runOperation(tezos, address1, () => this.contract.methods.getAllowance(address1.pkh, address3.pkh, this.natCallback.address).send());
         (await this.natCallback.storage()).should.be.bignumber.equal('20000');   
         await runOperation(tezos, address1, () => this.contract.methods.decreaseApproval(10000, address3.pkh).send());
-        await runOperation(tezos, address1, () => this.contract.methods.getAllowance(this.natCallback.address, address1.pkh, address3.pkh).send());
+        await runOperation(tezos, address1, () => this.contract.methods.getAllowance(address1.pkh, address3.pkh, this.natCallback.address).send());
         (await this.natCallback.storage()).should.be.bignumber.equal('10000');       
       });
   
       it('allows address1 to redefine a spending allowance for address3', async function () {
-        await runOperation(tezos, address1, () => this.contract.methods.getAllowance(this.natCallback.address, address1.pkh, address3.pkh).send());
+        await runOperation(tezos, address1, () => this.contract.methods.getAllowance(address1.pkh, address3.pkh, this.natCallback.address).send());
         (await this.natCallback.storage()).should.be.bignumber.equal('0');
         await runOperation(tezos, address1, () => this.contract.methods.approve(20000, address3.pkh).send());
-        await runOperation(tezos, address1, () => this.contract.methods.getAllowance(this.natCallback.address, address1.pkh, address3.pkh).send());
+        await runOperation(tezos, address1, () => this.contract.methods.getAllowance(address1.pkh, address3.pkh, this.natCallback.address).send());
         (await this.natCallback.storage()).should.be.bignumber.equal('20000');   
         await runOperation(tezos, address1, () => this.contract.methods.approve(50000, address3.pkh).send());
-        await runOperation(tezos, address1, () => this.contract.methods.getAllowance(this.natCallback.address, address1.pkh, address3.pkh).send());
+        await runOperation(tezos, address1, () => this.contract.methods.getAllowance(address1.pkh, address3.pkh, this.natCallback.address).send());
         (await this.natCallback.storage()).should.be.bignumber.equal('50000');       
       }); 
     });
@@ -653,17 +651,17 @@ contract('ShareBridgeToken', function ([owner, kingOwner, administrator, supplie
       context('Valid transfer', function () {
         it('allows address1 to transfer tokens to address2', async function () {
           (await this.yesNoUpdate.storage()).should.be.bignumber.equal('0');
-          await runOperation(tezos, address1, () => this.contract.methods.transfer(11000, address1.pkh, address2.pkh).send()); 
-          (await (await this.contract.storage()).balances.get(owner.pkh)).should.be.bignumber.equal('4000');
-          (await (await this.contract.storage()).balances.get(address1.pkh)).should.be.bignumber.equal('19999');
-          (await (await this.contract.storage()).balances.get(address2.pkh)).should.be.bignumber.equal('43001');
-          (await (await this.contract.storage()).balances.get(address3.pkh)).should.be.bignumber.equal('33000');
+          await runOperation(tezos, address1, () => this.contract.methods.transfer(address1.pkh, address2.pkh, 11000).send()); 
+          (await (await this.contract.storage()).ledger.get(owner.pkh)).balance.should.be.bignumber.equal('4000');
+          (await (await this.contract.storage()).ledger.get(address1.pkh)).balance.should.be.bignumber.equal('19999');
+          (await (await this.contract.storage()).ledger.get(address2.pkh)).balance.should.be.bignumber.equal('43001');
+          (await (await this.contract.storage()).ledger.get(address3.pkh)).balance.should.be.bignumber.equal('33000');
           (await this.contract.storage()).totalSupply.should.be.bignumber.equal('100000');
           (await this.yesNoUpdate.storage()).should.be.bignumber.equal('1');       
         });
     
         it('reverts if address1 transfers more tokens than owned to address2', async function () {
-          await shouldFail(runOperation(tezos, address1, () => this.contract.methods.transfer(50000, address1.pkh, address2.pkh).send()), "BA01");        
+          await shouldFail(runOperation(tezos, address1, () => this.contract.methods.transfer(address1.pkh, address2.pkh, 50000).send()), "BA01");        
         });
     
         it('allows address3 to transfer tokens from address1 to address2 with the right allowance', async function () {
@@ -672,34 +670,34 @@ contract('ShareBridgeToken', function ([owner, kingOwner, administrator, supplie
     
           // Transfer
           (await this.yesNoUpdate.storage()).should.be.bignumber.equal('0');
-          await runOperation(tezos, address1, () => this.contract.methods.getAllowance(this.natCallback.address, address1.pkh, address3.pkh).send());
+          await runOperation(tezos, address1, () => this.contract.methods.getAllowance(address1.pkh, address3.pkh, this.natCallback.address).send());
           (await this.natCallback.storage()).should.be.bignumber.equal('20000'); 
-          await runOperation(tezos, address3, () => this.contract.methods.transfer(11000, address1.pkh, address2.pkh).send()); 
-          await runOperation(tezos, address1, () => this.contract.methods.getAllowance(this.natCallback.address, address1.pkh, address3.pkh).send());
+          await runOperation(tezos, address3, () => this.contract.methods.transfer(address1.pkh, address2.pkh, 11000).send()); 
+          await runOperation(tezos, address1, () => this.contract.methods.getAllowance(address1.pkh, address3.pkh, this.natCallback.address).send());
           (await this.natCallback.storage()).should.be.bignumber.equal('8999'); 
-          (await (await this.contract.storage()).balances.get(owner.pkh)).should.be.bignumber.equal('4000');
-          (await (await this.contract.storage()).balances.get(address1.pkh)).should.be.bignumber.equal('19999');
-          (await (await this.contract.storage()).balances.get(address2.pkh)).should.be.bignumber.equal('43001');
-          (await (await this.contract.storage()).balances.get(address3.pkh)).should.be.bignumber.equal('33000');
+          (await (await this.contract.storage()).ledger.get(owner.pkh)).balance.should.be.bignumber.equal('4000');
+          (await (await this.contract.storage()).ledger.get(address1.pkh)).balance.should.be.bignumber.equal('19999');
+          (await (await this.contract.storage()).ledger.get(address2.pkh)).balance.should.be.bignumber.equal('43001');
+          (await (await this.contract.storage()).ledger.get(address3.pkh)).balance.should.be.bignumber.equal('33000');
           (await this.contract.storage()).totalSupply.should.be.bignumber.equal('100000');
           (await this.yesNoUpdate.storage()).should.be.bignumber.equal('1');            
         });
     
         it('reverts if address3 transfers more tokens than the allowance from address1 to address2', async function () {
           // Define allowance
-          await runOperation(tezos, address1, () => this.contract.methods.getAllowance(this.natCallback.address, address1.pkh, address3.pkh).send());
+          await runOperation(tezos, address1, () => this.contract.methods.getAllowance(address1.pkh, address3.pkh, this.natCallback.address).send());
           (await this.natCallback.storage()).should.be.bignumber.equal('0'); 
           await runOperation(tezos, address1, () => this.contract.methods.approve(20000, address3.pkh).send());
-          await runOperation(tezos, address1, () => this.contract.methods.getAllowance(this.natCallback.address, address1.pkh, address3.pkh).send());
+          await runOperation(tezos, address1, () => this.contract.methods.getAllowance(address1.pkh, address3.pkh, this.natCallback.address).send());
           (await this.natCallback.storage()).should.be.bignumber.equal('20000'); 
     
           // Transfer
-          await shouldFail(runOperation(tezos, address3, () => this.contract.methods.transfer(31000, address1.pkh, address2.pkh).send()), "AL01");        
+          await shouldFail(runOperation(tezos, address3, () => this.contract.methods.transfer(address1.pkh, address2.pkh, 31000).send()), "AL01");        
         });
     
         it('reverts if address3 transfers more tokens than address1 owns from address1 to address2', async function () {
           await runOperation(tezos, address1, () => this.contract.methods.approve(1000000, address3.pkh).send());
-          await shouldFail(runOperation(tezos, address3, () => this.contract.methods.transfer(50000, address1.pkh, address2.pkh).send()), "BA01");              
+          await shouldFail(runOperation(tezos, address3, () => this.contract.methods.transfer(address1.pkh, address2.pkh, 50000).send()), "BA01");              
         });
       });
 
@@ -709,14 +707,14 @@ contract('ShareBridgeToken', function ([owner, kingOwner, administrator, supplie
         });
 
         it('reverts when address1 tries to transfer tokens to address2', async function () {
-          await shouldFail(runOperation(tezos, address1, () => this.contract.methods.transfer(11000, address1.pkh, address2.pkh).send()), "RU03");           
+          await shouldFail(runOperation(tezos, address1, () => this.contract.methods.transfer(address1.pkh, address2.pkh, 11000).send()), "RU03");           
         });
 
         it('reverts when address3 tries to transfer tokens from address1 to address2 with the right allowance', async function () {
           // Define allowance
           await runOperation(tezos, address1, () => this.contract.methods.approve(20000, address3.pkh).send());
           // Transfer
-          await shouldFail(runOperation(tezos, address3, () => this.contract.methods.transfer(11000, address1.pkh, address2.pkh).send()), "RU03");           
+          await shouldFail(runOperation(tezos, address3, () => this.contract.methods.transfer(address1.pkh, address2.pkh, 11000).send()), "RU03");           
         });
       });
     });

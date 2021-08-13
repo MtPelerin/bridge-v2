@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start-tezos-sandbox": "scripts/start-tezos-sandbox.sh",
+    "start-evm-sandbox": "scripts/start-evm-sandbox.sh",
     "tztest": "scripts/tztest.sh",
     "tztest-file": "mocha",
     "test": "scripts/test.sh",
@@ -40,7 +41,7 @@
     "@taquito/signer": "^9.2.0",
     "@taquito/taquito": "^9.2.0",
     "bignumber.js": "^9.0.1",
-    "ganache-cli": "^6.12.1-tezos.0",
+    "ganache-cli": "^6.12.2",
     "sol2ligo": "github:madfish-solutions/sol2ligo",
     "solc": "^0.6.9",
     "solidity-docgen": "git+https://github.com/skrafft/solidity-docgen.git",

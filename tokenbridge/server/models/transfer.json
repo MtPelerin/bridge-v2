@@ -1,0 +1,58 @@
+{
+  "name": "transfer",
+  "plural": "transfers",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "sourceChain": {
+      "type": "string",
+      "required": true
+    },
+    "sourceBlock": {
+      "type": "string",
+      "required": true
+    },
+    "sourceToken": {
+      "type": "string",
+      "required": true
+    },
+    "amount": {
+      "type": "string",
+      "required": true
+    },
+    "from": {
+      "type": "string",
+      "required": true
+    },
+    "to": {
+      "type": "string",
+      "required": true
+    },
+    "destChain": {
+      "type": "string",
+      "required": true
+    },
+    "destBlock": {
+      "type": "string"
+    },
+    "destToken": {
+      "type": "string",
+      "required": true
+    },
+    "status": {
+      "type": "string",
+      "required": true,
+      "default": "pending"
+    },
+    "error": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

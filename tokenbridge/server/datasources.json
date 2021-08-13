@@ -1,0 +1,8 @@
+{
+  "tokenbridge": {
+    "name": "tokenbridge",
+    "localStorage": "tb",
+    "file": "tokenbridge-database",
+    "connector": "memory"
+  }
+}

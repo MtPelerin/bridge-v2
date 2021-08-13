@@ -33,7 +33,7 @@ end;
 type state is record
   owner: address;
   roles : roles;
-  events: big_map(nat, list(token_locked))
+  events: map(nat, list(token_locked))
 end;
 
 // Access control functions

@@ -25,15 +25,24 @@ type setBoardResolutionDocumentParam is record
   boardResolutionDocumentUrl_: string;
 end;
 
-type getAllowanceParam is record
-  callback_: contract(nat);
-  owner_: address;
-  spender_: address;
+type allowanceKey is record
+  [@annot:owner] owner_: address;
+  [@annot:spender] spender_: address;
+end;
+
+type getAllowanceParam is [@layout:comb] record
+  request : allowanceKey;
+  [@annot:callback] callback_: contract(nat);
+end;
+
+type getTotalSupplyParam is [@layout:comb] record
+  request: unit;
+  [@annot:callback] callback_: contract(nat);
 end;
 
 type approveParam is record
-  amount_: nat;
-  spender_: address;
+  [@annot:value] amount_: nat;
+  [@annot:spender] spender_: address;
 end;
 
 type setPricesParam is record
@@ -97,7 +106,7 @@ type entry_action is
  | Name of contract(string)
  | Symbol of contract(string)
  | Decimals of contract(nat)
- | GetTotalSupply of contract(nat)
+ | GetTotalSupply of getTotalSupplyParam
  | Transfer of transfer
  | TransferIsTransferValidCb of isTransferValidResponse
  | TransferBeforeTransferHookCb of isTransferValidResponse
@@ -112,9 +121,6 @@ type entry_action is
  | GetPriceLastUpdated of getPriceLastUpdatedParam
  | ConvertTo of convertToParam
 
-type balance_map is map(address, nat);
-type allowance_map is big_map(bytes, nat);
-
 type internal_transfer_callback_state is transfer;
 
 type price is record
@@ -122,6 +128,13 @@ type price is record
   decimals: nat;
   lastUpdated: timestamp;
 end;
+
+type account is record
+  balance: nat;
+  allowances: map (address, nat);
+end;
+
+const default_account = record [ balance = 0n; allowances = (map []: map(address, nat))]
 
 const default_price = record [ price = 0n; decimals = 0n; lastUpdated = ("1970-01-01T00:00:00.000Z" : timestamp)];
 
@@ -131,8 +144,7 @@ type state is record
   name: string;
   symbol: string;
   totalSupply: nat;
-  balances: balance_map;
-  allowances: allowance_map;
+  ledger: big_map(address, account);
   rules: list(rule);
   trustedIntermediaries: list(address);
   realm: address;
@@ -154,35 +166,39 @@ function _isRuleResponseValid(const ruleResponses_: map(int, ruleResponse)): boo
   
 function _allowance(const self: state; const owner_: address; const spender_: address) : nat is 
   block {
-    const addressKey_: bytes = _keyWithAddress(owner_, spender_);
-    const allowance_ : nat = case self.allowances[addressKey_] of | None -> 0n | Some(x) -> x end;
+    const account_ : account = case self.ledger[owner_] of | None -> default_account | Some(x) -> x end;
+    const allowance_ : nat = case account_.allowances[spender_] of | None -> 0n | Some(x) -> x end;
   } with (allowance_);
 
 function _addBalance(var self: state; const owner_: address; const amount_: nat) : state is 
   block {
-    const balance_ : nat = case self.balances[owner_] of | None -> 0n | Some(x) -> x end;
-    self.balances[owner_] := balance_ + amount_;
+    var account_ : account := case self.ledger[owner_] of | None -> default_account | Some(x) -> x end;
+    account_.balance := account_.balance + amount_;
+    self.ledger[owner_] := account_;
   } with (self);
 
 function _subBalance(var self: state; const owner_: address; const amount_: nat) : state is 
   block {
-    const balance_ : nat = case self.balances[owner_] of | None -> 0n | Some(x) -> x end;
-    require(balance_ >= amount_, "BA01");
-    self.balances[owner_] := abs(balance_ - amount_);
+    var account_ : account := case self.ledger[owner_] of | None -> default_account | Some(x) -> x end;
+    require(account_.balance >= amount_, "BA01");
+    account_.balance := abs(account_.balance - amount_);
+    self.ledger[owner_] := account_;
   } with (self);
 
 function _increaseApproval(var self: state; const owner_: address; const spender_: address; const addedValue_: nat) : state is
   block {
-    const addressKey_: bytes = _keyWithAddress(owner_, spender_);
-    const currentAllowance_: nat = case self.allowances[addressKey_] of | None -> 0n | Some(x) -> x end;
-    self.allowances[addressKey_] := currentAllowance_ + addedValue_;
+    var account_ : account := case self.ledger[owner_] of | None -> default_account | Some(x) -> x end;
+    const currentAllowance_ : nat = case account_.allowances[spender_] of | None -> 0n | Some(x) -> x end;
+    account_.allowances[spender_] := currentAllowance_ + addedValue_;
+    self.ledger[owner_] := account_; 
   } with (self);
 
 function _decreaseApproval(var self: state; const owner_: address; const spender_: address; const subtractedValue_: nat) : state is
   block {
-    const addressKey_: bytes = _keyWithAddress(owner_, spender_);
-    const currentAllowance_: nat = case self.allowances[addressKey_] of | None -> 0n | Some(x) -> x end;
-    self.allowances[addressKey_] := case is_nat(currentAllowance_ - subtractedValue_) of | None -> 0n | Some(x) -> x end;
+    var account_ : account := case self.ledger[owner_] of | None -> default_account | Some(x) -> x end;
+    const currentAllowance_ : nat = case account_.allowances[spender_] of | None -> 0n | Some(x) -> x end;
+    account_.allowances[spender_] := case is_nat(currentAllowance_ - subtractedValue_) of | None -> 0n | Some(x) -> x end;
+    self.ledger[owner_] := account_; 
   } with (self);
 
 function _convertTo(const self: state; const amount_: nat; const currency_: string; const maxDecimals_: nat) : nat is 
@@ -554,14 +570,15 @@ function convertTo(const self: state; const amount_: nat; const currency_: strin
 
 function approve(var self: state; const spender_: address; const amount_: nat) : (list(operation) * state) is
   block {
-    const addressKey_: bytes = _keyWithAddress(Tezos.sender, spender_);
-    self.allowances[addressKey_] := amount_;
+    var account_ : account := case self.ledger[Tezos.sender] of | None -> default_account | Some(x) -> x end;
+    account_.allowances[spender_] := amount_;
+    self.ledger[Tezos.sender] := account_; 
   } with (noOperations, self);
 
 function getBalance(const self: state; const owner_: address; const callback_: contract(nat)) : list(operation) is
   block {
-    const balance_ : nat = case self.balances[owner_] of | None -> 0n | Some(x) -> x end;
-    const op : operation = Tezos.transaction(balance_, 0tez, callback_);
+    const account_ : account = case self.ledger[owner_] of | None -> default_account | Some(x) -> x end;
+    const op : operation = Tezos.transaction(account_.balance, 0tez, callback_);
     const ops : list (operation) = list [op]
   } with (ops);
 
@@ -651,13 +668,13 @@ function main (const action : entry_action; const self : state): (list(operation
  | Name(param) -> (name(self, param), self)
  | Symbol(param) -> (symbol(self, param), self)
  | Decimals(param) -> (decimals(self, param), self)
- | GetTotalSupply(param) -> (getTotalSupply(self, param), self)
+ | GetTotalSupply(param) -> (getTotalSupply(self, param.callback_), self)
  | Transfer(param) -> transfer(self, param.from_, param.to_, param.amount_)
  | TransferIsTransferValidCb(param) -> transferIsTransferValidCallback(self, param.ruleResponses_, param.from_, param.to_, param.amount_)
  | TransferBeforeTransferHookCb(param) -> transferBeforeTransferHookCallback(self, param.ruleResponses_, param.from_, param.to_, param.amount_)
  | Approve(param) -> approve(self, param.spender_, param.amount_)
  | GetBalance(param) -> (getBalance(self, param.owner_, param.callback_), self)
- | GetAllowance(param) -> (getAllowance(self, param.owner_, param.spender_, param.callback_), self)
+ | GetAllowance(param) -> (getAllowance(self, param.request.owner_, param.request.spender_, param.callback_), self)
  | IncreaseApproval(param) -> increaseApproval(self, param.spender_, param.amount_)
  | DecreaseApproval(param) -> decreaseApproval(self, param.spender_, param.amount_)
  | SetPrices(param) -> setPrices(self, param.currencies_, param.prices_, param.decimals_)
