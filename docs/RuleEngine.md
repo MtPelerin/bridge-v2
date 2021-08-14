@@ -2,6 +2,8 @@
 
 Each rule in the Rule Engine has to implement the IRule interface:
 
+
+#### Solidity
 ```
   function isTransferValid(
     address _token, address _from, address _to, uint256 _amount, uint256 _ruleParam)
@@ -12,6 +14,47 @@ Each rule in the Rule Engine has to implement the IRule interface:
   function afterTransferHook(
     address _token, address _from, address _to, uint256 _amount, uint256 _ruleParam)
     external returns (bool updateDone);
+```
+#### Ligo
+```
+type transferParam is record
+  amount_: nat;
+  amountInRefCurrency_: nat;
+  callback_: contract(isTransferValidResult);
+  from_: address;
+  realm_: address;
+  ruleParam_ : nat;
+  to_: address;
+  token_ : address;
+  trustedIntermediaries_: list(address);
+end; 
+
+type beforeHookParam is record
+  amount_: nat;
+  amountInRefCurrency_: nat;
+  callback_: contract(beforeTransferHookResult);
+  from_: address;
+  realm_: address;
+  ruleParam_ : nat;
+  to_: address;
+  token_ : address;
+  trustedIntermediaries_: list(address);
+end; 
+
+type afterHookParam is record
+  amount_: nat;
+  amountInRefCurrency_: nat;
+  from_: address;
+  realm_: address;
+  ruleParam_ : nat;
+  to_: address;
+  token_ : address;
+  trustedIntermediaries_: list(address);
+end; 
+
+IsTransferValid of transferParam
+BeforeTransferHook of beforeHookParam
+AfterTransferHook of afterHookParam
 ```
 
 **isValid allowed values**

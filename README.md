@@ -4,13 +4,15 @@ Bridge is an open source technology designed to issue and manage digital assets 
 
 Most of security token middlewares use a token-based approach to enforce such transfer restriction rules. This concept is a good step towards regulation, but lacks cross-token capabilities to apply rules that are computed accross multiple tokens (global transfer thresholds, for example). 
 
-The purpose of Bridge is to provide a solution to this problem by being a cross-token compliance layer that will restrict the transferability of an ERC20 compliant token based on a set of rules. Those rules are managed by the issuer. who can set new rules whenever needed.
+The purpose of Bridge is to provide a solution to this problem by being a cross-token compliance layer that will restrict the transferability of an ERC20/FA1.2 compliant token based on a set of rules. Those rules are managed by the issuer. who can set new rules whenever needed.
 
 Moreover, for regulatory compliance, Bridge provides features that would allow authorities to transfer tokens from one address to another in case of exceptional events (loss of keys, legal constraints, locked assets, etc.).
 
+# EVM compatible chains
+
 ## Audit
 
-Contracts have been thoroughly audited by Chain Security: [Read the final report](https://chainsecurity.com/security-audit/mt-pelerin-bridge/)
+Contracts have been thoroughly audited by Chain Security: [Read the final report](https://www.mtpelerin.com/docs/bridge-protocol-v2-chainsecurity-audit-report.pdf)
 
 ## Overall overview
 
@@ -47,6 +49,7 @@ The Rule Engine is a library of rules that can be used by the token issuer to co
 Trivial rules like maximum transfers or minimum transfers will not need to have interactions with other contracts. For more complex rules that need information about the identity linked to an address or the history of transfers linked to an address, two contract are currently provided: Compliance Registry and Price Oracle.
 
 [Detailed Rule Engine Documentation](docs/RuleEngine.md)
+
 [Rule Engine API Overview](docs/api.md#ruleengine)
 
 ## Compliance Registry
@@ -58,6 +61,7 @@ The Compliance Registry is responsible of the storage of all identity informatio
 To be able to maintain a single reference currency for transfers history, the Compliance Registry will use the Price Oracle.
 
 [Detailed Compliance Registry Documentation](docs/ComplianceRegistry.md)
+
 [Compliance Registry API Overview](docs/api.md#complianceregistry)
 
 ## Price Oracle
@@ -73,3 +77,55 @@ The Price Oracle is responsible of providing exchange rates between the referenc
 ## API
 
 - [API](docs/api.md)
+
+# Tezos chain
+
+## Overall overview
+
+All contracts for the Tezos chain were written in [ligo](https://www.ligolang.org/) using the Pascaligo syntax.
+
+Compared to the EVM version and due to some differences between Tezos architecture and EVM architecture ([Tezos vs Ethereum](https://www.ligolang.org/docs/tutorials/tz-vs-eth/tz-vs-eth)), adjustments were made to simplify the structure, avoid unnecessary callbacks and optimize the gas spent:
+
+- Processor was removed and is now integrated in the token itself
+- PriceOracle was removed and is now integrated in the token itself
+
+![Overall overview](docs/assets/TezosOverview.png "Overall overview")
+
+## Bridge Token
+
+The token part is the interface used by external parties to interact with the token through all its lifecycle (issue/redeem, approvals, transfers, etc.). 
+
+The token has a single owner, one or multiple administrators, one or multple issuers and one or multiple seizers.
+
+As we want Bridge to be as open as possible, the token issuer will have the opportunity to define trusted intermediaries that will act as the compliance authorities for this specific token. The role of the compliance authority is to maintain the compliance registry and make sure that the information stored in the compliance registry are accurate.
+
+The token is registered with a Rule Engine that will restrict the transferability of a token based on rules that were enforced at the token level.
+
+Every token issued with Bridge Token is compliant with the following standard proposals:
+
+- [FA1.2 (TZIP-7)](https://gitlab.com/tezos/tzip/-/blob/master/proposals/tzip-7/tzip-7.md)
+
+[Bridge Token API Overview](docs/tezos/api/Token.md)
+
+## Rule Engine
+
+The Rule Engine is a library of rules that can be used by the token issuer to control how a token can be transfered or not. As regulations evolve, new rules can be added to the Rule Engine and the token issuer will be able to enforce them to adapt its compliance.
+
+Trivial rules like maximum transfers or minimum transfers will not need to have interactions with other contracts. For more complex rules that need information about the identity linked to an address or the history of transfers linked to an address, the Compliance Registry will provide the needed data.
+
+[Detailed Rule Engine Documentation](docs/RuleEngine.md)
+
+[Rule Engine API Overview](docs/tezos/api/RuleEngine.md)
+
+## Compliance Registry
+
+The Compliance Registry is responsible of the storage of all identity information linked to an address or the storage of the history of transfers linked to an address. The compliance registry is managed by trusted intermediaries. Each trusted intermediary has its own space within the registry to update its own address related information. Based on the token trusted intermediaries, the Compliance Registry will return the compliance information that have been updated by one of the token trusted intermediary.
+
+> The Compliance Registry is designed to store only pseudo-anonymised data (no Customer Identification Data).
+
+To be able to maintain a single reference currency for transfers history, the Compliance Registry will call the token ````%convertTo```` function.
+
+[Detailed Compliance Registry Documentation](docs/ComplianceRegistry.md)
+
+[Compliance Registry API Overview](docs/tezos/api/ComplianceRegistry.md)
+
