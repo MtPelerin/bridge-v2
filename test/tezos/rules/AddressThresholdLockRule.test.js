@@ -105,6 +105,7 @@ contract('AddressThresholdLockRule', function ([owner, realm, administrator, add
       decimals: 3,
       totalSupply: 0,
       ledger: new MichelsonMap(),
+      metadata: new MichelsonMap(),
       rules: [],
       trustedIntermediaries: [trustedIntermediary1.pkh, trustedIntermediary2.pkh],
       realm: realm.pkh,

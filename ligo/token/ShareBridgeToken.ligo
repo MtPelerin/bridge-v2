@@ -40,9 +40,9 @@ type getTotalSupplyParam is [@layout:comb] record
   [@annot:callback] callback_: contract(nat);
 end;
 
-type approveParam is record
-  [@annot:value] amount_: nat;
+type approveParam is [@layout:comb] record
   [@annot:spender] spender_: address;
+  [@annot:value] amount_: nat;
 end;
 
 type setPricesParam is record
@@ -151,6 +151,7 @@ type state is record
   prices: big_map(string, price);
   ruleEngine: address;
   contact: string;
+  metadata: big_map(string, bytes);
   tokenizedSharePercentage: nat;
   boardResolutionDocumentUrl: string;
   boardResolutionDocumentHash: bytes;

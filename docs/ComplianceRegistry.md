@@ -1,6 +1,6 @@
 ## Attributes nomenclature
 
-Attributes is an array of uint256.
+Attributes is an array of uint256 for EVM chains, nat for Tezos chain.
 
 Attribute id | Attribute name | Attribute description
 --- | --- | ---
