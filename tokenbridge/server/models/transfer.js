@@ -315,7 +315,6 @@ module.exports = function(Transfer) {
             const events = [];
             async.eachLimit(blocks, 10, (blockId, next) => {
               let contractEvents = contractStorage.events.get(BigNumber(blockId));
-              // contractStorage.events.get(blockId).then((contractEvents) => {
               contractEvents = contractEvents || [];
               events.push(...contractEvents.map(e => ({
                 from: e.from_,
@@ -325,7 +324,6 @@ module.exports = function(Transfer) {
                 block: blockId,
               })));
               next();
-              // }).catch(next);
             }, (err) => {
               if (err) return cb(err);
               return cb(null, events);
@@ -544,7 +542,7 @@ module.exports = function(Transfer) {
     });
   };
 
-  /* setInterval(() => {
+  setInterval(() => {
     Transfer.processTokenBridge(() => {});
-  }, BRIDGE_INTERVAL); */
+  }, BRIDGE_INTERVAL);
 };
