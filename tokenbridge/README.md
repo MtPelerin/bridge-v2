@@ -42,9 +42,11 @@ The bridge works by deploying a specific locking smart contract on each chain.
 
 ## Running
 
-Run the following command to start the service:
+Set the previously mentionned environment variables to fit your needs and run the following command to start the service:
 
 ```node .```
+
+You can use tools like ```forever``` or embed this service in a Docker container if you need it to run as a deamon.
 
 ## Security
 
