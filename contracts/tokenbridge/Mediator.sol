@@ -50,15 +50,29 @@ contract Mediator is BasicMediator {
         passMessage(_recipient, _tokenAddress, _value);
     }
 
-    function passMessage(address _recipient, address _tokenAddress, uint256 _value) internal override {
+    function passMessage(
+        address _recipient, 
+        address _tokenAddress, 
+        uint256 _value
+    ) internal override {
         require(tokenMapping[_tokenAddress] != address(0), 'AM01');
         bytes4 methodSelector = IERC20ToERC20Mediator(0).handleBridgedTokens.selector;
-        bytes memory data = abi.encodeWithSelector(methodSelector, _recipient, tokenMapping[_tokenAddress], _value, nonce);
+        bytes memory data = abi.encodeWithSelector(
+            methodSelector, 
+            _recipient, 
+            tokenMapping[_tokenAddress],
+             _value, 
+             nonce
+        );
 
         IERC20Detailed token = IERC20Detailed(_tokenAddress);
         token.transferFrom(_msgSender(), address(this), _value);
 
-        bytes32 msgId = bridgeContract().requireToPassMessage(mediatorContractOnOtherSide(), data, requestGasLimit());
+        bytes32 msgId = bridgeContract().requireToPassMessage(
+            mediatorContractOnOtherSide(), 
+            data, 
+            requestGasLimit()
+        );
         setMessageRecipient(msgId, _recipient);
         setMessageTokenAddress(msgId, _tokenAddress);
         setMessageValue(msgId, _value);
@@ -103,7 +117,10 @@ contract Mediator is BasicMediator {
         emit FailedMessageFixed(_messageId, recipient, tokenAddress, value);
     }
 
-    function setTokenMapping(address _localTokenAddress, address _remoteTokenAddress) public onlyOperator validAddress(_remoteTokenAddress) validAddress(_localTokenAddress) {
+    function setTokenMapping(
+        address _localTokenAddress, 
+        address _remoteTokenAddress
+    ) public onlyOperator validAddress(_remoteTokenAddress) validAddress(_localTokenAddress) {
         tokenMapping[_localTokenAddress] = _remoteTokenAddress;
     }
 
