@@ -10,7 +10,7 @@ Moreover, for regulatory compliance, Bridge provides features that would allow a
 
 ## Audit
 
-Contracts have been thoroughly audited by Chain Security: [Read the final report](https://chainsecurity.com/security-audit/mt-pelerin-bridge/)
+Contracts have been thoroughly audited by Chain Security: [Read the final report](https://www.mtpelerin.com/docs/bridge-protocol-v2-chainsecurity-audit-report.pdf)
 
 ## Overall overview
 
