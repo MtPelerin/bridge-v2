@@ -36,7 +36,7 @@
 */
 
 const { expectEvent, shouldFail } = require('openzeppelin-test-helpers');
-require('chai/register-should');
+require('chai').should()
 
 const Contract = artifacts.require('TargetMethodPaymaster');
 

@@ -35,46 +35,63 @@
     address: hello@mtpelerin.com
 */
 
-require('chai').should()
-const { TestHelper } = require('@openzeppelin/cli');
-const { Contracts, ZWeb3 } = require('@openzeppelin/upgrades');
-const { expectEvent, shouldFail } = require('openzeppelin-test-helpers');
+pragma solidity 0.6.2;
 
-ZWeb3.initialize(web3.currentProvider);
+import "../access/Roles.sol";
+import "../interfaces/IOwnable.sol";
+import "../interfaces/IGovernable.sol";
 
-const Contract = Contracts.getFromLocal('MinTransferRule');
 
-contract('MinTransferRule', function ([_, token, address1, address2]) {
-  beforeEach(async function () {
-    this.project = await TestHelper();
-    this.contract = await this.project.createProxy(Contract, {initArgs: []});
-  });
+contract OwnableGovernableTokenMock is IGovernable, IOwnable {
+  using Roles for Roles.Role;
+  address internal _owner;
+  address internal _realm;
+  address[] internal _trustedIntermediaries;
+  Roles.Role internal _realmAdministrators;
 
-  it('can get the contract version', async function () {
-    (await this.contract.methods.VERSION().call()).should.equal('1');
-  });
+  constructor () public {
+    _owner = msg.sender;
+  }
 
-  context('Check transfer validity', function () {
-    it('returns that transfer is valid if amount is more than minAmount', async function () {
-      const ret = await this.contract.methods.isTransferValid(token, address1, address2, 20000, 15000).call();
-      ret['0'].should.equal('1');
-      ret['1'].should.equal('0');
-    });
-    it('returns that transfer is valid if amount is equal to minAmount', async function () {
-      const ret = await this.contract.methods.isTransferValid(token, address1, address2, 15000, 15000).call();
-      ret['0'].should.equal('1');
-      ret['1'].should.equal('0');
-    });
-    it('returns that transfer is invalid if amount is less than minAmount', async function () {
-      const ret = await this.contract.methods.isTransferValid(token, address1, address2, 10000, 15000).call();
-      ret['0'].should.equal('0');
-      ret['1'].should.equal('1');
-    });
-  });
+  function realm() public override view returns (address) {
+    return _realm;
+  }
 
-  context('Update after transfer', function () {
-    it('should revert if trying to update', async function () {
-      await shouldFail.reverting.withMessage(this.contract.methods.afterTransferHook(token, address1, address2, 10000, 15000).send({from: address1}), "RU02");
-    });
-  });
-});
+  function owner() public override view returns (address) {
+    return _owner;
+  }
+
+  function transferOwnership(address _newOwner) external override returns (bool) {
+     return true; 
+  }
+  
+  function renounceOwnership() external override returns (bool) {
+     return true; 
+  }
+
+  function setRealm(address newRealm) public override {
+    _realm = newRealm;
+  } 
+
+  function trustedIntermediaries() public override view returns (address[] memory) {
+    return _trustedIntermediaries;
+  }
+
+  function setTrustedIntermediaries(address[] calldata newTrustedIntermediaries) external override {
+    _trustedIntermediaries = newTrustedIntermediaries;
+  }  
+
+  function isRealmAdministrator(address _administrator) public override view returns (bool) {
+    return _realmAdministrators.has(_administrator);
+  }
+
+  function addRealmAdministrator(address _administrator) public override {
+    _realmAdministrators.add(_administrator);
+    emit RealmAdministratorAdded(_administrator);
+  }
+
+  function removeRealmAdministrator(address _administrator) public override {
+    _realmAdministrators.remove(_administrator);
+    emit RealmAdministratorRemoved(_administrator);
+  }
+}

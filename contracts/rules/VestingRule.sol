@@ -53,12 +53,9 @@ import "./abstract/AbstractRule.sol";
  * Errors
  * 1: address not found in User Registry
  * 2: address does not have a bypass key
-*/
+*/ 
 
-
-interface 
-
-contract VestingRule is Initializable, AbstractRule, Operator {
+contract VestingRule is Initializable, AbstractRule {
 
   uint256 public constant VERSION = 1;
 
@@ -71,9 +68,9 @@ contract VestingRule is Initializable, AbstractRule, Operator {
 
   /**
   * @dev Initializer (replaces constructor when contract is upgradable)
-  * @param _complianceRegistry The Compliance Registry address that will be used by this rule for compliance checks
+  * @param complianceRegistry_ The Compliance Registry address that will be used by this rule for compliance checks
   */
-  function initialize(IComplianceRegistry complianceRegistry_) external override initializer {
+  function initialize(IComplianceRegistry complianceRegistry_) public initializer {
     _complianceRegistry = complianceRegistry_;
   }
 
@@ -86,7 +83,7 @@ contract VestingRule is Initializable, AbstractRule, Operator {
     address _token, address _from, address _to, uint256 /* _amount */, uint256 timestamp)
     public override view returns (uint256, uint256)
   {
-    if (timestamp > now) {
+    if (timestamp > block.timestamp) {
         if (_from == IOwnable(_token).owner()) return (TRANSFER_VALID_WITH_NO_HOOK, REASON_OK);
         address[] memory trustedIntermediaries = IGovernable(_token).trustedIntermediaries();
         (uint256 userId, address trustedIntermediary) = _complianceRegistry.userId(trustedIntermediaries, _to);

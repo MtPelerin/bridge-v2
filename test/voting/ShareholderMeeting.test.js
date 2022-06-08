@@ -35,7 +35,7 @@
     address: hello@mtpelerin.com
 */
 
-require('chai/register-should');
+require('chai').should()
 const { expectEvent, shouldFail } = require('openzeppelin-test-helpers');
 
 const bytes32 = function (val) {

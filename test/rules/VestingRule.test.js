@@ -35,27 +35,42 @@
     address: hello@mtpelerin.com
 */
 
-require('chai/register-should');
+require('chai').should()
 const { TestHelper } = require('@openzeppelin/cli');
 const { Contracts, ZWeb3 } = require('@openzeppelin/upgrades');
 const { expectEvent, shouldFail } = require('openzeppelin-test-helpers');
+const { MAX_UINT256 } = require('openzeppelin-test-helpers/src/constants');
 
 ZWeb3.initialize(web3.currentProvider);
 
 const Contract = Contracts.getFromLocal('VestingRule');
 const ComplianceRegistry = Contracts.getFromLocal('ComplianceRegistry');
+const GovernableTokenMock = artifacts.require('OwnableGovernableTokenMock');
+let token;
 
-const timestamp = function () {
-  return Math.floor(new Date().getTime()/1000);
-};
+const TRANSFER_VALID = '1';
+const TRANSFER_INVALID = '0';
 
-contract('VestingRule', function ([_, owner, token, address1, address2]) {
+const REASON_OK = '0';
+const REASON_USER_NOT_FOUND = '1';
+const REASON_TRANSFERS_FROZEN_VESTING = '2';
+
+const BYPASS_KEY = 140;
+
+const timestamp = 100000000000
+
+contract('VestingRule', function ([_, tokenOwner, owner, trustedIntermediary1, address1, address2, address3, address4, address5]) {
   beforeEach(async function () {
     this.project = await TestHelper();
     this.complianceRegistry = await this.project.createProxy(ComplianceRegistry, {initArgs: [owner]});
-    await this.complianceRegistry.methods.registerUser(address2, [140], [1]).send({from: trustedIntermediary1, gas: 900000});
-    await this.complianceRegistry.methods.registerUser(address1, [], []).send({from: trustedIntermediary1, gas: 900000});
-    this.contract = await this.project.createProxy(Contract, {initArgs: [owner, this.complianceRegistry.address]});
+    await this.complianceRegistry.methods.registerUsers([address1, address2], [0, 100, 110, 111, 112], [1874872800, 1, 10000, 15000, 180000]).send({from: trustedIntermediary1, gas: 900000});
+    await this.complianceRegistry.methods.registerUser(address3, [BYPASS_KEY], [1]).send({from: trustedIntermediary1, gas: 900000});
+
+    this.contract = await this.project.createProxy(Contract, {initArgs: [this.complianceRegistry.address]});
+    this.governableTokenMock = await GovernableTokenMock.new({ from: tokenOwner });
+    token = this.governableTokenMock.address;
+    await this.governableTokenMock.setTrustedIntermediaries([trustedIntermediary1]);
+
   });
 
   it('can get the contract version', async function () {
@@ -65,33 +80,45 @@ contract('VestingRule', function ([_, owner, token, address1, address2]) {
   context('When initial state', function () {
     it('allows transfers', async function () {
       const ret = await this.contract.methods.isTransferValid(token, address1, address2, 100, 0).call();
-      ret['0'].should.equal('1');
-      ret['1'].should.equal('0');
+      ret['0'].should.equal(TRANSFER_VALID);
+      ret['1'].should.equal(REASON_OK);
     });
   });
 
   context('When frozen', function () {
-    beforeEach(async function () {
-      await this.contract.methods.addOperator(operator).send({from: owner});
-      this.timestamp = '' + (timestamp() + 3600);
-      // Freeze
-      await this.contract.methods.freezeAll(this.timestamp).send({from: operator});
+
+    it('user not found', async function () {
+      const ret = await this.contract.methods.isTransferValid(token, address1, address4, 100, timestamp).call();
+      ret['0'].should.equal(TRANSFER_INVALID);
+      ret['1'].should.equal(REASON_USER_NOT_FOUND);
+    });
+
+    it('use bypass key', async function () {
+      const ret = await this.contract.methods.isTransferValid(token, address1, address3, 100, timestamp).call();
+      ret['0'].should.equal(TRANSFER_VALID);
+      ret['1'].should.equal(REASON_OK);
+    });
+
+    it('from toker owner', async function () {
+      const ret = await this.contract.methods.isTransferValid(token, tokenOwner, address2, 100, timestamp).call();
+      ret['0'].should.equal(TRANSFER_VALID);
+      ret['1'].should.equal(REASON_OK);
     });
 
     it('rejects transfers', async function () {
-      const ret = await this.contract.methods.isTransferValid(token, address1, address2, 100, 0).call();
-      ret['0'].should.equal('0');
-      ret['1'].should.equal('1');
+      const ret = await this.contract.methods.isTransferValid(token, address1, address2, 100, timestamp).call();
+      ret['0'].should.equal(TRANSFER_INVALID);
+      ret['1'].should.equal(REASON_TRANSFERS_FROZEN_VESTING);
     });
+  });
 
     context('When unfrozen', function () {
 
       it('allows transfers', async function () {
         const ret = await this.contract.methods.isTransferValid(token, address1, address2, 100, 0).call();
-        ret['0'].should.equal('1');
-        ret['1'].should.equal('0');
+        ret['0'].should.equal(TRANSFER_VALID);
+        ret['1'].should.equal(REASON_OK);
       });
     });
-  });
 
 });
