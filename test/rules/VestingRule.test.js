@@ -57,7 +57,11 @@ const REASON_TRANSFERS_FROZEN_VESTING = '2';
 
 const BYPASS_KEY = 140;
 
-const timestamp = 100000000000
+const currentTimestamp = function () {
+  return Math.floor(new Date().getTime()/1000);
+};
+
+const futureTimestamp = currentTimestamp() + 3600;
 
 contract('VestingRule', function ([_, tokenOwner, owner, trustedIntermediary1, address1, address2, address3, address4, address5]) {
   beforeEach(async function () {
@@ -88,25 +92,25 @@ contract('VestingRule', function ([_, tokenOwner, owner, trustedIntermediary1, a
   context('When frozen', function () {
 
     it('user not found', async function () {
-      const ret = await this.contract.methods.isTransferValid(token, address1, address4, 100, timestamp).call();
+      const ret = await this.contract.methods.isTransferValid(token, address1, address4, 100, futureTimestamp).call();
       ret['0'].should.equal(TRANSFER_INVALID);
       ret['1'].should.equal(REASON_USER_NOT_FOUND);
     });
 
     it('use bypass key', async function () {
-      const ret = await this.contract.methods.isTransferValid(token, address1, address3, 100, timestamp).call();
+      const ret = await this.contract.methods.isTransferValid(token, address1, address3, 100,futureTimestamp).call();
       ret['0'].should.equal(TRANSFER_VALID);
       ret['1'].should.equal(REASON_OK);
     });
 
     it('from toker owner', async function () {
-      const ret = await this.contract.methods.isTransferValid(token, tokenOwner, address2, 100, timestamp).call();
+      const ret = await this.contract.methods.isTransferValid(token, tokenOwner, address2, 100, futureTimestamp).call();
       ret['0'].should.equal(TRANSFER_VALID);
       ret['1'].should.equal(REASON_OK);
     });
 
     it('rejects transfers', async function () {
-      const ret = await this.contract.methods.isTransferValid(token, address1, address2, 100, timestamp).call();
+      const ret = await this.contract.methods.isTransferValid(token, address1, address2, 100, futureTimestamp).call();
       ret['0'].should.equal(TRANSFER_INVALID);
       ret['1'].should.equal(REASON_TRANSFERS_FROZEN_VESTING);
     });
