@@ -35,7 +35,7 @@
     address: hello@mtpelerin.com
 */
 
-require('chai').should()
+require('chai/register-should');
 const { TestHelper } = require('@openzeppelin/cli');
 const { Contracts, ZWeb3 } = require('@openzeppelin/upgrades');
 

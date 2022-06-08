@@ -36,7 +36,7 @@
 */
 
 const { expectEvent, shouldFail } = require('openzeppelin-test-helpers');
-require('chai').should()
+require('chai/register-should');
 
 const ProofOfAddress = artifacts.require('ProofOfAddress');
 
