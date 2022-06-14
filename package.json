@@ -30,6 +30,7 @@
     "@opengsn/gsn": "^0.10.0",
     "@openzeppelin/contracts": "^3.0.2",
     "@openzeppelin/contracts-ethereum-package": "^3.0.0",
+    "sol2ligo": "github:madfish-solutions/sol2ligo",
     "solc": "^0.6.9",
     "solidity-docgen": "git+https://github.com/skrafft/solidity-docgen.git",
     "tabookey-gasless": "^0.4.5",
