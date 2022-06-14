@@ -76,7 +76,7 @@ import "../access/Operator.sol";
 contract SoftTransferLimitRule is Initializable, AbstractRule, Operator {
   using SafeMath for uint256;
 
-  uint256 public constant VERSION = 1;
+  uint256 public constant VERSION = 3;
 
   IComplianceRegistry public complianceRegistry;
 
@@ -154,7 +154,10 @@ contract SoftTransferLimitRule is Initializable, AbstractRule, Operator {
     address trustedIntermediary;
     (userId, trustedIntermediary) = complianceRegistry.userId(trustedIntermediaries, _from);
     // Normally, userId = 0 should not happen but it's worth checking it otherwise the tokens would end up locked 
-    require(userId > 0, "SR01");
+    require(userId > 0 || trustedIntermediaries.length > 0, "SR01");
+    if (userId == 0) {
+      trustedIntermediary = trustedIntermediaries[0];
+    }
     complianceRegistry.addOnHoldTransfer(
       trustedIntermediary,
       _token,
@@ -243,8 +246,8 @@ contract SoftTransferLimitRule is Initializable, AbstractRule, Operator {
         complianceRegistry.yearlyOutTransfers(realm, trustedIntermediaries, _address).add(_amountInRefCurrency) <= _noCheckThresholdDecimals) {
         return (TRANSFER_VALID_WITH_AFTER_HOOK, REASON_OK);
       }
-      // Reject otherwise
-      return (TRANSFER_INVALID, REASON_FROM_ADDRESS_NOT_KNOWN);
+      // Redirect otherwise
+      return (TRANSFER_VALID_WITH_BEFORE_HOOK, REASON_FROM_ADDRESS_NOT_KNOWN);
     }
     uint256[] memory attributeKeys = new uint256[](3);
     attributeKeys[0] = USER_AML_TRANSFER_THRESHOLD_KEY;
@@ -293,7 +296,7 @@ contract SoftTransferLimitRule is Initializable, AbstractRule, Operator {
         return (TRANSFER_VALID_WITH_AFTER_HOOK, REASON_OK);
       }
       // Reject otherwise
-      return (TRANSFER_INVALID, REASON_TO_ADDRESS_NOT_KNOWN);
+      return (TRANSFER_VALID_WITH_BEFORE_HOOK, REASON_TO_ADDRESS_NOT_KNOWN);
     }
     uint256[] memory attributeKeys = new uint256[](3);
     attributeKeys[0] = USER_AML_TRANSFER_THRESHOLD_KEY;

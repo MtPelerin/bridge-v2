@@ -51,6 +51,7 @@ const MPS = bytes32('MPS');
 const CHF = bytes32('CHF');
 const EUR = bytes32('EUR');
 const BVS = bytes32('BVS');
+const NTIT = bytes32('NTIT');
 
 const Contract = Contracts.getFromLocal('SoftTransferLimitRule');
 const ComplianceRegistry = Contracts.getFromLocal('ComplianceRegistry');
@@ -71,22 +72,25 @@ contract('SoftTransferLimitRule', function ([_, tokenOwner, owner, operator, tru
     * 1 MPS = 5 CHF
     * 1 EUR = 1.12079 CHF
     * 1 BVS = 67615.08594138624048749941067 CHF
+    * 1 NTIT = 1.53 CHF
     */
-    await this.priceOracle.methods.setPrices([MPS, EUR, BVS], [CHF, CHF, CHF], ['500', '112079', '6761508594138624048749941067' ], [2, 5, 23]).send({from: owner, gas: 400000});
+    await this.priceOracle.methods.setPrices([MPS, EUR, BVS, NTIT], [CHF, CHF, CHF, CHF], ['500', '112079', '6761508594138624048749941067', '153'], [2, 5, 23, 2]).send({from: owner, gas: 600000});
     this.contract = await this.project.createProxy(Contract, {initArgs: [owner, this.complianceRegistry.address]});
     this.MPS = await BridgeERC20Mock.new(this.priceOracle.address, 'Mt Pelerin Shares', 'MPS', 0, { from: tokenOwner });
     this.BVS = await BridgeERC20Mock.new(this.priceOracle.address, 'Big Value Share Token', 'BVS', 18, { from: tokenOwner });
     this.EUR = await BridgeERC20Mock.new(this.priceOracle.address, 'Euro Token', 'EUR', 2, { from: tokenOwner });
+    this.noTrustedIntermediariesToken = await BridgeERC20Mock.new(this.priceOracle.address, 'NTIT', 'NTIT', 2, { from: tokenOwner });
     await this.MPS.setTrustedIntermediaries([trustedIntermediary1, trustedIntermediary2]);
     await this.BVS.setTrustedIntermediaries([trustedIntermediary1, trustedIntermediary2]);
     await this.EUR.setTrustedIntermediaries([trustedIntermediary1, trustedIntermediary2]);
     await this.MPS.setRealm(realm);
     await this.BVS.setRealm(realm);
     await this.EUR.setRealm(realm);
+    await this.noTrustedIntermediariesToken.setRealm(realm);
   });
 
   it('can get the contract version', async function () {
-    (await this.contract.methods.VERSION().call()).should.equal('1');
+    (await this.contract.methods.VERSION().call()).should.equal('3');
   });
 
   context('When owner', function () {
@@ -146,8 +150,20 @@ contract('SoftTransferLimitRule', function ([_, tokenOwner, owner, operator, tru
         this.events['0'].raw.topics[3].indexOf(rawAddress(address1)).should.be.at.least(0);
       });
 
-      it('should revert if from address is not known in compliance registry', async function () {
-        await shouldFail.reverting.withMessage(this.contract.methods.beforeTransferHook(this.EUR.address, address3, address2, 890133, 0).send({from: operator, gas: 200000}), "SR01");
+      it('should update onHold transfer registry from address is not known in compliance registry', async function () {
+        await this.contract.methods.beforeTransferHook(this.EUR.address, address1, address2, 890133, 0).send({from: operator, gas: 200000});
+        this.tokenAddress = this.EUR.address;
+        const ret = await this.complianceRegistry.methods.getOnHoldTransfers(trustedIntermediary1).call();
+        ret['length'].should.equal('1');
+        ret['id'][0].should.equal('0');
+        ret['token'][0].should.equal(this.EUR.address);
+        ret['from'][0].should.equal(address1);
+        ret['to'][0].should.equal(address2);
+        ret['amount'][0].should.equal('890133');
+      });
+
+      it('should revert if from address is not known in compliance registry and trusted intermediaries are not set', async function () {
+        await shouldFail.reverting.withMessage(this.contract.methods.beforeTransferHook(this.noTrustedIntermediariesToken.address, address3, address2, 890133, 0).send({from: operator, gas: 200000}), "SR01");
       });
     });
   });
@@ -274,14 +290,14 @@ contract('SoftTransferLimitRule', function ([_, tokenOwner, owner, operator, tru
         ret['0'].should.equal('3');
         ret['1'].should.equal('0');
       });
-      it('returns that transfer is invalid when from address is not found and amount is above no check threshold', async function () {
+      it('returns that transfer is valid with before hook when from address is not found and amount is above no check threshold', async function () {
         const ret = await this.contract.methods.isTransferValid(this.EUR.address, address3, address2, 890133, 250).call();
-        ret['0'].should.equal('0');
+        ret['0'].should.equal('2');
         ret['1'].should.equal('1');
       });
-      it('returns that transfer is invalid when to address is not found and amount is above no check threshold', async function () {
+      it('returns that transfer is valid with before hook when to address is not found and amount is above no check threshold', async function () {
         const ret = await this.contract.methods.isTransferValid(this.EUR.address, address1, address3, 890133, 250).call();
-        ret['0'].should.equal('0');
+        ret['0'].should.equal('2');
         ret['1'].should.equal('5');
       });
       it('returns that transfer is valid with before hook when transfer amount is above single transaction threshold', async function () {
@@ -309,14 +325,14 @@ contract('SoftTransferLimitRule', function ([_, tokenOwner, owner, operator, tru
         ret['0'].should.equal('3');
         ret['1'].should.equal('0');
       });
-      it('returns that transfer is invalid when from address is not found and cumulated amount is above no check threshold', async function () {
+      it('returns that transfer is valid with before hook when from address is not found and cumulated amount is above no check threshold', async function () {
         const ret = await this.contract.methods.isTransferValid(this.EUR.address, address3, address2, 8933, 250).call();
-        ret['0'].should.equal('0');
+        ret['0'].should.equal('2');
         ret['1'].should.equal('1');
       });
-      it('returns that transfer is invalid when to address is not found and cumulated amount is above no check threshold', async function () {
+      it('returns that transfer is valid with before hook when to address is not found and cumulated amount is above no check threshold', async function () {
         const ret = await this.contract.methods.isTransferValid(this.EUR.address, address1, address3, 8933, 250).call();
-        ret['0'].should.equal('0');
+        ret['0'].should.equal('2');
         ret['1'].should.equal('5');
       });
     });
