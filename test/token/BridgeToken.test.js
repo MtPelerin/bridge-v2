@@ -51,6 +51,8 @@ const RuleEngine = Contracts.getFromLocal('RuleEngine');
 const YesNoRule = Contracts.getFromLocal('YesNoRule');
 const YesNoUpdateRule = Contracts.getFromLocal('YesNoUpdateRule');
 
+const ERC677ReceiverMock = artifacts.require('ERC677ReceiverMock.sol')
+
 const zero = '0x0000000000000000000000000000000000000000';
 
 const PERMIT_TYPEHASH = web3.utils.keccak256('Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)');
@@ -269,17 +271,6 @@ contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1
       this.events.RulesChanged.returnValues.newRulesParams[1].should.equal('0');
     });
 
-    it('can set contact', async function () {
-      (await this.contract.methods.contact().call()).should.equal('');
-      ({events: this.events} = await this.contract.methods.setContact('hello@mtpelerin.com').send({from: administrator}));
-      (await this.contract.methods.contact().call()).should.equal('hello@mtpelerin.com');
-    }); 
-
-    it('emits a ContactSet event', function () {
-      this.events.should.have.property('ContactSet');
-      this.events.ContactSet.returnValues.should.have.property('contact', 'hello@mtpelerin.com');
-    });
-
     it('reverts if trying to add administrator', async function () {
       await shouldFail.reverting(this.contract.methods.addAdministrator(administrator).send({from: administrator}));
     });
@@ -413,10 +404,6 @@ contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1
       await shouldFail.reverting.withMessage(this.contract.methods.setRules([0, 1], [1, 0]).send({from: supplier}), "AD01");
     });
 
-    it('reverts if trying to set contact', async function () {
-      await shouldFail.reverting.withMessage(this.contract.methods.setContact('hello@mtpelerin.com').send({from: supplier}), "AD01");
-    });
-
     it('reverts if trying to seize tokens', async function () {
       await shouldFail.reverting.withMessage(this.contract.methods.seize(address1, 10000).send({from: supplier}), "SE02");
     });
@@ -510,10 +497,6 @@ contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1
 
     it('reverts if trying to set rules', async function () {
       await shouldFail.reverting.withMessage(this.contract.methods.setRules([0, 1], [1, 0]).send({from: seizer}), "AD01");
-    });
-
-    it('reverts if trying to set contact', async function () {
-      await shouldFail.reverting.withMessage(this.contract.methods.setContact('hello@mtpelerin.com').send({from: seizer}), "AD01");
     });
 
     it('reverts if trying to mint tokens', async function () {
@@ -613,6 +596,31 @@ contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1
         this.events.Approval.returnValues.should.have.property('owner', address1);
         this.events.Approval.returnValues.should.have.property('spender', address3);
         this.events.Approval.returnValues.should.have.property('value', '50000');
+      });
+    });
+
+    context('EIP677 - transferAndCall function', function () {
+      beforeEach(async function () {
+        this.ERC677Receiver = await ERC677ReceiverMock.new();
+      });
+      
+      it('can transfer tokens to a recepient and call onTokenTransfer afterwards', async function () {
+        (await this.yesNoUpdate.methods.updateCount().call()).should.equals('0');    
+        (await this.contract.methods.balanceOf(owner).call()).should.equal('4000');
+        (await this.contract.methods.balanceOf(address1).call()).should.equal('31000');
+        (await this.contract.methods.balanceOf(address2).call()).should.equal('32000');
+        (await this.contract.methods.balanceOf(address3).call()).should.equal('33000');
+        ({events: this.events} = await this.contract.methods.transferAndCall(this.ERC677Receiver.address, 11000, '0x1234567890').send({from: address1, gas: 200000})); 
+        (await this.contract.methods.balanceOf(owner).call()).should.equal('4000');
+        (await this.contract.methods.balanceOf(address1).call()).should.equal('20000');
+        (await this.contract.methods.balanceOf(this.ERC677Receiver.address).call()).should.equal('11000');
+        (await this.contract.methods.balanceOf(address2).call()).should.equal('32000');
+        (await this.contract.methods.balanceOf(address3).call()).should.equal('33000');
+        (await this.contract.methods.totalSupply().call()).should.equal('100000');   
+        (await this.yesNoUpdate.methods.updateCount().call()).should.equals('1'); 
+        web3.eth.abi.decodeParameter('bytes', this.events['0'].raw.data).should.equal('0x1234567890');
+        this.events['0'].raw.topics[1].should.equal(web3.eth.abi.encodeParameter('address', address1));
+        this.events['0'].raw.topics[2].should.equal(web3.eth.abi.encodeParameter('uint256', 11000));
       });
     });
 
@@ -1647,10 +1655,6 @@ contract('BridgeToken', function ([_, owner, administrator, trustedIntermediary1
 
       it('reverts if trying to set rules', async function () {
         await shouldFail.reverting.withMessage(this.contract.methods.setRules([0, 1], [1, 0]).send({from: address2}), "AD01");
-      });
-
-      it('reverts if trying to set contact', async function () {
-        await shouldFail.reverting.withMessage(this.contract.methods.setContact('hello@mtpelerin.com').send({from: address2}), "AD01");
       });
 
       it('reverts if trying to mint tokens', async function () {

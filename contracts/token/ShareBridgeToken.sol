@@ -39,7 +39,6 @@ pragma solidity 0.6.2;
 
 import "./BridgeToken.sol";
 import "../interfaces/IProcessor.sol";
-import "../interfaces/IVotable.sol";
 
 /**
  * @title ShareBridgeToken
@@ -49,14 +48,14 @@ import "../interfaces/IVotable.sol";
 **/
 
 
-contract ShareBridgeToken is Initializable, IVotable, BridgeToken {
+contract ShareBridgeToken is Initializable, BridgeToken {
   /**
   * Purpose:
-  * This event is emitted when the percentage of shares that are tokenized is changed
+  * This event is emitted when the number of shares that are tokenized is changed
   *
-  * @param tokenizedSharePercentage - new percentage of shares that are tokenized
+  * @param tokenizedShares - new number of shares that are tokenized
   */
-  event TokenizedSharePercentageSet(uint16 tokenizedSharePercentage);
+  event TokenizedShares(uint256 tokenizedShares);
 
   /**
   * Purpose:
@@ -66,12 +65,14 @@ contract ShareBridgeToken is Initializable, IVotable, BridgeToken {
   */
   event BoardResolutionDocumentSet(bytes32 boardResolutionDocumentHash);
 
-  uint256 public constant VERSION = 2;
+  uint256 public constant VERSION = 3;
   
-  uint16 public tokenizedSharePercentage;
-  address public override votingSession;
+  uint16 public tokenizedSharePercentage; // DEPRECATED - Not removed for proxy compatibility: https://docs.openzeppelin.com/sdk/2.5/writing-contracts.html#modifying-your-contracts
+  address public votingSession; // DEPRECATED - Not removed for proxy compatibility: https://docs.openzeppelin.com/sdk/2.5/writing-contracts.html#modifying-your-contracts
   string public boardResolutionDocumentUrl;
   bytes32 public boardResolutionDocumentHash;
+  string public terms;
+  uint256 public tokenizedShares;
 
   /**
   * @dev Initializer (replaces constructor when contract is upgradable)
@@ -80,7 +81,7 @@ contract ShareBridgeToken is Initializable, IVotable, BridgeToken {
   * @param name name of the token
   * @param symbol symbol of the token
   * @param trustedIntermediaries array of trusted intermediaries addresses
-  * @param _tokenizedSharePercentage percentage of shares that have been tokenized
+  * @param _tokenizedShares the number of shares that have been tokenized
   */
   function initialize(
     address owner,
@@ -88,7 +89,7 @@ contract ShareBridgeToken is Initializable, IVotable, BridgeToken {
     string memory name,
     string memory symbol,
     address[] memory trustedIntermediaries,
-    uint16 _tokenizedSharePercentage
+    uint256 _tokenizedShares
   )
     public initializer
   {
@@ -100,17 +101,25 @@ contract ShareBridgeToken is Initializable, IVotable, BridgeToken {
       0,
       trustedIntermediaries
     );
-    tokenizedSharePercentage = _tokenizedSharePercentage;
-    emit TokenizedSharePercentageSet(_tokenizedSharePercentage);
+    tokenizedShares = _tokenizedShares;
+    emit TokenizedShares(tokenizedShares);
   }
 
   /**
-  * @dev Set the percentage of shares that are tokenized
-  * @param _tokenizedSharePercentage the percentage of shares that are tokenized
+  * @dev Set the number of shares that are tokenized
+  * @param _tokenizedShares the number of shares that are tokenized
   */
-  function setTokenizedSharePercentage(uint16 _tokenizedSharePercentage) public onlyAdministrator {
-    tokenizedSharePercentage = _tokenizedSharePercentage;
-    emit TokenizedSharePercentageSet(_tokenizedSharePercentage);
+  function setTokenizedShares(uint256 _tokenizedShares) public onlyAdministrator {
+    tokenizedShares = _tokenizedShares;
+    emit TokenizedShares(tokenizedShares);
+  }
+
+  /**
+  * @dev Set the terms of the tokenization (usually a url)
+  * @param _terms the terms of the tokenization (usually a url)
+  */
+  function setTerms(string calldata _terms) external onlyAdministrator {
+    terms = _terms;
   }
 
   /**
@@ -122,16 +131,6 @@ contract ShareBridgeToken is Initializable, IVotable, BridgeToken {
     boardResolutionDocumentUrl = _boardResolutionDocumentUrl;
     boardResolutionDocumentHash = _boardResolutionDocumentHash;
     emit BoardResolutionDocumentSet(_boardResolutionDocumentHash);
-  }
-
-  /* Votable */
-  /**
-  * @dev Set the voting session contract address (used for general meetings)
-  * @param _votingSession the voting session contract address
-  */
-  function setVotingSession(address _votingSession) public override onlyAdministrator {
-    votingSession = _votingSession;
-    emit VotingSessionSet(_votingSession);
   }
 
   /* Reserved slots for future use: https://docs.openzeppelin.com/sdk/2.5/writing-contracts.html#modifying-your-contracts */

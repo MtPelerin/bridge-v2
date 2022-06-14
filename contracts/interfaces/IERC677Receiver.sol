@@ -36,69 +36,12 @@
 */
 
 pragma solidity 0.6.2;
-pragma experimental ABIEncoderV2;
 
-import "@opengsn/gsn/contracts/BasePaymaster.sol";
+/**
+ * @title IERC677Receiver
+ * @dev IERC677Receiver interface
+ */
 
-contract TargetMethodPaymaster is BasePaymaster {
-    event TargetMethodUpdated(address target);
-
-	mapping(address => bytes4[]) public targets;  
-
-	/**
-  * @dev Set the functions we are willing to pay gas for for a specific contract address
-  * @param target the contract address
-  * @param methods the encoded method IDs
-	*/
-	function setTarget(address target, bytes4[] calldata methods) external onlyOwner {
-		targets[target] = methods;
-		emit TargetMethodUpdated(target);
-	}
-
-	/**
-  * @dev checks whether we should accept relay cal
-  * @param relayRequest GSNTypes.RelayRequest containing request data (target and encodedFunction)
-  * @return context the timestamp at which the request was accepted
-  */
-	function acceptRelayedCall(
-		GSNTypes.RelayRequest calldata relayRequest,
-    bytes calldata /* signature */,
-		bytes calldata /* approvalData */, 
-		uint256 /* maxPossibleGas */
-	) external view override returns (bytes memory) {
-    bytes4 methodId = _getMethodId(relayRequest.encodedFunction);
-		for(uint256 i = 0; i < targets[relayRequest.target].length; i++) {
-		  if (targets[relayRequest.target][i] == methodId) {
-			  return abi.encode(now);
-		  }
-		}
-		revert("PM01");
-	}
-
-	function preRelayedCall(
-		bytes calldata /* context */
-	) external relayHubOnly override returns(bytes32) {
-		return bytes32(0);
-	}
-
-	function postRelayedCall(
-		bytes calldata /* context */,
-		bool /* success */,
-		bytes32 /* preRetVal */,
-		uint256 /* gasUse */,
-		GSNTypes.GasData calldata /* gasData */
-	) external relayHubOnly override {
-	}
-
-  function versionPaymaster() external override view returns (string memory) {
-    return "2.0.0";
-  }
-
-  function _getMethodId(bytes memory encodedFunction) internal pure returns (bytes4) {
-    bytes4 methodId;
-    assembly {
-      methodId := mload(add(encodedFunction, 32))
-    }
-    return methodId;
-  }
-} 
+interface IERC677Receiver {
+  function onTokenTransfer(address from, uint256 amount, bytes calldata data) external returns (bool);
+}
