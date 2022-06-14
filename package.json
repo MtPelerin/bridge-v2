@@ -41,10 +41,8 @@
     "@taquito/taquito": "^9.2.0",
     "bignumber.js": "^9.0.1",
     "ganache-cli": "^6.12.2",
-    "sol2ligo": "github:madfish-solutions/sol2ligo",
     "solc": "^0.6.9",
     "solidity-docgen": "git+https://github.com/skrafft/solidity-docgen.git",
-    "tabookey-gasless": "^0.4.5",
     "truffle": "^5.0.28"
   }
 }
