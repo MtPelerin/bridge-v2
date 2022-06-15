@@ -61,7 +61,7 @@ contract OwnableGovernableTokenMock is IGovernable, IOwnable {
     return _owner;
   }
 
-  function transferOwnership(address _newOwner) external override returns (bool) {
+  function transferOwnership(address /*_newOwner*/) external override returns (bool) {
      return true; 
   }
   
