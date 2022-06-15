@@ -1,4 +1,5 @@
 /*
+    Copyright (c) 2022 Realt LLC.
     Copyright (c) 2019 Mt Pelerin Group Ltd
 
     This program is free software; you can redistribute it and/or modify
@@ -88,14 +89,12 @@ contract VestingRule is Initializable, AbstractRule {
         address[] memory trustedIntermediaries = IGovernable(_token).trustedIntermediaries();
         (uint256 userId, address trustedIntermediary) = _complianceRegistry.userId(trustedIntermediaries, _to);
         if (userId == 0) return (TRANSFER_INVALID, REASON_USER_NOT_FOUND);
-        uint256[] memory attributeKeys = new uint256[](1);
-        attributeKeys[0] = BYPASS_KEY;
-        uint256[] memory userAttributes = _complianceRegistry.attributes(
+        uint256 userAttribute = _complianceRegistry.attribute(
             trustedIntermediary,
             userId,
-            attributeKeys
+            BYPASS_KEY
         );
-        if (userAttributes[0] == 0) return (TRANSFER_INVALID, REASON_TRANSFERS_FROZEN_VESTING);
+        if (userAttribute == 0) return (TRANSFER_INVALID, REASON_TRANSFERS_FROZEN_VESTING);
     }
     return (TRANSFER_VALID_WITH_NO_HOOK, REASON_OK);
   }
