@@ -38,7 +38,7 @@
 require('chai/register-should');
 const { TestHelper } = require('@openzeppelin/cli');
 const { Contracts, ZWeb3 } = require('@openzeppelin/upgrades');
-const { expectEvent, shouldFail } = require('openzeppelin-test-helpers');
+const { shouldFail } = require('openzeppelin-test-helpers');
 
 ZWeb3.initialize(web3.currentProvider);
 

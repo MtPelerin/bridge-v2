@@ -44,12 +44,11 @@ import "../interfaces/IAdministrable.sol";
 import "../interfaces/IERC20Detailed.sol";
 
 /**
- * @title FreezeRule
- * @dev FreezeRule allows trusted authorities to enforce a freeze of assets for specific addresses
+ * @title AddressThresholdLockRule
+ * @dev AddressThresholdLockRule allows trusted authorities to enforce a locked threshold for specific addresses
  *
  * Error messages
  * RU02: Function cannot be called
- * AD01: Caller is not token administrator
  *
  * Errors
  * 1: Locked threshold reached
@@ -73,7 +72,7 @@ contract AddressThresholdLockRule is Initializable, AbstractRule {
   * @return transferStatus Invalid transfer if the balance of token on the from address after transfer is lower than the address lock threshold, valid transfer without further action otherwise
   * @return statusCode The reason of the transfer rejection indicating than the lock threshold is reached
   */
-  function isTransferValid(
+  function isTransferValid( 
     address _token, address _from, address /* _to */, uint256 _amount , uint256 /* */)
     public override view returns (uint256, uint256)
   {

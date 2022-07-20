@@ -37,6 +37,7 @@
 
 require('chai/register-should');
 const { expectEvent, shouldFail } = require('openzeppelin-test-helpers');
+const { delay } = require('../helpers/utils');
 
 const bytes32 = function (val) {
   return web3.utils.fromAscii(val);
@@ -45,10 +46,6 @@ const bytes32 = function (val) {
 const bytes32Pad = function (val) {
   return web3.utils.fromAscii(val).padEnd(66, '0');
 };
-
-const timeout = function (ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 const Contract = artifacts.require('ShareholderMeeting');
 
@@ -92,33 +89,31 @@ contract('ShareholderMeeting', function ([_, owner, operator, address1, address2
 
     context('Register voters', function () {
       it('can add new voters in the session', async function () {
-        ({ logs: this.logs } = await this.contract.registerVoters([address1, address2, address3, address4, address5], [100, 200, 300, 400, 500], {from: owner, gas: 500000}));
+        ({ logs: this.logs } = await this.contract.registerVoters([address1, address2, address3, address4, address5], ["0x1", "0x2", "0x3", "0x3", "0x5"], {from: owner, gas: 500000}));
+        (await this.contract.voterIds(address1)).should.equal('0x0100000000000000000000000000000000000000000000000000000000000000');
+        (await this.contract.voterIds(address4)).should.equal('0x0300000000000000000000000000000000000000000000000000000000000000');
       });
 
-      it('emits 5 VoterRegistered events', function () {
-        this.logs.should.have.length(5);
-        this.logs[0].args.should.have.property('voter', address1);
-        this.logs[1].args.should.have.property('voter', address2);
-        this.logs[2].args.should.have.property('voter', address3);
-        this.logs[3].args.should.have.property('voter', address4);
-        this.logs[4].args.should.have.property('voter', address5);
-        this.logs[0].args.should.have.property('weight');
-        this.logs[0].args.weight.should.be.bignumber.equal('100');
-        this.logs[1].args.should.have.property('weight');
-        this.logs[1].args.weight.should.be.bignumber.equal('200');
-        this.logs[2].args.should.have.property('weight');
-        this.logs[2].args.weight.should.be.bignumber.equal('300');
-        this.logs[3].args.should.have.property('weight');
-        this.logs[3].args.weight.should.be.bignumber.equal('400');
-        this.logs[4].args.should.have.property('weight');
-        this.logs[4].args.weight.should.be.bignumber.equal('500');
-
+      it('reverts if voters array length is different than voterId array length', async function () {
+        await shouldFail.reverting.withMessage(this.contract.registerVoters([address1, address2, address3, address4], ["0x1", "0x2", "0x3", "0x3", "0x5"], {from: owner, gas: 500000}), "VO03");
       });
 
-      it('reverts if voters array length is different than weights array length', async function () {
-        await shouldFail.reverting.withMessage(this.contract.registerVoters([address1, address2, address3, address4], [100, 200, 300, 400, 500], {from: owner, gas: 500000}), "VO03");
-      });
-    });    
+      context('Register weights', function () {
+        beforeEach(async function () {
+          await this.contract.registerVoters([address1, address2, address3, address4, address5], ["0x1", "0x2", "0x3", "0x3", "0x5"], {from: owner, gas: 500000});
+        });
+
+        it('can set weights for voters in the session', async function () {
+          await this.contract.registerWeights(["0x1", "0x2", "0x3", "0x5"], [100, 200, 300, 500], {from: owner, gas: 500000});
+          (await this.contract.voters("0x1")).should.be.bignumber.equal('100');
+          (await this.contract.voters("0x5")).should.be.bignumber.equal('500');
+        });
+  
+        it('reverts if voters array length is different than weights array length', async function () {
+          await shouldFail.reverting.withMessage(this.contract.registerWeights(["0x1", "0x2", "0x3", "0x3", "0x5"], [100, 200, 300, 400], {from: owner, gas: 500000}), "VO03");
+        });
+      });  
+    });      
 
     context('Open resolution for vote', function () {
       beforeEach(async function () {
@@ -149,7 +144,7 @@ contract('ShareholderMeeting', function ([_, owner, operator, address1, address2
       });
 
       it('reverts when trying to register new voters in the session', async function () {
-        await shouldFail.reverting.withMessage(this.contract.registerVoters([address1, address2, address3, address4, address5], [100, 200, 300, 400, 500], {from: owner, gas: 500000}), "VO11");
+        await shouldFail.reverting.withMessage(this.contract.registerVoters([address1, address2, address3, address4, address5], ["0x1", "0x2", "0x2", "0x4", "0x5"], {from: owner, gas: 500000}), "VO11");
       });
     });
   });
@@ -157,17 +152,12 @@ contract('ShareholderMeeting', function ([_, owner, operator, address1, address2
   context('When standard user', function () {
     beforeEach(async function () {
       await this.contract.addResolutions([bytes32('QUESTION1'), bytes32('QUESTION2')], [bytes32('https://mtpelerin.com/v1/q1'), bytes32('https://mtpelerin.com/v1/q2')], [2, 3],{from: owner, gas: 500000})
-      await this.contract.registerVoters([address1, address2, address3, address4], [100, 200, 300, 400],{from: owner, gas: 500000})
+      await this.contract.registerVoters([address1, address2, address3, address4], ["0x1", "0x2", "0x2", "0x4"],{from: owner, gas: 500000})
+      await this.contract.registerWeights(["0x1", "0x2", "0x4"], [100, 200, 400], {from: owner, gas: 500000});
     });
 
     it('can get the contract version', async function () {
       (await this.contract.VERSION()).should.be.bignumber.equal('1');
-    });
-
-    context('Security model', function () {
-      it('reverts if trying to withdraw deposited ETH', async function () {
-        await shouldFail.reverting.withMessage(this.contract.withdraw({from: address1, gas: 500000}), "Ownable: caller is not the owner");
-      });
     });
 
     context('Resolutions', function () {
@@ -193,10 +183,8 @@ contract('ShareholderMeeting', function ([_, owner, operator, address1, address2
     context('Voters', function () {
       context('Before vote session start', function () {
         it('can delegate vote to a delegate', async function () {
-          await this.contract.delegateVote(address5,{from: address1});
-          const ret = await this.contract.voters(address1);
-          ret['0'].should.be.bignumber.equal('100');
-          ret['1'].should.equal(address5);
+          await this.contract.delegateVote(address5, {from: address1});
+          (await this.contract.voterIds(address5)).should.equal('0x0100000000000000000000000000000000000000000000000000000000000000');
         });
 
         it('reverts if trying to delegate vote when not voter', async function () {
@@ -204,11 +192,15 @@ contract('ShareholderMeeting', function ([_, owner, operator, address1, address2
         });
 
         it('reverts if trying to add new voters when not authorized', async function () {
-          await shouldFail.reverting.withMessage(this.contract.registerVoters([address1, address2, address3, address4, address5], [100, 200, 300, 400, 500],{from: address1, gas: 500000}), "Ownable: caller is not the owner");
+          await shouldFail.reverting.withMessage(this.contract.registerVoters([address1, address2, address3, address4, address5], ["0x1", "0x2", "0x3", "0x4", "0x5"],{from: address1, gas: 500000}), "Ownable: caller is not the owner");
+        });
+
+        it('reverts if trying to add new weights when not authorized', async function () {
+          await shouldFail.reverting.withMessage(this.contract.registerWeights(["0x1", "0x2", "0x3", "0x4", "0x5"], [100, 200, 300, 400, 500],{from: address1, gas: 500000}), "Ownable: caller is not the owner");
         });
 
         it('reverts if trying to vote', async function () {
-          await shouldFail.reverting.withMessage(this.contract.vote(address1, 0, 0,{from : address1}), "VO10");
+          await shouldFail.reverting.withMessage(this.contract.vote(0, 0, {from : address1}), "VO10");
         });
       });
 
@@ -225,13 +217,13 @@ contract('ShareholderMeeting', function ([_, owner, operator, address1, address2
           let ret;
           ret = await this.contract.getResolutionResults(0);
           ret['0'].should.be.bignumber.equal('0');
-          ({ logs: this.logs } = await this.contract.vote(address1, 0, 0,{from : address1, gas: 500000}));
+          ({ logs: this.logs } = await this.contract.vote(0, 0, {from : address1, gas: 500000}));
           ret = await this.contract.getResolutionResults(0);
           ret['0'].should.be.bignumber.equal('100');
         });
 
         it('emits Vote event', async function () {
-          this.logs[0].args.should.have.property('voter', address1);
+          this.logs[0].args.should.have.property('voterId', '0x0100000000000000000000000000000000000000000000000000000000000000');
           this.logs[0].args.should.have.property('resolutionId');
           this.logs[0].args.resolutionId.should.be.bignumber.equal('0');
           this.logs[0].args.should.have.property('proposalId');
@@ -244,15 +236,15 @@ contract('ShareholderMeeting', function ([_, owner, operator, address1, address2
           let ret;
           ret = await this.contract.getResolutionResults(0);
           ret['0'].should.be.bignumber.equal('0');
-          await timeout(2000);
-          ({ logs: this.logs } = await this.contract.vote(address1, 0, 0,{from : address1, gas: 500000}));
+          await delay(2000);
+          ({ logs: this.logs } = await this.contract.vote(0, 0, {from : address1, gas: 500000}));
           ret = await this.contract.getResolutionResults(0);
           ret['0'].should.be.bignumber.equal('100');
         });
 
         it('can check if voter has already voted', async function() {
           (await this.contract.hasVotedForResolution(address1, 0)).should.equal(false);
-          await this.contract.vote(address1, 0, 0,{from : address1});
+          await this.contract.vote(0, 0, {from : address1});
           (await this.contract.hasVotedForResolution(address1, 0)).should.equal(true);
         });
 
@@ -267,41 +259,37 @@ contract('ShareholderMeeting', function ([_, owner, operator, address1, address2
             ret['0'].should.be.bignumber.equal('0');
             ret = await this.contract.getResolutionResults(1);
             ret['0'].should.be.bignumber.equal('0');
-            await this.contract.vote(address1, 0, 0,{from : address1});
+            await this.contract.vote(0, 0,{from : address1});
             ret = await this.contract.getResolutionResults(0);
             ret['0'].should.be.bignumber.equal('100');
-            await this.contract.vote(address1, 1, 0,{from : address1});
+            await this.contract.vote(1, 0,{from : address1});
             ret = await this.contract.getResolutionResults(0);
             ret['0'].should.be.bignumber.equal('100');
           });
         });
 
-        it('reverts when trying to vote for someone else and not delegate', async function () {
-          await shouldFail.reverting.withMessage(this.contract.vote(address2, 0, 0,{from: address1}), "VO05");
-        });
-
-        it('reverts when trying to vote and weight is zero', async function () {
-          await shouldFail.reverting.withMessage(this.contract.vote(address5, 0, 0,{from: address5}), "VO06");
+        it('reverts when trying to vote and not delegate nor voter', async function () {
+          await shouldFail.reverting.withMessage(this.contract.vote(0, 0, {from: address5}), "VO05");
         });
 
         it('reverts when trying to vote for a non existing resolution', async function () {
-          await shouldFail.reverting.withMessage(this.contract.vote(address1, 3, 0,{from: address1}), "VO07");
+          await shouldFail.reverting.withMessage(this.contract.vote(3, 0,{from: address1}), "VO07");
         });
 
         it('reverts when trying to vote for a non existing proposal', async function () {
-          await shouldFail.reverting.withMessage(this.contract.vote(address1, 0, 6,{from: address1}), "VO08");
+          await shouldFail.reverting.withMessage(this.contract.vote( 0, 6,{from: address1}), "VO08");
         });
 
         it('reverts when trying to vote twice for the same resolution', async function () {
-          await this.contract.vote(address1, 0, 0,{from : address1});
-          await shouldFail.reverting.withMessage(this.contract.vote(address1, 0, 1,{from: address1}), "VO09");
+          await this.contract.vote( 0, 0,{from : address1});
+          await shouldFail.reverting.withMessage(this.contract.vote(0, 1,{from: address1}), "VO09");
         });
       });
 
       context('When voting ended', function () {
         beforeEach(async function () {
           await this.contract.openResolutionVote(0, 1,{from: owner});
-          await timeout(2000);
+          await delay(2000);
         });
 
         it('reverts if trying to delegate vote to a delegate', async function () {
@@ -309,14 +297,14 @@ contract('ShareholderMeeting', function ([_, owner, operator, address1, address2
         });
 
         it('reverts if trying to vote', async function () {
-          await shouldFail.reverting.withMessage(this.contract.vote(address1, 0, 0,{from : address1}), "VO10");
+          await shouldFail.reverting.withMessage(this.contract.vote(0, 0,{from : address1}), "VO10");
         });
       });
     });  
     
     context('When delegate', function () {
       beforeEach(async function () {
-        await this.contract.delegateVote(address5,{from: address1});
+        await this.contract.delegateVote(address5, {from: address1});
         await this.contract.openResolutionVote(0, 300,{from: owner});
       });
 
@@ -325,42 +313,26 @@ contract('ShareholderMeeting', function ([_, owner, operator, address1, address2
         ret = await this.contract.getResolutionResults(0);
         ret['0'].should.be.bignumber.equal('0');
         (await this.contract.hasVotedForResolution(address1, 0)).should.equal(false);
-        await this.contract.vote(address1, 0, 0,{from : address5});
+        await this.contract.vote(0, 0, {from : address5});
         (await this.contract.hasVotedForResolution(address1, 0)).should.equal(true);
         ret = await this.contract.getResolutionResults(0);
         ret['0'].should.be.bignumber.equal('100');
       });
 
-      it('reverts if trying to vote on behalf of address which has not delegated his vote', async function () {
+      it('reverts if trying to vote twice with different addresses with same voterId', async function () {
         let ret;
         ret = await this.contract.getResolutionResults(0);
         ret['0'].should.be.bignumber.equal('0');
-        (await this.contract.hasVotedForResolution(address2, 0)).should.equal(false);
-        await shouldFail.reverting.withMessage(this.contract.vote(address2, 0, 0,{from : address5}), "VO05");
-        (await this.contract.hasVotedForResolution(address2, 0)).should.equal(false);
+        (await this.contract.hasVotedForResolution(address1, 0)).should.equal(false);
+        await this.contract.vote(0, 0, {from : address1})
         ret = await this.contract.getResolutionResults(0);
-        ret['0'].should.be.bignumber.equal('0');
+        ret['0'].should.be.bignumber.equal('100');
+        (await this.contract.hasVotedForResolution(address1, 0)).should.equal(true);
+        await shouldFail.reverting.withMessage(this.contract.vote(0, 0, {from : address5}), "VO09");
+        ret = await this.contract.getResolutionResults(0);
+        ret['0'].should.be.bignumber.equal('100');
+        (await this.contract.hasVotedForResolution(address1, 0)).should.equal(true);
       });
     });
   }); 
-
-  context('Meta transaction', function () {
-    it('should allow meta transaction for delegateVote', async function () {
-      const delegateVoteEncodedFunction = '0xb31e1d4d000000000000000000000000e84da28128a48dd5585d1abb1ba67276fdd70776';
-      ret = await this.contract.acceptRelayedCall(relay, from, delegateVoteEncodedFunction, 10, 10, 10, 10, '0x', 100);
-      ret['0'].should.be.bignumber.equal('0');
-    });
-
-    it('should allow meta transaction for vote', async function () {
-      const voteEncodedFunction = '0x2a4a1b73000000000000000000000000ce42bdb34189a93c55de250e011c68faee374dd300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000';
-      ret = await this.contract.acceptRelayedCall(relay, from, voteEncodedFunction, 10, 10, 10, 10, '0x', 100);
-      ret['0'].should.be.bignumber.equal('0');
-    });
-
-    it('should deny meta transaction with anything else', async function () {
-      const badEncodedFunction = '0x2a4b1b73000000000000000000000000ce42bdb34189a93c55de250e011c68faee374dd300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000';
-      ret = await this.contract.acceptRelayedCall(relay, from, badEncodedFunction, 10, 10, 10, 10, '0x', 100);
-      ret['0'].should.be.bignumber.equal('1');
-    });
-  });
 });

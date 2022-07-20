@@ -39,9 +39,6 @@ pragma solidity 0.6.2;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "../gsn_1/GsnUtils.sol";
-import "../gsn_1/IRelayHub.sol";
-import "../gsn_1/RelayRecipient.sol";
 
 /**
 * @title ShareholderMeeting
@@ -62,7 +59,7 @@ import "../gsn_1/RelayRecipient.sol";
 */
 
 
-contract ShareholderMeeting is Ownable, RelayRecipient {
+contract ShareholderMeeting is Ownable {
   using SafeMath for uint256;
 
   uint256 public constant VERSION = 1;
@@ -72,8 +69,8 @@ contract ShareholderMeeting is Ownable, RelayRecipient {
           
   event ResolutionAdded(bytes32 indexed name, bytes32 url, uint256 proposalCount);
   event ResolutionOpen(uint256 votingEnd);
-  event VoterRegistered(address indexed voter, uint256 weight);
-  event Vote(address indexed voter, uint256 indexed resolutionId, uint256 indexed proposalId, uint256 weight);
+  event VoterRegistered(bytes32 indexed voterId, uint256 weight);
+  event Vote(bytes32 indexed voterId, uint256 indexed resolutionId, uint256 indexed proposalId, uint256 weight);
 
   struct Resolution {
     bytes32 name;
@@ -84,16 +81,15 @@ contract ShareholderMeeting is Ownable, RelayRecipient {
 
   struct Voter {
     uint256 weight;
-    address delegate;
     mapping(uint256 => bool) voted;
   }
 
   bool votingStarted;
-  mapping(address => Voter) public voters;
+  mapping(address => bytes32) public voterIds;
+  mapping(bytes32 => Voter) public voters;
   Resolution[] public resolutions;
 
   constructor() public {
-    setRelayHub(IRelayHub(RELAY_HUB));
   }
 
 
@@ -109,7 +105,9 @@ contract ShareholderMeeting is Ownable, RelayRecipient {
   * @dev Throws VO14 if caller is not voter
   */
   modifier isVoter {
-    require(voters[getSender()].weight > 0, "VO06");
+    bytes32 voterId = voterIds[msg.sender];
+    require(voterId != 0x0, "VO06");
+    require(voters[voterId].weight > 0, "VO06");
     _;
   }
 
@@ -155,17 +153,31 @@ contract ShareholderMeeting is Ownable, RelayRecipient {
   }
 
   /**
-  * @dev Set the addresses allowed to vote with their respective weight
-  * @dev Throws VO02 if voters length is not the same as weights length
+  * @dev Set the addresses allowed to vote with their respective voter id
+  * @dev Throws VO03 if voters length is not the same as voter ids length
   * @dev Throws VO11 if the voting session has already started
   * @param _voters array of addresses allowed to vote
+  * @param _voterIds array of weigths, each weight corresponding to a voter
+  */
+  function registerVoters(address[] calldata _voters, bytes32[] calldata _voterIds) external onlyOwner beforeVotingSession {
+    require(_voters.length == _voterIds.length, "VO03");
+    for (uint256 i = 0; i < _voters.length; i++) {
+      voterIds[_voters[i]] = _voterIds[i];
+    }
+  }
+
+  /**
+  * @dev Set the addresses allowed to vote with their respective weight
+  * @dev Throws VO03 if voters length is not the same as weights length
+  * @dev Throws VO11 if the voting session has already started
+  * @param _voterIds array of ids allowed to vote
   * @param _weights array of weigths, each weight corresponding to a voter
   */
-  function registerVoters(address[] calldata _voters, uint256[] calldata _weights) external onlyOwner beforeVotingSession {
-    require(_voters.length == _weights.length, "VO03");
-    for (uint256 i = 0; i < _voters.length; i++) {
-      voters[_voters[i]].weight = _weights[i];
-      emit VoterRegistered(_voters[i], _weights[i]);
+  function registerWeights(bytes32[] calldata _voterIds, uint256[] calldata _weights) external onlyOwner beforeVotingSession {
+    require(_voterIds.length == _weights.length, "VO03");
+    for (uint256 i = 0; i < _voterIds.length; i++) {
+      voters[_voterIds[i]].weight = _weights[i];
+      emit VoterRegistered(_voterIds[i], _weights[i]);
     }
   }
 
@@ -177,7 +189,7 @@ contract ShareholderMeeting is Ownable, RelayRecipient {
   */
   function delegateVote(address delegate) public isVoter beforeVotingSession {
     require(delegate != address(0), "VO04");
-    voters[getSender()].delegate = delegate;
+    voterIds[delegate] = voterIds[msg.sender];
   }
 
   /**
@@ -187,21 +199,20 @@ contract ShareholderMeeting is Ownable, RelayRecipient {
   * @dev Throws VO07 if resolution id overflows
   * @dev Throws VO08 if proposal id overflows
   * @dev Throws VO09 if voter has already voted for this resolution
-  * @param voter the final voter address 
   * @param resolutionId Id of the resolution to vote for
   * @param proposalId Id of the proposal to vote for
   */
-  function vote(address voter, uint256 resolutionId, uint256 proposalId) public {
+  function vote(uint256 resolutionId, uint256 proposalId) public {
     require(resolutionId < resolutions.length, "VO07");
     require(proposalId < resolutions[resolutionId].proposals.length, "VO08");
     require(resolutions[resolutionId].votingEnd > 0 && resolutions[resolutionId].votingEnd > now, "VO10");
     // Check if function caller is allowed to vote
-    require(voter == getSender() || voters[voter].delegate == getSender(), "VO05");
-    require(voters[voter].weight > 0, "VO06");
-    require(voters[voter].voted[resolutionId] == false, "VO09");
-    voters[voter].voted[resolutionId] = true;
-    resolutions[resolutionId].proposals[proposalId] = resolutions[resolutionId].proposals[proposalId].add(voters[voter].weight);
-    emit Vote(voter, resolutionId, proposalId, voters[voter].weight);
+    bytes32 voterId = voterIds[msg.sender];
+    require(voterId != 0x0, "VO05");
+    require(voters[voterId].voted[resolutionId] == false, "VO09");
+    voters[voterId].voted[resolutionId] = true;
+    resolutions[resolutionId].proposals[proposalId] = resolutions[resolutionId].proposals[proposalId].add(voters[voterId].weight);
+    emit Vote(voterId, resolutionId, proposalId, voters[voterId].weight);
   }
 
   /**
@@ -224,51 +235,10 @@ contract ShareholderMeeting is Ownable, RelayRecipient {
   */
   function hasVotedForResolution(address voter, uint256 resolutionId) public view returns (bool) {
     require(resolutionId < resolutions.length, "VO07");
-    return voters[voter].voted[resolutionId];
-  }
-
-  function preRelayedCall(bytes calldata /* context */) external override returns (bytes32) {
-  }
-
-  function acceptRelayedCall(
-      address /* relay */,
-      address /* from */,
-      bytes calldata encodedFunction,
-      uint256 /* transactionFee */,
-      uint256 /* gasPrice */,
-      uint256 /* gasLimit  */,
-      uint256 /* nonce */,
-      bytes calldata /* approvalData */,
-      uint256 /* maxPossibleCharge */
-  )
-  external
-  override
-  view
-  returns (uint256, bytes memory) {
-    bytes4 methodId = _getMethodId(encodedFunction);
-    if (methodId == VOTE_METHOD_ID || methodId == DELEGATE_METHOD_ID) {
-      return (0, abi.encode(now));
-    }
-    return (1, '');
-  }
-
-  function postRelayedCall(bytes calldata /* context */, bool /* success */, uint /* actualCharge */, bytes32 /*  preRetVal */) external override {
-  }
-
-  function _getMethodId(bytes memory encodedFunction) internal pure returns (bytes4) {
-    bytes4 methodId;
-    assembly {
-      methodId := mload(add(encodedFunction, 32))
-    }
-    return methodId;
+    bytes32 voterId = voterIds[voter];
+    return voters[voterId].voted[resolutionId];
   }
 
   receive() external payable {
-  }
-
-  function withdraw() public onlyOwner {
-    uint256 balance = getRelayHub().balanceOf(address(this));
-    getRelayHub().withdraw(balance, payable(address(this)));
-    msg.sender.transfer(address(this).balance);
   }
 }

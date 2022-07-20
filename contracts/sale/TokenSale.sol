@@ -39,7 +39,8 @@ pragma solidity 0.6.2;
 
 import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/utils/Pausable.sol";
-import "../token/BridgeToken.sol";
+import "../interfaces/IERC20Detailed.sol";
+import "../interfaces/IPriceable.sol";
 import "../access/Operator.sol";
 
 
@@ -65,7 +66,7 @@ contract TokenSale is Initializable, PausableUpgradeSafe, Operator {
 
   uint256 public constant VERSION = 1;
 
-  BridgeToken public token;
+  address public token;
   address payable public etherVault;
   address public tokenVault;
   string public refCurrency;
@@ -79,7 +80,7 @@ contract TokenSale is Initializable, PausableUpgradeSafe, Operator {
 
   function initialize(
     address _owner,
-    BridgeToken _token,
+    address _token,
     address payable _etherVault,
     address _tokenVault,
     string memory _refCurrency,
@@ -150,22 +151,22 @@ contract TokenSale is Initializable, PausableUpgradeSafe, Operator {
     require(etherAmount != 0, "TS05");
     uint256 rate;
     uint256 tokenAmount;
-    rate = token.convertTo(10 ** uint256(token.decimals()), "ETH", MAX_DECIMALS);
+    rate = IPriceable(token).convertTo(10 ** uint256(IERC20Detailed(token).decimals()), "ETH", MAX_DECIMALS);
     require(rate != 0, "TS06");
     tokenAmount = etherAmount.mul(10**(uint256(2*MAX_DECIMALS) - uint256(ETH_DECIMALS))).div(rate);
     require(tokenAmount > 0, "TS10");
-    require(token.transferFrom(tokenVault, _investor, tokenAmount), "TS07");
+    require(IERC20Detailed(token).transferFrom(tokenVault, _investor, tokenAmount), "TS07");
   }
 
   function _investRefCurrency(address _investor, uint256 refCurrencyAmount) internal {
     require(refCurrencyAmount != 0, "TS05");
     uint256 rate;
     uint256 tokenAmount;
-    rate = token.convertTo(10 ** uint256(token.decimals()), refCurrency, MAX_DECIMALS);
+    rate = IPriceable(token).convertTo(10 ** uint256(IERC20Detailed(token).decimals()), refCurrency, MAX_DECIMALS);
     require(rate != 0, "TS09");
     tokenAmount = refCurrencyAmount.mul(10**(uint256(2*MAX_DECIMALS) - uint256(refCurrencyDecimals))).div(rate);
     require(tokenAmount > 0, "TS10");
-    require(token.transferFrom(tokenVault, _investor, tokenAmount), "TS07");
+    require(IERC20Detailed(token).transferFrom(tokenVault, _investor, tokenAmount), "TS07");
   }
 
   function _rebalance() internal {
