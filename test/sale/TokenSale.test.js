@@ -231,6 +231,14 @@ contract('TokenSale', function ([_, owner, operator, administrator, supplier, et
         await shouldFail.reverting.withMessage(this.contract.methods.setSchedule('1567987200', '1568246400').send({from: address1}), "OP01");
       });
 
+      it('reverts if trying to pause', async function () {
+        await shouldFail.reverting.withMessage(this.contract.methods.pause().send({from: address1}), "OP01");
+      });
+
+      it('reverts if trying to unpause', async function () {
+        await shouldFail.reverting.withMessage(this.contract.methods.pause().send({from: address1}), "OP01");
+      });
+
       it('reverts if trying to withdraw Ether', async function () {
         await shouldFail.reverting.withMessage(this.contract.methods.withdrawEther().send({from: address1}), "OP01");
       });

@@ -107,11 +107,11 @@ contract TokenSale is Initializable, PausableUpgradeSafe, Operator {
     _;
   }
 
-  function pause() public {
+  function pause() public onlyOperator {
     _pause();
   }
 
-  function unpause() public {
+  function unpause() public onlyOperator {
     _unpause();
   }
 
