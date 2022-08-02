@@ -45,57 +45,91 @@ import "../interfaces/IOwnable.sol";
 import "./abstract/AbstractRule.sol";
 
 /**
-* @title VestingRule
-* @dev Vesting Rule allows a legal authority to enforce an asset freeze, with some exceptions
-*
+ * @title VestingRule
+ * @dev Vesting Rule allows a legal authority to enforce an asset freeze, with some exceptions
+ *
  * Error messages
  * RU02: Function cannot be called
  *
  * Errors
  * 1: address not found in User Registry
  * 2: address does not have a bypass key
-*/ 
+ */
 
 contract VestingRule is Initializable, AbstractRule {
+    uint256 public constant VERSION = 1;
 
-  uint256 public constant VERSION = 1;
+    uint256 internal constant BYPASS_KEY = 140;
+    uint256 internal constant BYPASS_DIRECTION_NONE = 0;
+    uint256 internal constant BYPASS_DIRECTION_RECEIVE = 1;
+    uint256 internal constant BYPASS_DIRECTION_SEND = 2;
+    uint256 internal constant BYPASS_DIRECTION_BOTH = 3;
 
-  uint256 constant internal BYPASS_KEY = 140;
+    uint256 internal constant REASON_USER_NOT_FOUND = 2;
+    uint256 internal constant REASON_TRANSFERS_FROZEN_VESTING = 3;
 
-  IComplianceRegistry private _complianceRegistry;
+    IComplianceRegistry private _complianceRegistry;
 
-  uint256 internal constant REASON_USER_NOT_FOUND = 1;
-  uint256 internal constant REASON_TRANSFERS_FROZEN_VESTING = 2;
-
-  /**
-  * @dev Initializer (replaces constructor when contract is upgradable)
-  * @param complianceRegistry_ The Compliance Registry address that will be used by this rule for compliance checks
-  */
-  function initialize(IComplianceRegistry complianceRegistry_) public initializer {
-    _complianceRegistry = complianceRegistry_;
-  }
-
-  /**
-  * @dev Validates a transfer if transfers are not frozen or sent by owner or using a bypass key
-  * @return transferStatus Valid (1) or invalid transfer (0)
-  * @return statusCode details about the transfer status
-  */
-  function isTransferValid(
-    address _token, address _from, address _to, uint256 /* _amount */, uint256 timestamp)
-    public override view returns (uint256, uint256)
-  {
-    if (timestamp > block.timestamp) {
-        if (_from == IOwnable(_token).owner()) return (TRANSFER_VALID_WITH_NO_HOOK, REASON_OK);
-        address[] memory trustedIntermediaries = IGovernable(_token).trustedIntermediaries();
-        (uint256 userId, address trustedIntermediary) = _complianceRegistry.userId(trustedIntermediaries, _to);
-        if (userId == 0) return (TRANSFER_INVALID, REASON_USER_NOT_FOUND);
-        uint256 userAttribute = _complianceRegistry.attribute(
-            trustedIntermediary,
-            userId,
-            BYPASS_KEY
-        );
-        if (userAttribute == 0) return (TRANSFER_INVALID, REASON_TRANSFERS_FROZEN_VESTING);
+    /**
+     * @dev Initializer (replaces constructor when contract is upgradable)
+     * @param complianceRegistry_ The Compliance Registry address that will be used by this rule for compliance checks
+     */
+    function initialize(IComplianceRegistry complianceRegistry_)
+        public
+        initializer
+    {
+        _complianceRegistry = complianceRegistry_;
     }
-    return (TRANSFER_VALID_WITH_NO_HOOK, REASON_OK);
-  }
+
+    /**
+     * @dev Validates a transfer if transfers are not frozen or sent by owner or using a bypass key
+     * @return transferStatus Valid (1) or invalid transfer (0)
+     * @return statusCode details about the transfer status
+     */
+    function isTransferValid(
+        address _token,
+        address _from,
+        address _to,
+        uint256, /* _amount */
+        uint256 timestamp
+    ) public view override returns (uint256, uint256) {
+        if (timestamp > block.timestamp) {
+            if (_from == IOwnable(_token).owner())
+                return (TRANSFER_VALID_WITH_NO_HOOK, REASON_OK);
+
+            address[] memory trustedIntermediaries = IGovernable(_token)
+                .trustedIntermediaries();
+
+            uint256 fromKey = _getBypassKeyValue(trustedIntermediaries, _from);
+            if (fromKey == 0) return (TRANSFER_INVALID, REASON_USER_NOT_FOUND);
+            uint256 toKey = _getBypassKeyValue(trustedIntermediaries, _to);
+            if (toKey == 0) return (TRANSFER_INVALID, REASON_USER_NOT_FOUND);
+            if (fromKey < 2 || toKey % 2 == 0)
+                return (TRANSFER_INVALID, REASON_TRANSFERS_FROZEN_VESTING);
+        }
+        return (TRANSFER_VALID_WITH_NO_HOOK, REASON_OK);
+    }
+
+    /**
+     * @dev Get address bypass keyvalue or 0 if user not found
+     * @param trustedIntermediaries array of trusted intermediaries defined at the token level
+     * @param userAddress address to check
+     * @return Bypass key value + 1 and 0 if user not found
+     */
+    function _getBypassKeyValue(
+        address[] memory trustedIntermediaries,
+        address userAddress
+    ) private returns (uint256) {
+        (uint256 userId, address trustedIntermediary) = complianceRegistry
+            .userId(trustedIntermediaries, userAddress);
+        if (userId == 0) {
+            return TRANSFER_INVALID;
+        }
+        return
+            complianceRegistry.attribute(
+                trustedIntermediary,
+                userId,
+                BYPASS_KEY
+            );
+    }
 }
