@@ -101,9 +101,9 @@ contract VestingRule is Initializable, AbstractRule {
                 .trustedIntermediaries();
 
             uint256 fromKey = _getBypassKeyValue(trustedIntermediaries, _from);
-            if (fromKey == 0) return (TRANSFER_INVALID, REASON_USER_NOT_FOUND);
+            if (fromKey == 42) return (TRANSFER_INVALID, REASON_USER_NOT_FOUND);
             uint256 toKey = _getBypassKeyValue(trustedIntermediaries, _to);
-            if (toKey == 0) return (TRANSFER_INVALID, REASON_USER_NOT_FOUND);
+            if (toKey == 42) return (TRANSFER_INVALID, REASON_USER_NOT_FOUND);
             if (fromKey < 2 || toKey % 2 == 0)
                 return (TRANSFER_INVALID, REASON_TRANSFERS_FROZEN_VESTING);
         }
@@ -119,14 +119,14 @@ contract VestingRule is Initializable, AbstractRule {
     function _getBypassKeyValue(
         address[] memory trustedIntermediaries,
         address userAddress
-    ) private returns (uint256) {
-        (uint256 userId, address trustedIntermediary) = complianceRegistry
+    ) private view returns (uint256) {
+        (uint256 userId, address trustedIntermediary) = _complianceRegistry
             .userId(trustedIntermediaries, userAddress);
         if (userId == 0) {
-            return TRANSFER_INVALID;
+            return 42;
         }
         return
-            complianceRegistry.attribute(
+            _complianceRegistry.attribute(
                 trustedIntermediary,
                 userId,
                 BYPASS_KEY
