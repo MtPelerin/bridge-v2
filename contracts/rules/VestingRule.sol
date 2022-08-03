@@ -39,10 +39,10 @@
 pragma solidity 0.6.2;
 
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
+import "./abstract/AbstractRule.sol";
 import "../interfaces/IComplianceRegistry.sol";
 import "../interfaces/IGovernable.sol";
 import "../interfaces/IOwnable.sol";
-import "./abstract/AbstractRule.sol";
 
 /**
  * @title VestingRule
@@ -96,7 +96,6 @@ contract VestingRule is Initializable, AbstractRule {
         if (timestamp > block.timestamp) {
             if (_from == IOwnable(_token).owner())
                 return (TRANSFER_VALID_WITH_NO_HOOK, REASON_OK);
-
             address[] memory trustedIntermediaries = IGovernable(_token)
                 .trustedIntermediaries();
 
@@ -104,8 +103,9 @@ contract VestingRule is Initializable, AbstractRule {
             if (fromKey == 42) return (TRANSFER_INVALID, REASON_USER_NOT_FOUND);
             uint256 toKey = _getBypassKeyValue(trustedIntermediaries, _to);
             if (toKey == 42) return (TRANSFER_INVALID, REASON_USER_NOT_FOUND);
-            if (fromKey < 2 || toKey % 2 == 0)
+            if (fromKey < 2 || toKey % 2 == 0) {
                 return (TRANSFER_INVALID, REASON_TRANSFERS_FROZEN_VESTING);
+            }
         }
         return (TRANSFER_VALID_WITH_NO_HOOK, REASON_OK);
     }
