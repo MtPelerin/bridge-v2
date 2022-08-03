@@ -65,6 +65,8 @@ contract VestingRule is Initializable, AbstractRule {
     uint256 internal constant BYPASS_DIRECTION_SEND = 2;
     uint256 internal constant BYPASS_DIRECTION_BOTH = 3;
 
+    uint256 internal constant INTERNAL_USER_NOT_FOUND = 42;
+
     uint256 internal constant REASON_USER_NOT_FOUND = 2;
     uint256 internal constant REASON_TRANSFERS_FROZEN_VESTING = 3;
 
@@ -100,10 +102,10 @@ contract VestingRule is Initializable, AbstractRule {
                 .trustedIntermediaries();
 
             uint256 fromKey = _getBypassKeyValue(trustedIntermediaries, _from);
-            if (fromKey == 42) return (TRANSFER_INVALID, REASON_USER_NOT_FOUND);
+            if (fromKey == INTERNAL_USER_NOT_FOUND) return (TRANSFER_INVALID, REASON_USER_NOT_FOUND);
             uint256 toKey = _getBypassKeyValue(trustedIntermediaries, _to);
-            if (toKey == 42) return (TRANSFER_INVALID, REASON_USER_NOT_FOUND);
-            if (fromKey < 2 || toKey % 2 == 0) {
+            if (toKey == INTERNAL_USER_NOT_FOUND) return (TRANSFER_INVALID, REASON_USER_NOT_FOUND);
+            if (fromKey == BYPASS_DIRECTION_NONE || fromKey == BYPASS_DIRECTION_RECEIVE || toKey == BYPASS_DIRECTION_NONE || toKey == BYPASS_DIRECTION_SEND) {
                 return (TRANSFER_INVALID, REASON_TRANSFERS_FROZEN_VESTING);
             }
         }
@@ -123,7 +125,7 @@ contract VestingRule is Initializable, AbstractRule {
         (uint256 userId, address trustedIntermediary) = _complianceRegistry
             .userId(trustedIntermediaries, userAddress);
         if (userId == 0) {
-            return 42;
+            return INTERNAL_USER_NOT_FOUND;
         }
         return
             _complianceRegistry.attribute(
