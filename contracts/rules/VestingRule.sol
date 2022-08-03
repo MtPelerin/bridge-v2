@@ -57,7 +57,7 @@ import "../interfaces/IOwnable.sol";
  */
 
 contract VestingRule is Initializable, AbstractRule {
-    uint256 public constant VERSION = 1;
+    uint256 public constant VERSION = 2;
 
     uint256 internal constant BYPASS_KEY = 140;
     uint256 internal constant BYPASS_DIRECTION_NONE = 0;

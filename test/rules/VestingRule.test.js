@@ -87,7 +87,7 @@ contract('VestingRule', function ([_, tokenOwner, owner, trustedIntermediary1, t
   });
 
   it('can get the contract version', async function () {
-    (await this.contract.methods.VERSION().call()).should.equal('1');
+    (await this.contract.methods.VERSION().call()).should.equal('2');
   });
 
   context('When initial state', function () {
