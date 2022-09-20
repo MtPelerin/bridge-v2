@@ -62,7 +62,7 @@ import "../access/Operator.sol";
 contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
   using SafeMath for uint256;
 
-  uint256 public constant VERSION = 1;
+  uint256 public constant VERSION = 2;
 
   uint256 constant internal MONTH = 31 days;
   uint8 constant internal TRANSFER_ONHOLD = 0;
@@ -552,10 +552,11 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
     for (uint256 i = 0; i < transfers.length; i++) {
       /* Only process on-hold transfers, other statuses are ignored */
       if (onHoldTransfers[_msgSender()][transfers[i]].decision == TRANSFER_ONHOLD) {
-        onHoldTransfers[_msgSender()][transfers[i]].decision = transferDecisions[i];
         if (transferDecisions[i] == TRANSFER_APPROVE) {
+          onHoldTransfers[_msgSender()][transfers[i]].decision = TRANSFER_APPROVE;
           _approveOnHoldTransfer(transfers[i]);
         } else {
+          onHoldTransfers[_msgSender()][transfers[i]].decision = TRANSFER_REJECT;
           _rejectOnHoldTransfer(transfers[i]);
         }
       }
