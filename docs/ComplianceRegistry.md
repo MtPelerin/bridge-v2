@@ -19,3 +19,8 @@ Attribute id | Attribute name | Attribute description
 123 | **ATTRIBUTE_FREEZE_INVERTED** | Specifies if start date and end date period has to be inverted  
   || *FREEZE_INVERTED_NO* (0) | Freeze period not inverted  
   || *FREEZE_INVERTED_YES* (1) | Freeze period inverted  
+140 | **ATTRIBUTE_BYPASS_KEY** | Bypass key direction  (Only during vesting period) 
+  || *BYPASS_DIRECTION_NONE* (0) | Can't transfer tokens
+  || *BYPASS_DIRECTION_RECEIVE* (1) | Can only receive tokens  
+  || *BYPASS_DIRECTION_SEND* (2) | Can only send tokens  
+  || *BYPASS_DIRECTION_BOTH* (3) | Can send and receive token

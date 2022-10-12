@@ -35,3 +35,4 @@ Each rule in the Rule Engine has to implement the IRule interface:
 9. [User Kyc Threshold Both Rule](api.md#userkycthresholdbothrule)
 10. [Address Threshold Lock Rule](api.md#addressthresholdlockrule)
 11. [User Attribute Valid Rule](api.md#userattributevalidtorule)
+12. [Vesting Rule](api.md#vestingrule)
