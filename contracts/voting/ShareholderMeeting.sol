@@ -62,15 +62,13 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract ShareholderMeeting is Ownable {
   using SafeMath for uint256;
 
-  uint256 public constant VERSION = 1;
-  address private constant RELAY_HUB = 0xD216153c06E857cD7f72665E0aF1d7D82172F494;
-  bytes4 private constant VOTE_METHOD_ID = 0x2a4a1b73;
-  bytes4 private constant DELEGATE_METHOD_ID = 0xb31e1d4d;
+  uint256 public constant VERSION = 2;
           
   event ResolutionAdded(bytes32 indexed name, bytes32 url, uint256 proposalCount);
   event ResolutionOpen(uint256 votingEnd);
   event VoterRegistered(bytes32 indexed voterId, uint256 weight);
   event Vote(bytes32 indexed voterId, uint256 indexed resolutionId, uint256 indexed proposalId, uint256 weight);
+  event VoteDelegated(bytes32 indexed voterId, address indexed delegate);
 
   struct Resolution {
     bytes32 name;
@@ -84,8 +82,13 @@ contract ShareholderMeeting is Ownable {
     mapping(uint256 => bool) voted;
   }
 
+  struct VoterId {
+    bytes32 main;
+    bytes32[] delegates;
+  }
+
   bool votingStarted;
-  mapping(address => bytes32) public voterIds;
+  mapping(address => VoterId) public voterIds;
   mapping(bytes32 => Voter) public voters;
   Resolution[] public resolutions;
 
@@ -105,7 +108,7 @@ contract ShareholderMeeting is Ownable {
   * @dev Throws VO14 if caller is not voter
   */
   modifier isVoter {
-    bytes32 voterId = voterIds[msg.sender];
+    bytes32 voterId = voterIds[msg.sender].main;
     require(voterId != 0x0, "VO06");
     require(voters[voterId].weight > 0, "VO06");
     _;
@@ -162,7 +165,7 @@ contract ShareholderMeeting is Ownable {
   function registerVoters(address[] calldata _voters, bytes32[] calldata _voterIds) external onlyOwner beforeVotingSession {
     require(_voters.length == _voterIds.length, "VO03");
     for (uint256 i = 0; i < _voters.length; i++) {
-      voterIds[_voters[i]] = _voterIds[i];
+      voterIds[_voters[i]].main = _voterIds[i];
     }
   }
 
@@ -189,7 +192,20 @@ contract ShareholderMeeting is Ownable {
   */
   function delegateVote(address delegate) public isVoter beforeVotingSession {
     require(delegate != address(0), "VO04");
-    voterIds[delegate] = voterIds[msg.sender];
+    if (!_isAlreadyDelegate(delegate, voterIds[msg.sender].main)) {
+      voterIds[delegate].delegates.push(voterIds[msg.sender].main);
+      emit VoteDelegated(voterIds[msg.sender].main, delegate);
+    }
+  }
+
+  /**
+  * @dev Returns if delegate address has been delegated vote for voterId
+  * @param delegate The address of the delegate
+  * @param voterId The voter id
+  * @return true if the vote for voterId has been delegated to the address, false otherwise
+  */
+  function isDelegate(address delegate, bytes32 voterId) public view returns (bool) {
+    return _isAlreadyDelegate(delegate, voterId);
   }
 
   /**
@@ -206,13 +222,23 @@ contract ShareholderMeeting is Ownable {
     require(resolutionId < resolutions.length, "VO07");
     require(proposalId < resolutions[resolutionId].proposals.length, "VO08");
     require(resolutions[resolutionId].votingEnd > 0 && resolutions[resolutionId].votingEnd > now, "VO10");
-    // Check if function caller is allowed to vote
-    bytes32 voterId = voterIds[msg.sender];
-    require(voterId != 0x0, "VO05");
-    require(voters[voterId].voted[resolutionId] == false, "VO09");
-    voters[voterId].voted[resolutionId] = true;
-    resolutions[resolutionId].proposals[proposalId] = resolutions[resolutionId].proposals[proposalId].add(voters[voterId].weight);
-    emit Vote(voterId, resolutionId, proposalId, voters[voterId].weight);
+    /* Main vote */
+    bytes32 voterId = voterIds[msg.sender].main;
+    if (voterId != 0x0) {
+      require(voters[voterId].voted[resolutionId] == false, "VO09");
+      voters[voterId].voted[resolutionId] = true;
+      resolutions[resolutionId].proposals[proposalId] = resolutions[resolutionId].proposals[proposalId].add(voters[voterId].weight);
+      emit Vote(voterId, resolutionId, proposalId, voters[voterId].weight);
+    }
+    /* Delegate votes */
+    for (uint256 i = 0; i < voterIds[msg.sender].delegates.length; i++) {
+      voterId = voterIds[msg.sender].delegates[i];
+      if (voterId != 0x0 && voters[voterId].voted[resolutionId] == false) {
+        voters[voterId].voted[resolutionId] = true;
+        resolutions[resolutionId].proposals[proposalId] = resolutions[resolutionId].proposals[proposalId].add(voters[voterId].weight);
+        emit Vote(voterId, resolutionId, proposalId, voters[voterId].weight);
+      }
+    }
   }
 
   /**
@@ -235,10 +261,19 @@ contract ShareholderMeeting is Ownable {
   */
   function hasVotedForResolution(address voter, uint256 resolutionId) public view returns (bool) {
     require(resolutionId < resolutions.length, "VO07");
-    bytes32 voterId = voterIds[voter];
+    bytes32 voterId = voterIds[voter].main;
     return voters[voterId].voted[resolutionId];
   }
 
   receive() external payable {
+  }
+
+  function _isAlreadyDelegate(address voter, bytes32 voterId) internal view returns (bool) {
+    for (uint256 i = 0; i < voterIds[voter].delegates.length; i++) {
+      if (voterIds[voter].delegates[i] == voterId) {
+        return true;
+      }
+    }
+    return false;
   }
 }
