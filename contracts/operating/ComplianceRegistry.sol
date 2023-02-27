@@ -712,6 +712,7 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
     for (uint256 i = 0; i < _attributeKeys.length; i++) {
       userAttributes[_msgSender()][_userId][_attributeKeys[i]] = _attributeValues[i];
     }
+    emit UpdatedUserAttributes(_msgSender(), _userId, _attributeKeys, _attributeValues);
   }
 
   /**
