@@ -778,4 +778,32 @@ contract('ComplianceRegistry', function ([_, owner, operator, trustedIntermediar
       });
     });
   });
+
+  context("Storage slots positions", function () {
+    beforeEach(async function () {
+      await this.contract.methods.registerUsers([address1, address2, address5], [0, 100, 110, 111, 112], [1874872800, 1, 10000, 15000, 180000]).send({from: trustedIntermediary1, gas: 900000});
+      await this.contract.methods.updateUserAttributes(1, [0, 100, 110, 111, 112, 113], [1874872900, 0, 11000, 16000, 300000, 567]).send({from: trustedIntermediary1, gas: 900000});
+      await this.contract.methods.attachAddresses([1, 2], [address3, address4]).send({from: trustedIntermediary1, gas: 900000});
+    });
+
+    it('retains original slot for userCount', async function () {
+      const USER_COUNT_SLOT = '0000000000000000000000000000000000000000000000000000000000000098'; // 152 in hex
+      const key = web3.utils.padLeft(trustedIntermediary1, 64);
+      const storageAddress = web3.utils.sha3(key + USER_COUNT_SLOT, {"encoding":"hex"});
+      const data = await web3.eth.getStorageAt(this.contract.address, storageAddress);
+      data.should.equal('0x03');
+    });
+
+    it('retains original slot for userAttributes', async function () {
+      const USER_ATTRIBUTES_SLOT = '0000000000000000000000000000000000000000000000000000000000000099'; // 153 in hex
+      const key = web3.utils.padLeft(trustedIntermediary1, 64);
+      const intermediaryStorageAddress = web3.utils.sha3(key + USER_ATTRIBUTES_SLOT, {"encoding":"hex"});
+      const user = '0x0000000000000000000000000000000000000000000000000000000000000001';
+      const userStorageAddress = web3.utils.sha3(user + intermediaryStorageAddress.replace('0x', ''), {"encoding":"hex"});
+      const attribute = '0x0000000000000000000000000000000000000000000000000000000000000000';
+      const attributeStorageAddress = web3.utils.sha3(attribute + userStorageAddress.replace('0x', ''), {"encoding":"hex"});
+      const data = await web3.eth.getStorageAt(this.contract.address, attributeStorageAddress);
+      data.should.equal('0x6fc04a44'); // 1874872900 in hex
+    });
+  });
 });

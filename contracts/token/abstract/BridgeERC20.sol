@@ -37,8 +37,8 @@
 
 pragma solidity 0.6.2;
 
-import "../../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
-import "../../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 import "../../access/Roles.sol";
 import "../../interfaces/IERC20Detailed.sol";
 import "../../interfaces/IERC677Receiver.sol";
