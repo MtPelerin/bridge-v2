@@ -40,6 +40,7 @@ pragma solidity 0.6.2;
 import "../interfaces/IRule.sol";
 import "../interfaces/IRuleEngine.sol";
 import "../access/Operator.sol";
+import "../utils/CompactAddressArray.sol";
 
 /**
  * @title RuleEngine
@@ -52,10 +53,11 @@ import "../access/Operator.sol";
 
 
 contract RuleEngine is Initializable, Operator {
+  using CompactAddressArray for CompactAddressArray.Data;
 
   uint256 public constant VERSION = 1;
 
-  IRule[] internal _rules;
+  CompactAddressArray.Data internal _rules;
 
   /**
   * @dev Initializer (replaces constructor when contract is upgradable)
@@ -69,8 +71,8 @@ contract RuleEngine is Initializable, Operator {
   * @dev set the rules of the library (replacing existing rules)
   * @param rules Array of rules that will replace the existing rules
   */
-  function setRules(IRule[] calldata rules) external onlyOperator {
-    _rules = rules;
+  function setRules(address[] calldata rules) external onlyOperator {
+    _rules.set(rules);
   }
 
   /**
@@ -78,7 +80,7 @@ contract RuleEngine is Initializable, Operator {
    * @return The number of rules in the library
    */
   function ruleLength() public view returns (uint256) {
-    return _rules.length;
+    return _rules.length();
   }
 
   /**
@@ -88,8 +90,8 @@ contract RuleEngine is Initializable, Operator {
    * @return rule Address of the rule
    */
   function rule(uint256 _ruleId) public view returns (IRule) {
-    require(_ruleId < _rules.length, "RE01");
-    return _rules[_ruleId];
+    require(_ruleId < _rules.length(), "RE01");
+    return IRule(_rules.at(_ruleId));
   }
 
   /**
@@ -100,10 +102,10 @@ contract RuleEngine is Initializable, Operator {
    */
   function rules(uint256[] calldata _ruleIds) external view returns(IRule[] memory result) {
     result = new IRule[](_ruleIds.length);
-    uint256 length = _rules.length;
+    uint256 length = _rules.length();
     for (uint256 i = 0; i < _ruleIds.length; i++) {
       require(_ruleIds[i] < length, "RE01");
-      result[i] = _rules[_ruleIds[i]];
+      result[i] = IRule(_rules.at(_ruleIds[i]));
     }
     return result;
   }
@@ -132,8 +134,8 @@ contract RuleEngine is Initializable, Operator {
     require(_tokenRuleKeys.length == _tokenRuleParams.length, "RE02");
     uint256 ruleValid;
     for (ruleId = 0; ruleId < _tokenRuleKeys.length; ruleId++) {
-      if (_tokenRuleKeys[ruleId] < _rules.length) {
-        (ruleValid, reason) = _rules[_tokenRuleKeys[ruleId]].isTransferValid(
+      if (_tokenRuleKeys[ruleId] < _rules.length()) {
+        (ruleValid, reason) = IRule(_rules.at(_tokenRuleKeys[ruleId])).isTransferValid(
           _token, _from, _to, _amount, _tokenRuleParams[ruleId]);
         if (ruleValid == 0) {
           return (false, _tokenRuleKeys[ruleId], reason);
