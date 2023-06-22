@@ -30,7 +30,8 @@
     "hardhat": "^2.12.7",
     "mocha": "^8.3.1",
     "openzeppelin-test-helpers": "^0.3.2",
-    "solidity-coverage": "^0.7.5"
+    "solidity-coverage": "^0.7.5",
+    "truffle-plugin-verify": "0.6.1"
   },
   "dependencies": {
     "@opengsn/gsn": "^0.10.0",
@@ -41,6 +42,7 @@
     "@taquito/signer": "^9.2.0",
     "@taquito/taquito": "^9.2.0",
     "bignumber.js": "^9.0.1",
+    "dotenv": "^16.0.1",
     "ganache-cli": "^6.12.2",
     "solc": "^0.6.9",
     "solidity-docgen": "git+https://github.com/skrafft/solidity-docgen.git",

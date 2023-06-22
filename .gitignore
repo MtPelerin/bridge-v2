@@ -3,3 +3,4 @@ build
 coverage.json
 coverage
 .DS_Store
+.env
