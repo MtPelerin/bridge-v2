@@ -45,7 +45,7 @@ interface IComplianceRegistry {
 
   event AddressAttached(address indexed trustedIntermediary, uint256 indexed userId, address indexed address_);
   event AddressDetached(address indexed trustedIntermediary, uint256 indexed userId, address indexed address_);
-
+  event UpdatedUserAttributes(address trustedIntermediary, uint256 userId, uint256[] attributeKeys, uint256[] attributeValues);
   function userId(address[] calldata _trustedIntermediaries, address _address) 
     external view returns (uint256, address);
   function validUntil(address _trustedIntermediary, uint256 _userId) 

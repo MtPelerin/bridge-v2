@@ -58,11 +58,12 @@ import "../access/Operator.sol";
  * UR06: Transfer and transfer decisions must have the same length
  * UR07: Only originator can cancel transfer
  * UR08: Unsuccessful transfer
+ * UR09: Only on hold transfers can be canceled
 */
 contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
   using SafeMath for uint256;
 
-  uint256 public constant VERSION = 1;
+  uint256 public constant VERSION = 3;
 
   uint256 constant internal MONTH = 31 days;
   uint8 constant internal TRANSFER_ONHOLD = 0;
@@ -552,10 +553,11 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
     for (uint256 i = 0; i < transfers.length; i++) {
       /* Only process on-hold transfers, other statuses are ignored */
       if (onHoldTransfers[_msgSender()][transfers[i]].decision == TRANSFER_ONHOLD) {
-        onHoldTransfers[_msgSender()][transfers[i]].decision = transferDecisions[i];
         if (transferDecisions[i] == TRANSFER_APPROVE) {
+          onHoldTransfers[_msgSender()][transfers[i]].decision = TRANSFER_APPROVE;
           _approveOnHoldTransfer(transfers[i]);
         } else {
+          onHoldTransfers[_msgSender()][transfers[i]].decision = TRANSFER_REJECT;
           _rejectOnHoldTransfer(transfers[i]);
         }
       }
@@ -594,6 +596,7 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
     for (uint256 i = 0; i < transfers.length; i++) {
       OnHoldTransfer memory transfer = onHoldTransfers[trustedIntermediary][transfers[i]];
       require(transfer.from == _msgSender(), "UR07");
+      require(onHoldTransfers[trustedIntermediary][transfers[i]].decision == TRANSFER_ONHOLD, "UR09");
       onHoldTransfers[trustedIntermediary][transfers[i]].decision = TRANSFER_CANCEL;
       require(IERC20Detailed(transfer.token).transfer(transfer.from, transfer.amount), "UR08");
       emit TransferCancelled(
@@ -688,13 +691,13 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
   function _registerUser(address _address, uint256[] memory _attributeKeys, uint256[] memory _attributeValues)
     internal
   {
-    uint256 _userCount = userCount[_msgSender()];
-    _updateUserAttributes(++_userCount, _attributeKeys, _attributeValues);
+    uint256 _userCount = userCount[_msgSender()] + 1;
     addressUsers[_msgSender()][_address] = _userCount;
     userAddresses[_msgSender()][_userCount].push(_address);
+    userCount[_msgSender()] = _userCount;
 
     emit AddressAttached(_msgSender(), _userCount, _address);
-    userCount[_msgSender()] = _userCount;
+    _updateUserAttributes(_userCount, _attributeKeys, _attributeValues);
   }
 
   /**
@@ -709,6 +712,7 @@ contract ComplianceRegistry is Initializable, IComplianceRegistry, Operator {
     for (uint256 i = 0; i < _attributeKeys.length; i++) {
       userAttributes[_msgSender()][_userId][_attributeKeys[i]] = _attributeValues[i];
     }
+    emit UpdatedUserAttributes(_msgSender(), _userId, _attributeKeys, _attributeValues);
   }
 
   /**

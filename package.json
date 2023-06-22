@@ -30,7 +30,7 @@
     "mocha": "^8.3.1",
     "openzeppelin-test-helpers": "^0.3.2",
     "solidity-coverage": "^0.7.5",
-    "truffle-plugin-verify": "^0.5.26"
+    "truffle-plugin-verify": "0.6.1"
   },
   "dependencies": {
     "@opengsn/gsn": "^0.10.0",

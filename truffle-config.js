@@ -46,6 +46,11 @@ module.exports = {
       port: 80,
       network_id: 42, 
     },
+    sepolia: {
+      url: "https://sepolia.infura.io/v3/" + process.env.INFURA_KEY, // Infura
+      port: 80,
+      network_id: 11155111,
+    },
     
   },
   compilers: {
